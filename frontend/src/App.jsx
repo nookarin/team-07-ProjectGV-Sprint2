@@ -1,3 +1,5 @@
+import Navbar from "#components/Navbar"
+import Homepage from "./pages/Homepage/Homepage"
 
 
 function App() {
@@ -5,7 +7,8 @@ function App() {
 
   return (
     <>
-     
+      <Navbar />
+     <Homepage />
     </>
   )
 }
