@@ -1,3 +1,4 @@
+import Register from "./pages/Register/Register"
 
 
 function App() {
@@ -5,7 +6,7 @@ function App() {
 
   return (
     <>
-     
+     <Register />
     </>
   )
 }
