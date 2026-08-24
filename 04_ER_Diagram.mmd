@@ -1,0 +1,185 @@
+erDiagram
+    User ||--o{ Order : places
+    User ||--o{ Review : writes
+    User ||--o{ Wishlist : add
+    User ||--o{ ShoppingCart : add
+
+    Order ||--o{ PromoCode : applies
+
+    Order ||--|{ ShoppingCart : checkout_from
+
+    Product ||--o{ Order : included_in
+    Product ||--o{ Review : has
+    Product ||--o{ Bundle : bundle_in
+    Product ||--o{ Color : come_in
+
+    Manufacturer ||--o{ Product : produces
+
+    Distributor }o--|| Order : receives
+
+    Category ||--|{ Product : contains
+    SubCategory ||--|{ Category : contains
+    KBSwitch ||--|{ SubCategory : contains
+    Keycap ||--|{ SubCategory : contains
+    ProductVariant ||--|{ SubCategory : contains
+
+User{
+    ObjectId user_id PK
+    string username
+    string password
+    string firstname
+    string lastname
+    string email
+    string phone_number
+    string address1 
+    string address2 
+    string role "customer | admin"
+    date created_at 
+}
+
+%%user merged with admin
+
+Product{
+    ObjectId product_id PK
+    string product_name
+    string description
+    ObjectId category_id FK
+    ObjectId subcategory_id FK
+    ObjectId color_id FK
+
+    string connectivity_type
+    float bluetooth_version
+    
+    float price
+    float weight
+    int stock
+
+    ObjectId manufacturer_id FK
+}
+
+Category{
+    ObjectId category_id PK
+    string category_name "keyboard | mouse | headphone"
+    ObjectId subcategory_id
+}
+
+SubCategory{
+    ObjectId subcategory_id PK
+    string subcategory_name "mechanical | magnetic | rubber-dome | wired | wireless | headset"
+}
+
+
+Order{
+    ObjectId order_id PK
+    ObjectId distributor_id FK
+    ObjectId user_id FK
+    int total_quantity
+    string payment_method
+    float final_price
+    date order_date
+    string payment_status "pending | paid"
+    ObjectId product_id FK
+}
+
+%%order merged with transaction, created orderitem
+
+ShoppingCart{
+    ObjectId cart_id PK
+    ObjectId product_id FK
+    ObjectId user_id FK
+}
+
+Wishlist{
+    ObjectId wishlist_id PK
+    ObjectId product_id FK
+    ObjectId user_id FK
+}
+
+Review{
+    ObjectId review_id PK
+    ObjectId user_id FK
+    Object product_id FK
+    date review_date
+    float rating
+    string comment
+}
+
+Bundle{
+    ObjectId bundle_id PK
+    string bundlename
+    string description
+    float bundle_price
+    boolean is_active
+    int quantity_limit
+    ObjectId product_id FK
+}
+
+PromoCode{
+    ObjectId promo_id
+    string code
+    float min_order_price
+    int max_use
+    boolean is_active
+    date promo_start
+    date expire_at
+    string description
+    float discount_amount
+    ObjectId order_id FK
+}
+
+ProductVariant{
+    ObjectId product_id FK
+
+    %%mouse
+    int dpi
+    string sensor_type
+    int button_count
+
+    %%keyboard
+    string language
+    int key_count
+    string keyboard_form
+    ObjectId switch_id FK
+    ObjectId keycap_id FK
+
+    %%headphone
+    string sound_support "stereo | 5.1 | 7.1"
+    boolean is_headset
+    string freq_range
+}
+
+Color{
+    ObjectId color_id PK
+    string color_name
+    ObjectId product_id FK
+}
+
+KBSwitch{
+    ObjectId switch_id PK
+    string switch_name
+    ObjectId product_id FK
+}
+
+Keycap{
+    ObjectId keycap_id PK
+    string keycap_name
+    ObjectId product_id FK
+}
+
+%%added manufacturer and distributor/platforms
+
+Manufacturer{
+    ObjectId manufacturer_id PK
+    string manufacturer_name
+    string manufacturer_location
+    ObjectId product_id FK
+}
+
+Distributor{
+    ObjectId distributor_id PK
+    string distributor_name
+    string distributor_location
+    
+    ObjectId order_id FK
+    string shipping_status "shipped | on the way | out of delivery | completed"
+}
