@@ -1,3 +1,4 @@
+import PersonalInfo from "./pages/User/01MyAccount/PersonalInfo"
 
 
 function App() {
@@ -5,7 +6,7 @@ function App() {
 
   return (
     <>
-     
+     <PersonalInfo/>
     </>
   )
 }
