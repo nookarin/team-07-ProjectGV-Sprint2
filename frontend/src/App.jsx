@@ -16,8 +16,8 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <Homepage /> },
       { path: "register", element: <Register /> },
-      { path: "edit-profiles", element: <PersonalInfo /> },
-      { path: "edit-profiles/addresses", element: <Addresses /> },
+      { path: "edit-profile", element: <PersonalInfo /> },
+      { path: "edit-profile/addresses", element: <Addresses /> },
       { path: "my-purchases", element: <MyPurchase /> },
       { path: "my-reviews", element: <MyReviews /> },
       { path: "my-cancellations", element: <MyCancellations /> },
