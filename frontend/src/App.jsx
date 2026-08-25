@@ -1,7 +1,8 @@
-import Register from "./pages/Register/Register";
-import Homepage from "./pages/Homepage/Homepage";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import Layout from "#components/Layout";
+import CartPage from "./pages/ShoppingCart/CartPage"
+import Register from "./pages/Register/Register"
+import Homepage from "./pages/Homepage/Homepage"
+import { createBrowserRouter, RouterProvider } from "react-router-dom"
+import Layout from "#components/Layout"
 import PersonalInfo from "./pages/User/01MyAccount/PersonalInfo"
 import Addresses from "./pages/User/01MyAccount/Addresses"
 import MyPurchase from "./pages/User/02MyPurchase/MyPurchase"
@@ -13,7 +14,7 @@ const router = createBrowserRouter([
     path: "/",
     element: <Layout />,
     children: [
-      { path: "/", element: <Homepage /> },
+      { index: true, element: <Homepage /> },
       { path: "register", element: <Register /> },
       { path: 'edit-profiles', element: <PersonalInfo />},
       { path: 'edit-profiles/addresses', element: <Addresses />},
@@ -28,6 +29,14 @@ const router = createBrowserRouter([
 function App() {
   return <RouterProvider router={router} />;
   
+      { path: "edit-profile", element: <PersonalInfo /> },
+      { path: "cart-page", element: <CartPage /> },
+    ],
+  },
+])
+
+function App() {
+  return <RouterProvider router={router} />
 }
 
-export default App;
+export default App
