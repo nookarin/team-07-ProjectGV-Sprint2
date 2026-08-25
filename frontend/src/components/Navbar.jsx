@@ -17,7 +17,7 @@ import {
   MenubarSubTrigger,
   MenubarTrigger,
 } from "#components/ui/menubar";
-import { Search, ShoppingBag, User } from "lucide-react";
+import { CircleUser, CircleX, LogOut, Search, ShoppingBag, Star, User } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
   NavigationMenu,
@@ -35,31 +35,26 @@ const Navbar = () => {
         <img className="w-10 h-10" src={LogoImg} alt="logo" />
         <img className="w-40" src={LogoText} alt="logo text" />
       </Link>
+      {/* SECTION 2 */}
       <NavigationMenu>
         <NavigationMenuList>
           <NavigationMenuItem>
-            <NavigationMenuTrigger>Item One</NavigationMenuTrigger>
+            <NavigationMenuTrigger>SHOP</NavigationMenuTrigger>
             <NavigationMenuContent>
               <NavigationMenuLink>Link</NavigationMenuLink>
             </NavigationMenuContent>
           </NavigationMenuItem>
           <NavigationMenuItem>
-            <NavigationMenuTrigger>Item One</NavigationMenuTrigger>
+            <NavigationMenuTrigger>COLLECTIONS</NavigationMenuTrigger>
             <NavigationMenuContent>
               <NavigationMenuLink>Link</NavigationMenuLink>
             </NavigationMenuContent>
           </NavigationMenuItem>
           <NavigationMenuItem>
-            <NavigationMenuTrigger>Item One</NavigationMenuTrigger>
-            <NavigationMenuContent>
-              <NavigationMenuLink>Link</NavigationMenuLink>
-            </NavigationMenuContent>
+            <NavigationMenuLink>NEW ARRIVALS</NavigationMenuLink>
           </NavigationMenuItem>
           <NavigationMenuItem>
-            <NavigationMenuTrigger>Item One</NavigationMenuTrigger>
-            <NavigationMenuContent>
-              <NavigationMenuLink>Link</NavigationMenuLink>
-            </NavigationMenuContent>
+            <NavigationMenuLink className={'border border-pink-300 text-pink-300 h-8 rounded-lg'}>SALE</NavigationMenuLink>
           </NavigationMenuItem>
         </NavigationMenuList>
       </NavigationMenu>
@@ -67,18 +62,23 @@ const Navbar = () => {
       {/* SEC3 */}
       
       <NavigationMenu>
-        <NavigationMenuList>
+        <NavigationMenuList className={'flex gap-2'}>
           <NavigationMenuItem>
-              <NavigationMenuLink><Search /></NavigationMenuLink>
+              <NavigationMenuLink className={'border border-[#1C1C24] rounded-lg h-10'}><Search size={20} color="#22D3EE" /></NavigationMenuLink>
           </NavigationMenuItem>
           <NavigationMenuItem>
-            <NavigationMenuTrigger><User /> PROFILE</NavigationMenuTrigger>
-            <NavigationMenuContent >
-              <NavigationMenuLink>Link</NavigationMenuLink>
+            <NavigationMenuTrigger className={'border border-[#1C1C24] rounded-lg h-10'}><User size={20} color="#22D3EE" className="mr-2" />PROFILE</NavigationMenuTrigger>
+            <NavigationMenuContent className={'w-52'}>
+              <NavigationMenuLink render={<Link to={'/edit-profile'} />} className={'text-white hover:bg-[#2a2a452f]'}><CircleUser color="#6B6B8D" />My Account</NavigationMenuLink>
+              <NavigationMenuLink className={'text-white'}><ShoppingBag color="#6B6B8D" />My Order</NavigationMenuLink>
+              <NavigationMenuLink className={'text-white'}><Star color="#6B6B8D" />My Reviews</NavigationMenuLink>
+              <NavigationMenuLink className={'text-white'}><CircleX color="#6B6B8D" />My Returns</NavigationMenuLink>
+              <hr className="w-full border-[#ffffff1f]" />
+              <NavigationMenuLink className={'text-white'}><LogOut color="#6B6B8D" />Logout</NavigationMenuLink>
             </NavigationMenuContent>
           </NavigationMenuItem>
           <NavigationMenuItem>
-            <NavigationMenuTrigger>Item One</NavigationMenuTrigger>
+            <NavigationMenuTrigger className={'border border-[#1C1C24] rounded-lg h-10'}><ShoppingBag size={20} color="#22D3EE" /></NavigationMenuTrigger>
             <NavigationMenuContent>
               <NavigationMenuLink>Link</NavigationMenuLink>
             </NavigationMenuContent>
