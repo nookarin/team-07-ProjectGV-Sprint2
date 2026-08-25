@@ -13,9 +13,9 @@ const ProductCard = ({ img }) => {
         </p>
       </div>
       <div className="flex justify-between m-4">
-        <div className="flex items-center border-2 gap-2 rounded-lg border-[#A78BFA]">
-          <p className="text-[#A78BFA] p-2">$149.99</p>
-          <button className="bg-[#A78BFA] p-2">
+        <div className="flex w-40 justify-between items-center border-2 rounded-xl border-[#A78BFA]">
+          <p className="text-[#A78BFA] w-full font-bold p-2">$149.99</p>
+          <button className="bg-[#A78BFA] p-2 rounded-e-lg">
             <ShoppingCart />
           </button>
         </div>
