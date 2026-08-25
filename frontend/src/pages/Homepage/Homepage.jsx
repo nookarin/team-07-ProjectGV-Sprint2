@@ -15,6 +15,9 @@ import img_cate1 from "../../assets/image-category/Gemini_Generated_Image_hh5i48
 import img_cate2 from "../../assets/image-category/Gemini_Generated_Image_k7cgvsk7cgvsk7cg.jpg";
 import img_cate3 from "../../assets/image-category/Gemini_Generated_Image_pjqv70pjqv70pjqv.jpg";
 import img_cate4 from "../../assets/image-category/Gemini_Generated_Image_rex7yirex7yirex7.jpg";
+import img_product1 from "../../assets/image-product/Gemini_Generated_Image_4knuxp4knuxp4knu.jpg";
+import img_product2 from "../../assets/image-product/Gemini_Generated_Image_cfukikcfukikcfuk.jpg";
+import img_product3 from "../../assets/image-product/Gemini_Generated_Image_waq5aswaq5aswaq5.jpg";
 import { Link } from "react-router-dom";
 import { Heart, ShoppingCart } from "lucide-react";
 import ProductCard from "#components/Homepage/ProductCard";
@@ -97,9 +100,9 @@ const Homepage = () => {
       <div className="w-3/4 mx-auto py-10">
         <h2 className="text-white font-bold text-xl mb-8"><span className="text-[#A78BFA] font-black">—</span> TRENDING GEAR</h2>
         <div className="grid grid-cols-3 gap-12 text-white">
-          <ProductCard img={img_cate1} />
-          <ProductCard img={img_cate2} />
-          <ProductCard img={img_cate3} />
+          <ProductCard img={img_product1} />
+          <ProductCard img={img_product2} />
+          <ProductCard img={img_product3} />
         </div>
       </div>
     </div>
