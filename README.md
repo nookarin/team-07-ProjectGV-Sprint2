@@ -2,8 +2,8 @@ Sprint backlog: [Notion](https://app.notion.com/p/Sprint-Board-a10330c3805f41ad9
 
 Member's task (Phase 1):
 
-04_Arinchai -> Team Lead | React Component: User
-05_Atcharaporn -> Scrum Master | React Component: Landing Page
-07_Chadapan -> React Component: Login/Register
-16_Jutatip -> React Component: Shopping Cart
-23_Nutthaphat -> React Component: Product Page
+04_Arinchai -> Team Lead | React Component: User <br>
+05_Atcharaporn -> Scrum Master | React Component: Landing Page <br>
+07_Chadapan -> React Component: Login/Register <br>
+16_Jutatip -> React Component: Shopping Cart <br>
+23_Nutthaphat -> React Component: Product Page <br>
