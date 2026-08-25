@@ -30,7 +30,7 @@ import {
 
 const Navbar = () => {
   return (
-    <nav className="bg-black w-full h-16 flex items-center justify-between px-10 text-white">
+    <nav className="bg-[#12121A] w-full h-16 flex items-center justify-between px-10 text-white relative z-10 shadow-xl shadow-amber-400">
       <Link to={"/"} className="flex items-center gap-4">
         <img className="w-10 h-10" src={LogoImg} alt="logo" />
         <img className="w-40" src={LogoText} alt="logo text" />
@@ -69,12 +69,12 @@ const Navbar = () => {
           <NavigationMenuItem>
             <NavigationMenuTrigger className={'border border-[#1C1C24] rounded-lg h-10'}><User size={20} color="#22D3EE" className="mr-2" />PROFILE</NavigationMenuTrigger>
             <NavigationMenuContent className={'w-52'}>
-              <NavigationMenuLink render={<Link to={'/edit-profile'} />} className={'text-white hover:bg-[#2a2a452f]'}><CircleUser color="#6B6B8D" />My Account</NavigationMenuLink>
-              <NavigationMenuLink className={'text-white'}><ShoppingBag color="#6B6B8D" />My Order</NavigationMenuLink>
-              <NavigationMenuLink className={'text-white'}><Star color="#6B6B8D" />My Reviews</NavigationMenuLink>
-              <NavigationMenuLink className={'text-white'}><CircleX color="#6B6B8D" />My Returns</NavigationMenuLink>
-              <hr className="w-full border-[#ffffff1f]" />
-              <NavigationMenuLink className={'text-white'}><LogOut color="#6B6B8D" />Logout</NavigationMenuLink>
+              <NavigationMenuLink render={<Link to={'/edit-profile'} />} className={'text-white gap-4 hover:bg-[#2a2a452f]'}><CircleUser color="#6B6B8D" />My Account</NavigationMenuLink>
+              <NavigationMenuLink render={<Link to={'/edit-profile'} />} className={'text-white gap-4 hover:bg-[#2a2a452f]'}><ShoppingBag color="#6B6B8D" />My Order</NavigationMenuLink>
+              <NavigationMenuLink render={<Link to={'/edit-profile'} />} className={'text-white gap-4 hover:bg-[#2a2a452f]'}><Star color="#6B6B8D" />My Reviews</NavigationMenuLink>
+              <NavigationMenuLink render={<Link to={'/edit-profile'} />} className={'text-white gap-4 hover:bg-[#2a2a452f]'}><CircleX color="#6B6B8D" />My Returns</NavigationMenuLink>
+              <hr className="w-full my-2 border-[#ffffff1f]" />
+              <NavigationMenuLink zrender={<Link to={'/edit-profile'} />} className={'text-white gap-4 hover:bg-[#2a2a452f]'}><LogOut color="#6B6B8D" />Logout</NavigationMenuLink>
             </NavigationMenuContent>
           </NavigationMenuItem>
           <NavigationMenuItem>

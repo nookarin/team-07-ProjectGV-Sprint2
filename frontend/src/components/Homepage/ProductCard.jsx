@@ -1,0 +1,30 @@
+import { Heart, ShoppingCart } from "lucide-react";
+import React from "react";
+
+const ProductCard = ({ img }) => {
+  return (
+    <div className="border border-[#A78BFA] text-center rounded-2xl">
+      <img className="rounded-2xl" src={img} alt="" />
+      <div className="w-[80%] mx-auto">
+        <h3 className="font-bold text-xl">Product Name</h3>
+        <p className="text-sm font-light">
+          Lorem ipsum dolor sit amet consectetur adipisicing elit. Nesciunt
+          sequi enim modi ab? Exp
+        </p>
+      </div>
+      <div className="flex justify-between m-4">
+        <div className="flex items-center border-2 gap-2 rounded-lg border-[#A78BFA]">
+          <p className="text-[#A78BFA] p-2">$149.99</p>
+          <button className="bg-[#A78BFA] p-2">
+            <ShoppingCart />
+          </button>
+        </div>
+        <button>
+          <Heart />
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export default ProductCard;
