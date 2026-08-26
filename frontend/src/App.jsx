@@ -3,6 +3,7 @@ import Register from "./pages/Register/Register";
 import Homepage from "./pages/Homepage/Homepage";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Layout from "#components/Layout";
+import ProductPage from "./pages/Product Page/ProductPage";
 import PersonalInfo from "./pages/User/01MyAccount/PersonalInfo";
 import Addresses from "./pages/User/01MyAccount/Addresses";
 import MyPurchase from "./pages/User/02MyPurchase/MyPurchase";
@@ -22,6 +23,7 @@ const router = createBrowserRouter([
       { path: "my-reviews", element: <MyReviews /> },
       { path: "my-cancellations", element: <MyCancellations /> },
       { path: "cart-page", element: <CartPage /> },
+      { path: "product", element: <ProductPage /> },
     ],
   },
 ]);
