@@ -1,156 +1,95 @@
-import React from 'react'
-import LogoImg from '../assets/Artboard1.png'
-import LogoText from '../assets/Untitled-2.png'
+import React from "react";
+import LogoImg from "../assets/Artboard1.png";
+import LogoText from "../assets/Untitled-2.png";
 import {
   Menubar,
-//   MenubarCheckboxItem,
-//   MenubarContent,
-//   MenubarGroup,
-//   MenubarItem,
-//   MenubarMenu,
-//   MenubarRadioGroup,
-//   MenubarRadioItem,
-//   MenubarSeparator,
-//   MenubarShortcut,
-//   MenubarSub,
-//   MenubarSubContent,
-//   MenubarSubTrigger,
-//   MenubarTrigger,
-} from "#components/ui/menubar"
+  MenubarCheckboxItem,
+  MenubarContent,
+  MenubarGroup,
+  MenubarItem,
+  MenubarMenu,
+  MenubarRadioGroup,
+  MenubarRadioItem,
+  MenubarSeparator,
+  MenubarShortcut,
+  MenubarSub,
+  MenubarSubContent,
+  MenubarSubTrigger,
+  MenubarTrigger,
+} from "#components/ui/menubar";
+import { CircleUser, CircleX, LogOut, Search, ShoppingBag, Star, User } from "lucide-react";
+import { Link } from "react-router-dom";
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from "#components/ui/navigation-menu"
 
 const Navbar = () => {
   return (
-    <nav className='bg-black w-full h-16 flex items-center justify-between px-10 text-white'>
-        <div className='flex items-center gap-4'>
-            <img className='w-10 h-10' src={LogoImg} alt="logo" />
-            <img className='w-40' src={LogoText} alt="logo text" />
-        </div>
-        <div>
-            <Menubar className="w-72">
-      {/* <MenubarMenu>
-        <MenubarTrigger>File</MenubarTrigger>
-        <MenubarContent>
-          <MenubarGroup>
-            <MenubarItem>
-              New Tab <MenubarShortcut>⌘T</MenubarShortcut>
-            </MenubarItem>
-            <MenubarItem>
-              New Window <MenubarShortcut>⌘N</MenubarShortcut>
-            </MenubarItem>
-            <MenubarItem disabled>New Incognito Window</MenubarItem>
-          </MenubarGroup>
-          <MenubarSeparator />
-          <MenubarGroup>
-            <MenubarSub>
-              <MenubarSubTrigger>Share</MenubarSubTrigger>
-              <MenubarSubContent>
-                <MenubarGroup>
-                  <MenubarItem>Email link</MenubarItem>
-                  <MenubarItem>Messages</MenubarItem>
-                  <MenubarItem>Notes</MenubarItem>
-                </MenubarGroup>
-              </MenubarSubContent>
-            </MenubarSub>
-          </MenubarGroup>
-          <MenubarSeparator />
-          <MenubarGroup>
-            <MenubarItem>
-              Print... <MenubarShortcut>⌘P</MenubarShortcut>
-            </MenubarItem>
-          </MenubarGroup>
-        </MenubarContent>
-      </MenubarMenu>
-      <MenubarMenu>
-        <MenubarTrigger>Edit</MenubarTrigger>
-        <MenubarContent>
-          <MenubarGroup>
-            <MenubarItem>
-              Undo <MenubarShortcut>⌘Z</MenubarShortcut>
-            </MenubarItem>
-            <MenubarItem>
-              Redo <MenubarShortcut>⇧⌘Z</MenubarShortcut>
-            </MenubarItem>
-          </MenubarGroup>
-          <MenubarSeparator />
-          <MenubarGroup>
-            <MenubarSub>
-              <MenubarSubTrigger>Find</MenubarSubTrigger>
-              <MenubarSubContent>
-                <MenubarGroup>
-                  <MenubarItem>Search the web</MenubarItem>
-                </MenubarGroup>
-                <MenubarSeparator />
-                <MenubarGroup>
-                  <MenubarItem>Find...</MenubarItem>
-                  <MenubarItem>Find Next</MenubarItem>
-                  <MenubarItem>Find Previous</MenubarItem>
-                </MenubarGroup>
-              </MenubarSubContent>
-            </MenubarSub>
-          </MenubarGroup>
-          <MenubarSeparator />
-          <MenubarGroup>
-            <MenubarItem>Cut</MenubarItem>
-            <MenubarItem>Copy</MenubarItem>
-            <MenubarItem>Paste</MenubarItem>
-          </MenubarGroup>
-        </MenubarContent>
-      </MenubarMenu>
-      <MenubarMenu>
-        <MenubarTrigger>View</MenubarTrigger>
-        <MenubarContent className="w-44">
-          <MenubarGroup>
-            <MenubarCheckboxItem>Bookmarks Bar</MenubarCheckboxItem>
-            <MenubarCheckboxItem checked>Full URLs</MenubarCheckboxItem>
-          </MenubarGroup>
-          <MenubarSeparator />
-          <MenubarGroup>
-            <MenubarItem inset>
-              Reload <MenubarShortcut>⌘R</MenubarShortcut>
-            </MenubarItem>
-            <MenubarItem disabled inset>
-              Force Reload <MenubarShortcut>⇧⌘R</MenubarShortcut>
-            </MenubarItem>
-          </MenubarGroup>
-          <MenubarSeparator />
-          <MenubarGroup>
-            <MenubarItem inset>Toggle Fullscreen</MenubarItem>
-          </MenubarGroup>
-          <MenubarSeparator />
-          <MenubarGroup>
-            <MenubarItem inset>Hide Sidebar</MenubarItem>
-          </MenubarGroup>
-        </MenubarContent>
-      </MenubarMenu>
-      <MenubarMenu>
-        <MenubarTrigger>Profiles</MenubarTrigger>
-        <MenubarContent>
-          <MenubarRadioGroup value="benoit">
-            <MenubarRadioItem value="andy">Andy</MenubarRadioItem>
-            <MenubarRadioItem value="benoit">Benoit</MenubarRadioItem>
-            <MenubarRadioItem value="Luis">Luis</MenubarRadioItem>
-          </MenubarRadioGroup>
-          <MenubarSeparator />
-          <MenubarGroup>
-            <MenubarItem inset>Edit...</MenubarItem>
-          </MenubarGroup>
-          <MenubarSeparator />
-          <MenubarGroup>
-            <MenubarItem inset>Add Profile...</MenubarItem>
-          </MenubarGroup>
-        </MenubarContent>
-      </MenubarMenu> */}
-    </Menubar>
-        </div>
-        <div>
-            <ul className='flex gap-4'>
-                <li>Search</li>
-                <li>Profile</li>
-                <li>Shopping Cart</li>
-            </ul>
-        </div>
-    </nav>
-  )
-}
+    <nav className="bg-[#12121A] w-full h-16 flex items-center justify-between px-10 text-white relative z-10 shadow-xl shadow-[#BF00FF]">
+      <Link to={"/"} className="flex items-center gap-4">
+        <img className="w-10 h-10" src={LogoImg} alt="logo" />
+        <img className="w-40" src={LogoText} alt="logo text" />
+      </Link>
+      {/* SECTION 2 */}
+      <NavigationMenu>
+        <NavigationMenuList>
+          <NavigationMenuItem>
+            <NavigationMenuTrigger>SHOP</NavigationMenuTrigger>
+            <NavigationMenuContent>
+              <NavigationMenuLink>Link</NavigationMenuLink>
+            </NavigationMenuContent>
+          </NavigationMenuItem>
+          <NavigationMenuItem>
+            <NavigationMenuTrigger>COLLECTIONS</NavigationMenuTrigger>
+            <NavigationMenuContent>
+              <NavigationMenuLink>Link</NavigationMenuLink>
+            </NavigationMenuContent>
+          </NavigationMenuItem>
+          <NavigationMenuItem>
+            <NavigationMenuLink>NEW ARRIVALS</NavigationMenuLink>
+          </NavigationMenuItem>
+          <NavigationMenuItem>
+            <NavigationMenuLink className={'border border-pink-300 text-pink-300 h-8 rounded-lg'}>SALE</NavigationMenuLink>
+          </NavigationMenuItem>
+        </NavigationMenuList>
+      </NavigationMenu>
 
-export default Navbar
+      {/* SEC3 */}
+      
+      <NavigationMenu>
+        <NavigationMenuList className={'flex gap-2'}>
+          <NavigationMenuItem>
+              <NavigationMenuLink className={'border border-[#1C1C24] rounded-lg h-10'}><Search size={20} color="#22D3EE" /></NavigationMenuLink>
+          </NavigationMenuItem>
+          <NavigationMenuItem>
+            <NavigationMenuTrigger className={'border border-[#1C1C24] rounded-lg h-10'}><User size={20} color="#22D3EE" className="mr-2" />PROFILE</NavigationMenuTrigger>
+            <NavigationMenuContent className={'w-52'}>
+              <NavigationMenuLink render={<Link to={'/edit-profile'} />} className={'text-white gap-4 hover:bg-[#2a2a452f]'}><CircleUser color="#6B6B8D" />My Account</NavigationMenuLink>
+              <NavigationMenuLink render={<Link to={'/edit-profile'} />} className={'text-white gap-4 hover:bg-[#2a2a452f]'}><ShoppingBag color="#6B6B8D" />My Order</NavigationMenuLink>
+              <NavigationMenuLink render={<Link to={'/edit-profile'} />} className={'text-white gap-4 hover:bg-[#2a2a452f]'}><Star color="#6B6B8D" />My Reviews</NavigationMenuLink>
+              <NavigationMenuLink render={<Link to={'/edit-profile'} />} className={'text-white gap-4 hover:bg-[#2a2a452f]'}><CircleX color="#6B6B8D" />My Returns</NavigationMenuLink>
+              <hr className="w-full my-2 border-[#ffffff1f]" />
+              <NavigationMenuLink zrender={<Link to={'/edit-profile'} />} className={'text-white gap-4 hover:bg-[#2a2a452f]'}><LogOut color="#6B6B8D" />Logout</NavigationMenuLink>
+            </NavigationMenuContent>
+          </NavigationMenuItem>
+          <NavigationMenuItem>
+            <NavigationMenuTrigger className={'border border-[#1C1C24] rounded-lg h-10'}><ShoppingBag size={20} color="#22D3EE" /></NavigationMenuTrigger>
+            <NavigationMenuContent>
+              <NavigationMenuLink>Link</NavigationMenuLink>
+            </NavigationMenuContent>
+          </NavigationMenuItem>
+          <NavigationMenuItem>
+            <NavigationMenuLink>USD/THB</NavigationMenuLink>
+          </NavigationMenuItem>
+        </NavigationMenuList>
+      </NavigationMenu>
+    </nav>
+  );
+};
+
+export default Navbar;
