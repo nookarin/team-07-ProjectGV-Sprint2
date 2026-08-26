@@ -4,29 +4,38 @@ erDiagram
     User ||--o{ Wishlist : add
     User ||--o{ ShoppingCart : add
 
-    Order ||--o{ PromoCode : applies
+    ShoppingCart ||--o| Order : checkout_to
+    ShoppingCart ||--|{ CartItem : contains
 
-    Order ||--|{ ShoppingCart : checkout_from
+    Order ||--|{ OrderItem : contains
+    PromoCode ||--o{ Order : applied_to
 
-    Product ||--o{ Order : included_in
+    Product ||--o{ CartItem : added_as
+    Product ||--o{ OrderItem : included_in
     Product ||--o{ Review : has
-    Product ||--o{ Bundle : bundle_in
-    Product ||--o{ Color : come_in
+    Product ||--o{ Wishlist : saved_in
+    Product ||--o{ BundleItem : included_in
+
+    ProductVariant ||--o{ CartItem : selected_as
+    ProductVariant ||--o{ OrderItem : purchased_as
+
+    Bundle ||--|{ BundleItem : contains
 
     Manufacturer ||--o{ Product : produces
 
-    Distributor }o--|| Order : receives
+    Distributor ||--o{ Order : fulfills
 
-    Category ||--|{ Product : contains
-    SubCategory ||--|{ Category : contains
-    KBSwitch ||--|{ SubCategory : contains
-    Keycap ||--|{ SubCategory : contains
-    ProductVariant ||--|{ SubCategory : contains
+    Category ||--o{ SubCategory : contains
+    SubCategory ||--o{ Product : classifies
+    Product ||--o{ ProductVariant : has
+    Color ||--o{ ProductVariant : selected_in
+    KBSwitch ||--o{ ProductVariant : used_in
+    Keycap ||--o{ ProductVariant : used_in
 
 User{
     ObjectId user_id PK
     string username
-    string password
+    string password_hash
     string firstname
     string lastname
     string email
@@ -45,7 +54,7 @@ Product{
     string description
     ObjectId category_id FK
     ObjectId subcategory_id FK
-    ObjectId color_id FK
+    ObjectId manufacturer_id FK
 
     string connectivity_type
     float bluetooth_version
@@ -60,33 +69,57 @@ Product{
 Category{
     ObjectId category_id PK
     string category_name "keyboard | mouse | headphone"
-    ObjectId subcategory_id
 }
 
 SubCategory{
     ObjectId subcategory_id PK
+    ObjectId category_id FK
     string subcategory_name "mechanical | magnetic | rubber-dome | wired | wireless | headset"
 }
 
-
 Order{
     ObjectId order_id PK
-    ObjectId distributor_id FK
+    ObjectId cart_id FK
+    int order_number
+    string status "pending | paid | shipped | completed"
     ObjectId user_id FK
     int total_quantity
     string payment_method
+    string shipping_address
+    ObjectId promo_id FK 
     float final_price
     date order_date
-    string payment_status "pending | paid"
-    ObjectId product_id FK
+    ObjectId distributor_id FK
 }
 
 %%order merged with transaction, created orderitem
 
-ShoppingCart{
-    ObjectId cart_id PK
-    ObjectId product_id FK
-    ObjectId user_id FK
+OrderItem {
+  ObjectId orderitem_id PK
+  ObjectId order_id FK
+  ObjectId product_id FK
+  ObjectId variant_id FK
+  int quantity
+  float unit_price
+}
+
+ShoppingCart {
+  ObjectId cart_id PK
+  ObjectId user_id FK
+  string status "active | checked_out"
+  date created_at
+  date updated_at
+}
+
+CartItem {
+  ObjectId cart_item_id PK
+  ObjectId cart_id FK
+  ObjectId product_id FK
+  ObjectId variant_id FK
+  int quantity
+  float unit_price
+  date created_at
+  date updated_at
 }
 
 Wishlist{
@@ -98,10 +131,11 @@ Wishlist{
 Review{
     ObjectId review_id PK
     ObjectId user_id FK
-    Object product_id FK
-    date review_date
+    ObjectId product_id FK
+    ObjectId orderitem_id FK
     float rating
     string comment
+    date review_date
 }
 
 Bundle{
@@ -114,10 +148,18 @@ Bundle{
     ObjectId product_id FK
 }
 
+BundleItem {
+  ObjectId bundle_item_id PK
+  ObjectId bundle_id FK
+  ObjectId product_id FK
+  int quantity
+}
+
 PromoCode{
-    ObjectId promo_id
+    ObjectId promo_id PK
     string code
     float min_order_price
+    float discount_value
     int max_use
     boolean is_active
     date promo_start
@@ -128,7 +170,9 @@ PromoCode{
 }
 
 ProductVariant{
+    ObjectId variant_id PK
     ObjectId product_id FK
+    ObjectId color_id FK
 
     %%mouse
     int dpi
@@ -179,7 +223,4 @@ Distributor{
     ObjectId distributor_id PK
     string distributor_name
     string distributor_location
-    
-    ObjectId order_id FK
-    string shipping_status "shipped | on the way | out of delivery | completed"
 }
