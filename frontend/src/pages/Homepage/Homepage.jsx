@@ -58,6 +58,7 @@ const Homepage = () => {
               src={video_banner1}
               muted
               autoPlay
+              loop
             ></video>
           </CarouselItem>
           <CarouselItem>
@@ -79,6 +80,7 @@ const Homepage = () => {
               src={video_banner2}
               muted
               autoPlay
+              loop
             ></video>
           </CarouselItem>
           <CarouselItem>
@@ -108,6 +110,7 @@ const Homepage = () => {
               src={video_banner3}
               muted
               autoPlay
+              loop
             ></video>
           </CarouselItem>
         </CarouselContent>
