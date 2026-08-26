@@ -19,10 +19,17 @@ import { Link } from "react-router-dom";
 import { Heart, ShoppingCart } from "lucide-react";
 import ProductCard from "#components/Homepage/ProductCard";
 import CategoryCard from "#components/Homepage/CategoryCard";
+import Autoplay from "embla-carousel-autoplay";
 const Homepage = () => {
   return (
     <div className="bg-[#0A0A0F]">
-      <Carousel>
+      <Carousel
+        plugins={[
+          Autoplay({
+            delay: 2000,
+          }),
+        ]}
+      >
         <CarouselContent>
           <CarouselItem>
             <Card
@@ -85,7 +92,9 @@ const Homepage = () => {
       </Carousel>
       <div className="w-3/4 mx-auto my-10">
         <div>
-          <h2 className="text-white font-bold text-xl mb-8"><span className="text-[#A78BFA] font-black">—</span> CATEGORIES</h2>
+          <h2 className="text-white font-bold text-xl mb-8">
+            <span className="text-[#A78BFA] font-black">—</span> CATEGORIES
+          </h2>
           <div className="grid grid-cols-2 ">
             <CategoryCard img={img_cate1} />
             <CategoryCard img={img_cate2} />
@@ -95,7 +104,9 @@ const Homepage = () => {
         </div>
       </div>
       <div className="w-3/4 mx-auto py-10">
-        <h2 className="text-white font-bold text-xl mb-8"><span className="text-[#A78BFA] font-black">—</span> TRENDING GEAR</h2>
+        <h2 className="text-white font-bold text-xl mb-8">
+          <span className="text-[#A78BFA] font-black">—</span> TRENDING GEAR
+        </h2>
         <div className="grid grid-cols-3 gap-12 text-white">
           <ProductCard img={img_cate1} />
           <ProductCard img={img_cate2} />
