@@ -30,7 +30,7 @@ import {
 
 const Navbar = () => {
   return (
-    <nav className="bg-[#12121A] w-full h-16 flex items-center justify-between px-10 text-white relative z-10 shadow-xl shadow-[#BF00FF]">
+    <nav className="bg-[#12121A] w-full h-16 flex items-center justify-between px-10 text-white relative z-10 shadow-xl shadow-[#5B21B6]">
       <Link to={"/"} className="flex items-center gap-4">
         <img className="w-10 h-10" src={LogoImg} alt="logo" />
         <img className="w-40" src={LogoText} alt="logo text" />
