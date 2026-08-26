@@ -1,25 +1,13 @@
 import { useRef, useState } from "react";
-import {
-  CircleUserRound,
-  ClipboardList,
-  ShieldX,
-  Star,
-} from "lucide-react";
 import nookAvatar from "../../../assets/nook.jpg";
+import AccountSidebar from "../AccountSidebar";
 
 const profileRows = [
-  { label: "Username:", value: "John Doe", editable: true },
+  { label: "Username:", value: "Nook Doe", editable: true },
   { label: "Email:", value: "johndoe@email.com" },
   { label: "Password:", value: "••••••••••••••••••", editable: true },
   { label: "Phone Number:", value: "099-546-3219", editable: true },
-  { label: "Date of Birth:", value: "03-07-1996" },
-];
-
-const navigation = [
-  { label: "My Account", icon: CircleUserRound },
-  { label: "My Purchase", icon: ClipboardList },
-  { label: "My Reviews", icon: Star },
-  { label: "My Cancellations\n& Returns", icon: ShieldX },
+  { label: "Date of Birth:", value: "26-04-2001" },
 ];
 
 export default function PersonalInfo() {
@@ -32,36 +20,9 @@ export default function PersonalInfo() {
   }
 
   return (
-    <main className="min-h-screen bg-[#16162A] px-4 py-12 font-sans text-[#DDD6FE] sm:px-8 lg:px-14 lg:py-[72px]">
+    <main className="min-h-screen bg-black px-4 py-12 font-sans text-[#DDD6FE] sm:px-8 lg:px-14 lg:py-[72px]">
       <div className="mx-auto grid max-w-[920px] gap-12 lg:grid-cols-[220px_minmax(360px,1fr)_170px] lg:gap-[60px]">
-        <aside className="text-sm font-semibold">
-          <p className="mb-4 pl-9 text-base">Hi, &nbsp;John Doe</p>
-          <div className="mb-3 h-px bg-[#2A2A45]" />
-
-          <nav aria-label="Account navigation" className="space-y-1.5">
-            {navigation.map(({ label, icon: Icon }, index) => (
-              <div key={label}>
-                <a
-                  href="#"
-                  className="flex items-start gap-4 rounded-xl px-5 py-1.5 transition-colors hover:bg-[#22223A]"
-                >
-                  <Icon className="mt-0.5 size-4 shrink-0 text-[#A78BFA]" strokeWidth={1.8} />
-                  <span className="whitespace-pre-line leading-5">{label}</span>
-                </a>
-                {index === 0 && (
-                  <div className="ml-10 space-y-0.5">
-                    <a href="#personal-information" className="block rounded-xl border border-[#2A2A45] bg-[#1A1A2E] px-4 py-1.5 font-medium text-[#F9A8D4]">
-                      Personal Information
-                    </a>
-                    <a href="#addresses" className="block px-4 py-1 font-medium text-[#DDD6FE]">
-                      Addresses
-                    </a>
-                  </div>
-                )}
-              </div>
-            ))}
-          </nav>
-        </aside>
+        <AccountSidebar active="/edit-profiles" />
 
         <section id="personal-information" aria-labelledby="personal-heading">
           <h1 id="personal-heading" className="mb-3 text-base font-bold">
@@ -109,7 +70,13 @@ export default function PersonalInfo() {
           >
             Select Image
           </button>
+
+            
+
         </section>
+
+
+
       </div>
     </main>
   );
