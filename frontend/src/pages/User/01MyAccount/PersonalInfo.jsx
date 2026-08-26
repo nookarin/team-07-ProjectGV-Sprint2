@@ -3,7 +3,7 @@ import nookAvatar from "../../../assets/nook.jpg";
 import AccountSidebar from "../AccountSidebar";
 
 const profileRows = [
-  { label: "Username:", value: "John Doe", editable: true },
+  { label: "Username:", value: "Nook Doe", editable: true },
   { label: "Email:", value: "johndoe@email.com" },
   { label: "Password:", value: "••••••••••••••••••", editable: true },
   { label: "Phone Number:", value: "099-546-3219", editable: true },

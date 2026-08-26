@@ -22,10 +22,17 @@ import { Link } from "react-router-dom";
 import { Heart, ShoppingCart } from "lucide-react";
 import ProductCard from "#components/Homepage/ProductCard";
 import CategoryCard from "#components/Homepage/CategoryCard";
+import Autoplay from "embla-carousel-autoplay";
 const Homepage = () => {
   return (
     <div className="bg-[#0A0A0F]">
-      <Carousel>
+      <Carousel
+        plugins={[
+          Autoplay({
+            delay: 2000,
+          }),
+        ]}
+      >
         <CarouselContent>
           <CarouselItem>
             <Card
@@ -39,7 +46,7 @@ const Homepage = () => {
                 }
               >
                 <div>
-                  <h1 className="font-black text-7xl text-shadow-[0px_0px_20px_#22D3EE]">
+                  <h1 className="font-black text-7xl text-shadow-[0px_0px_20px_#A78BFA]">
                     PRECISION TO VICTORY.
                   </h1>
                   <p>
@@ -67,6 +74,11 @@ const Homepage = () => {
             ></video>
           </CarouselItem>
           <CarouselItem>
+            <div className="absolute w-full h-full flex flex-col justify-center items-center text-white">
+              <h6 className="font-light text-md">NEW ARRIVALS</h6>
+              <h2>GearVerse Magnetic Keyboard MK II</h2>
+              <p>Light up your typing</p>
+            </div>
             <video
               className="border w-full h-175 object-cover"
               src={video_banner2}
@@ -88,7 +100,9 @@ const Homepage = () => {
       </Carousel>
       <div className="w-3/4 mx-auto my-10">
         <div>
-          <h2 className="text-white font-bold text-xl mb-8"><span className="text-[#A78BFA] font-black">—</span> CATEGORIES</h2>
+          <h2 className="text-white font-bold text-xl mb-8">
+            <span className="text-[#A78BFA] font-black">—</span> CATEGORIES
+          </h2>
           <div className="grid grid-cols-2 ">
             <CategoryCard img={img_cate1} />
             <CategoryCard img={img_cate2} />
@@ -98,7 +112,9 @@ const Homepage = () => {
         </div>
       </div>
       <div className="w-3/4 mx-auto py-10">
-        <h2 className="text-white font-bold text-xl mb-8"><span className="text-[#A78BFA] font-black">—</span> TRENDING GEAR</h2>
+        <h2 className="text-white font-bold text-xl mb-8">
+          <span className="text-[#A78BFA] font-black">—</span> TRENDING GEAR
+        </h2>
         <div className="grid grid-cols-3 gap-12 text-white">
           <ProductCard img={img_product1} />
           <ProductCard img={img_product2} />
