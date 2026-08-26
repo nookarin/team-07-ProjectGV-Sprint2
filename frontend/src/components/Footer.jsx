@@ -7,8 +7,8 @@ import { Field } from "#components/ui/field";
 const Footer = () => {
   return (
     <div className="bg-[#050508] text-[#8A8A93] py-10 text-sm">
-      <div className="w-11/12 grid grid-cols-4 border border-green-400 mx-auto">
-        <div className="border border-red-500">
+      <div className="w-11/12 grid grid-cols-4 mx-auto">
+        <div>
           <h2 className="text-white text-base mb-4">
             <span className="font-black text-[#BF00FF]">|</span> SHOP
           </h2>
