@@ -27,7 +27,7 @@ export default function AccountSidebar({ active }) {
         {navigation.map(({ label, icon: Icon, to }, index) => {
           const isActive =
             active === to ||
-            (to === "/edit-profile" && active.startsWith("/edit-profiles/"));
+            (to === "/edit-profile" && active.startsWith("/edit-profile/"));
 
           return (
             <div key={label}>

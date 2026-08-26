@@ -22,7 +22,7 @@ export default function PersonalInfo() {
   return (
     <main className="min-h-screen bg-black px-4 py-12 font-sans text-[#DDD6FE] sm:px-8 lg:px-14 lg:py-[72px]">
       <div className="mx-auto grid max-w-[920px] gap-12 lg:grid-cols-[220px_minmax(360px,1fr)_170px] lg:gap-[60px]">
-        <AccountSidebar active="/edit-profiles" />
+        <AccountSidebar active="/edit-profile" />
 
         <section id="personal-information" aria-labelledby="personal-heading">
           <h1 id="personal-heading" className="mb-3 text-base font-bold">
