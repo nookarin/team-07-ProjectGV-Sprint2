@@ -20,7 +20,7 @@ const router = createBrowserRouter([
       { path: 'my-purchases', element: <MyPurchase />},
       { path: 'my-reviews', element: <MyReviews />},
       { path: 'my-cancellations', element: <MyCancellations />},
-      { path: "cart-page", element: <CartPage /> },
+      // { path: "cart-page", element: <CartPage /> },
     ],
   },
     
