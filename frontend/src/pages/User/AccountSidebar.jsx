@@ -7,7 +7,7 @@ import {
 import { Link } from "react-router-dom";
 
 const navigation = [
-  { label: "My Account", icon: CircleUserRound, to: "/edit-profiles" },
+  { label: "My Account", icon: CircleUserRound, to: "/edit-profile" },
   { label: "My Purchase", icon: ClipboardList, to: "/my-purchases" },
   { label: "My Reviews", icon: Star, to: "/my-reviews" },
   {
@@ -27,7 +27,7 @@ export default function AccountSidebar({ active }) {
         {navigation.map(({ label, icon: Icon, to }, index) => {
           const isActive =
             active === to ||
-            (to === "/edit-profiles" && active.startsWith("/edit-profiles/"));
+            (to === "/edit-profile" && active.startsWith("/edit-profile/"));
 
           return (
             <div key={label}>
@@ -44,9 +44,9 @@ export default function AccountSidebar({ active }) {
             {index === 0 && (
               <div className="ml-10 space-y-0.5">
                 <Link
-                  to="/edit-profiles"
+                  to="/edit-profile"
                   className={`block rounded-xl px-4 py-1.5 font-medium ${
-                    active === "/edit-profiles"
+                    active === "/edit-profile"
                       ? "border border-[#2A2A45] bg-[#1A1A2E] text-[#F9A8D4]"
                       : "text-[#DDD6FE]"
                   }`}
@@ -54,9 +54,9 @@ export default function AccountSidebar({ active }) {
                   Personal Information
                 </Link>
                 <Link
-                  to="/edit-profiles/addresses"
+                  to="/edit-profile/addresses"
                   className={`block rounded-xl px-4 py-1.5 font-medium ${
-                    active === "/edit-profiles/addresses"
+                    active === "/edit-profile/addresses"
                       ? "border border-[#2A2A45] bg-[#1A1A2E] text-[#F9A8D4]"
                       : "text-[#DDD6FE]"
                   }`}

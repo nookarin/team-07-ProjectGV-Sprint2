@@ -32,7 +32,7 @@ export default function () {
   return (
     <main className="min-h-screen bg-black px-4 py-12 font-sans text-[#DDD6FE] sm:px-8 lg:px-14 lg:py-[72px]">
       <div className="mx-auto grid max-w-[920px] gap-12 lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-[60px]">
-        <AccountSidebar active="/edit-profiles/addresses" />
+        <AccountSidebar active="/edit-profile/addresses" />
 
         <section id="addresses" aria-labelledby="addresses-heading">
           <div className="mb-5 flex items-center justify-between gap-4">
