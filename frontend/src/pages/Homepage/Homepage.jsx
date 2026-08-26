@@ -20,13 +20,13 @@ import img_product2 from "../../assets/image-product/Gemini_Generated_Image_cfuk
 import img_product3 from "../../assets/image-product/Gemini_Generated_Image_waq5aswaq5aswaq5.jpg";
 import { Link } from "react-router-dom";
 import { Heart, ShoppingCart } from "lucide-react";
-import ProductCard from "#components/Homepage/ProductCard";
+import ProductSecondaryCard from "#components/Homepage/ProductSecondaryCard";
 import CategoryCard from "#components/Homepage/CategoryCard";
 import Autoplay from "embla-carousel-autoplay";
 import { Badge } from "#components/ui/badge";
 const Homepage = () => {
   return (
-    <div className="bg-[#0A0A0F]">
+    <div className="bg-gbg-3">
       <Carousel
         plugins={[
           Autoplay({
@@ -47,7 +47,7 @@ const Homepage = () => {
               <Button
                 variant="outline"
                 className={
-                  "rounded-lg mt-20 px-8 py-5 shadow-lg shadow-[#A78BFA] inset-shadow-sm inset-shadow-[#A78BFA]"
+                  "rounded-lg mt-20 px-8 py-5 shadow-lg shadow-gpurptext-gpurple-2 inset-shadow-sm inset-shadow-gpurptext-gpurple-2"
                 }
               >
                 SHOP NOW {"⮞"}
@@ -99,7 +99,7 @@ const Homepage = () => {
               {/* <Button
                 variant="outline"
                 className={
-                  "rounded-lg mt-20 px-8 py-5 shadow-lg shadow-[#A78BFA] inset-shadow-sm inset-shadow-[#A78BFA]"
+                  "rounded-lg mt-20 px-8 py-5 shadow-lg shadow-gpurptext-gpurple-2 inset-shadow-sm inset-shadow-gpurptext-gpurple-2"
                 }
               >
                 SHOP NOW {"⮞"}
@@ -120,7 +120,7 @@ const Homepage = () => {
       <div className="w-3/4 mx-auto my-10">
         <div>
           <h2 className="text-white font-bold text-xl mb-8">
-            <span className="text-[#A78BFA] font-black">—</span> CATEGORIES
+            <span className="text-gpurple-2 font-black">—</span> CATEGORIES
           </h2>
           <div className="grid grid-cols-2 ">
             <CategoryCard img={img_cate1} />
@@ -132,12 +132,12 @@ const Homepage = () => {
       </div>
       <div className="w-3/4 mx-auto py-10">
         <h2 className="text-white font-bold text-xl mb-8">
-          <span className="text-[#A78BFA] font-black">—</span> TRENDING GEAR
+          <span className="text-gpurple-2 font-black">—</span> TRENDING GEAR
         </h2>
         <div className="grid grid-cols-3 gap-12 text-white">
-          <ProductCard img={img_product1} />
-          <ProductCard img={img_product2} />
-          <ProductCard img={img_product3} />
+          <ProductSecondaryCard img={img_product1} />
+          <ProductSecondaryCard img={img_product2} />
+          <ProductSecondaryCard img={img_product3} />
         </div>
       </div>
     </div>

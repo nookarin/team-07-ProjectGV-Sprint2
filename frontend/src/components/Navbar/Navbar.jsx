@@ -1,6 +1,6 @@
 import React from "react";
-import LogoImg from "../assets/Artboard1.png";
-import LogoText from "../assets/Untitled-2.png";
+import LogoImg from "../../assets/Artboard1.png";
+import LogoText from "../../assets/Untitled-2.png";
 import {
   Menubar,
   MenubarCheckboxItem,
@@ -32,7 +32,7 @@ import NavbarUnauthen from "./NavbarUnauthen";
 
 const Navbar = () => {
   return (
-    <nav className="bg-[#12121A] w-full h-16 flex items-center justify-between px-10 text-white relative z-10 shadow-xl shadow-[#BF00FF]">
+    <nav className="bg-gbg-2 w-full h-16 flex items-center justify-between px-10 text-white relative z-10 shadow-xl shadow-gpurple-4/80">
       <Link to={"/"} className="flex items-center gap-4">
         <img className="w-10 h-10" src={LogoImg} alt="logo" />
         <img className="w-40" src={LogoText} alt="logo text" />
@@ -41,10 +41,11 @@ const Navbar = () => {
       <NavigationMenu>
         <NavigationMenuList>
           <NavigationMenuItem>
-            <NavigationMenuTrigger>SHOP</NavigationMenuTrigger>
+            <NavigationMenuLink render={<Link to={"/products"} />} className={`active:text-gcyan-light`}>SHOP</NavigationMenuLink>
+            {/* <NavigationMenuTrigger>SHOP</NavigationMenuTrigger>
             <NavigationMenuContent>
               <NavigationMenuLink>Link</NavigationMenuLink>
-            </NavigationMenuContent>
+            </NavigationMenuContent> */}
           </NavigationMenuItem>
           <NavigationMenuItem>
             <NavigationMenuTrigger>COLLECTIONS</NavigationMenuTrigger>

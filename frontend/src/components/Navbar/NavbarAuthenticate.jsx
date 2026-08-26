@@ -25,14 +25,14 @@ const NavbarAuthenticate = () => {
         <NavigationMenuList className={"flex gap-2"}>
           <NavigationMenuItem>
             <NavigationMenuLink
-              className={"border border-[#1C1C24] rounded-lg h-10"}
+              className={"border border-gbase-1 rounded-lg h-10"}
             >
               <Search size={20} color="#22D3EE" />
             </NavigationMenuLink>
           </NavigationMenuItem>
           <NavigationMenuItem>
             <NavigationMenuTrigger
-              className={"border border-[#1C1C24] rounded-lg h-10"}
+              className={"border border-gbase-1 rounded-lg h-10"}
             >
               <User size={20} color="#22D3EE" className="mr-2" />
               PROFILE
@@ -40,28 +40,28 @@ const NavbarAuthenticate = () => {
             <NavigationMenuContent className={"w-52"}>
               <NavigationMenuLink
                 render={<Link to={"/edit-profile"} />}
-                className={"text-white gap-4 hover:bg-[#2a2a452f]"}
+                className={"text-white gap-4 hover:bg-gbase-3"}
               >
                 <CircleUser color="#6B6B8D" />
                 My Account
               </NavigationMenuLink>
               <NavigationMenuLink
                 render={<Link to={"/my-purchases"} />}
-                className={"text-white gap-4 hover:bg-[#2a2a452f]"}
+                className={"text-white gap-4 hover:bg-gbase-3"}
               >
                 <ShoppingBag color="#6B6B8D" />
                 My Order
               </NavigationMenuLink>
               <NavigationMenuLink
                 render={<Link to={"/my-reviews"} />}
-                className={"text-white gap-4 hover:bg-[#2a2a452f]"}
+                className={"text-white gap-4 hover:bg-gbase-3"}
               >
                 <Star color="#6B6B8D" />
                 My Reviews
               </NavigationMenuLink>
               <NavigationMenuLink
                 render={<Link to={"/my-cancellations"} />}
-                className={"text-white gap-4 hover:bg-[#2a2a452f]"}
+                className={"text-white gap-4 hover:bg-gbase-3"}
               >
                 <CircleX color="#6B6B8D" />
                 My Returns
@@ -69,8 +69,8 @@ const NavbarAuthenticate = () => {
               <hr className="w-full my-2 border-[#ffffff1f]" />
               {/* // add logout link under here */}
               <NavigationMenuLink
-                zrender={<Link to={"/edit-profile"} />}
-                className={"text-white gap-4 hover:bg-[#2a2a452f]"}
+                render={<Link to={"/edit-profile"} />}
+                className={"text-white gap-4 hover:bg-gbase-3"}
               >
                 <LogOut color="#6B6B8D" />
                 Logout
@@ -79,7 +79,7 @@ const NavbarAuthenticate = () => {
           </NavigationMenuItem>
           <NavigationMenuItem>
             <NavigationMenuTrigger
-              className={"border border-[#1C1C24] rounded-lg h-10"}
+              className={"border border-gbase-1 rounded-lg h-10"}
             >
               <ShoppingBag size={20} color="#22D3EE" />
             </NavigationMenuTrigger>

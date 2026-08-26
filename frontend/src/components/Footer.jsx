@@ -6,7 +6,7 @@ import { Field } from "#components/ui/field";
 
 const Footer = () => {
   return (
-    <div className="bg-[#050508] text-[#8A8A93] py-10 text-sm">
+    <div className="bg-gbg-1 text-[#8A8A93] py-10 text-sm">
       <div className="w-11/12 grid grid-cols-4 mx-auto">
         <div>
           <h2 className="text-white text-base mb-4">
@@ -69,11 +69,11 @@ const Footer = () => {
             <Input
               type="search"
               placeholder="user@gearverse.com"
-              className={"ring-1 ring-[#1C1C24] bg-[#0A0A0F] rounded-lg"}
+              className={"ring-1 ring-[#1C1C24] bg-gbg-3 rounded-lg"}
             />
             <Button
               className={
-                "rounded-lg bg-pink-500 shadow-md shadow-pink-500 text-white"
+                "rounded-lg bg-gpink-2 shadow-md shadow-gpink-2 text-white"
               }
             >
               SUBMIT

@@ -10,3 +10,27 @@
 body {
     font-family: 'Kanit';
 }
+
+@theme {
+    --color-gpurple-1: #DDD6FE;
+    --color-gpurple-2: #A78BFA;
+    --color-gpurple-3: #8B5CF6;
+    --color-gpurple-4: #5B21B6;
+    --color-gpurple-5: #2D1B69;
+    
+    --color-gpink-1: #F9A8D4;
+    --color-gpink-2: #EC4899;
+    --color-gpink-3: #9D174D;
+    --color-gcyan-light: #22D3EE;
+    --color-gcyan-dark: #0E7490;
+    --color-gcyan-neon: #A5D6FC;
+    
+    --color-gbase-1: #2A2A45;
+    --color-gbase-2: #22223A;
+    --color-gbase-3: #16162A;
+    --color-gbase-4: #1A1A2E;
+    
+    --color-gbg-1: #050508;
+    --color-gbg-2: #12121A;
+    --color-gbg-3: #0A0A0F;
+}
