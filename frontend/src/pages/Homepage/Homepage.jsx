@@ -15,11 +15,15 @@ import img_cate1 from "../../assets/image-category/Gemini_Generated_Image_hh5i48
 import img_cate2 from "../../assets/image-category/Gemini_Generated_Image_k7cgvsk7cgvsk7cg.jpg";
 import img_cate3 from "../../assets/image-category/Gemini_Generated_Image_pjqv70pjqv70pjqv.jpg";
 import img_cate4 from "../../assets/image-category/Gemini_Generated_Image_rex7yirex7yirex7.jpg";
+import img_product1 from "../../assets/image-product/Gemini_Generated_Image_4knuxp4knuxp4knu.jpg";
+import img_product2 from "../../assets/image-product/Gemini_Generated_Image_cfukikcfukikcfuk.jpg";
+import img_product3 from "../../assets/image-product/Gemini_Generated_Image_waq5aswaq5aswaq5.jpg";
 import { Link } from "react-router-dom";
 import { Heart, ShoppingCart } from "lucide-react";
 import ProductCard from "#components/Homepage/ProductCard";
 import CategoryCard from "#components/Homepage/CategoryCard";
 import Autoplay from "embla-carousel-autoplay";
+import { Badge } from "#components/ui/badge";
 const Homepage = () => {
   return (
     <div className="bg-[#0A0A0F]">
@@ -32,37 +36,23 @@ const Homepage = () => {
       >
         <CarouselContent>
           <CarouselItem>
-            <Card
-              className={
-                "ring-0 absolute -translate-x-1/2 left-1/2 top-1/2 -translate-y-1/2"
-              }
-            >
-              <CardContent
+            <div className="absolute w-full h-full flex flex-col justify-center items-center text-white">
+              <h1 className="font-black text-7xl text-shadow-[0px_0px_20px_#A78BFA]">
+                PRECISION TO VICTORY.
+              </h1>
+              <p>
+                Precision gear designed for ultimate control. Upgrade
+                today.A78BFA
+              </p>
+              <Button
+                variant="outline"
                 className={
-                  "h-80 flex flex-col items-center justify-between text-center text-white"
+                  "rounded-lg mt-20 px-8 py-5 shadow-lg shadow-[#A78BFA] inset-shadow-sm inset-shadow-[#A78BFA]"
                 }
               >
-                <div>
-                  <h1 className="font-black text-7xl text-shadow-[0px_0px_20px_#22D3EE]">
-                    PRECISION TO VICTORY.
-                  </h1>
-                  <p>
-                    Precision gear designed for ultimate control. Upgrade
-                    today.A78BFA
-                  </p>
-                </div>
-                <div>
-                  <Button
-                    variant="outline"
-                    className={
-                      "rounded-lg px-8 py-5 shadow-lg shadow-[#A78BFA] inset-shadow-sm inset-shadow-[#A78BFA]"
-                    }
-                  >
-                    SHOP NOW {">"}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+                SHOP NOW {"⮞"}
+              </Button>
+            </div>
             <video
               className="border w-full h-175 object-cover"
               src={video_banner1}
@@ -71,6 +61,19 @@ const Homepage = () => {
             ></video>
           </CarouselItem>
           <CarouselItem>
+            <div className="absolute w-full h-full flex flex-col justify-center items-center text-white">
+              <div>
+                <Badge variant="outline" className={"bg-red-500/25"}>
+                  NEW ARRIVAL
+                </Badge>
+                <h2 className="font-extrabold text-6xl tracking-wide text-shadow-lg text-shadow-pink-500 my-2">
+                  GearVerse Magnetic Keyboard MK II
+                </h2>
+                <p className="uppercase font-bold text-xl">
+                  Light up your typing
+                </p>
+              </div>
+            </div>
             <video
               className="border w-full h-175 object-cover"
               src={video_banner2}
@@ -79,6 +82,27 @@ const Homepage = () => {
             ></video>
           </CarouselItem>
           <CarouselItem>
+            <div className="absolute w-full h-full flex flex-col gap-3 justify-center items-center text-white">
+              <p className="font-extrabold tracking-wider text-xl text-shadow-xs text-shadow-pink-600">SPECIAL OFFER</p>
+              <h1 className="font-black text-6xl bg-[#c42976] p-4 rounded-2xl shadow-2xl shadow-[#bd427f]">
+                BACK TO SCHOOL
+              </h1>
+              <h3 className="text-4xl font-semibold">
+                GET{" "}
+                <span className="text-5xl font-extrabold text-pink-400 underline">
+                  70%
+                </span>{" "}
+                OFF
+              </h3>
+              {/* <Button
+                variant="outline"
+                className={
+                  "rounded-lg mt-20 px-8 py-5 shadow-lg shadow-[#A78BFA] inset-shadow-sm inset-shadow-[#A78BFA]"
+                }
+              >
+                SHOP NOW {"⮞"}
+              </Button> */}
+            </div>
             <video
               className="border w-full h-175 object-cover"
               src={video_banner3}
@@ -108,9 +132,9 @@ const Homepage = () => {
           <span className="text-[#A78BFA] font-black">—</span> TRENDING GEAR
         </h2>
         <div className="grid grid-cols-3 gap-12 text-white">
-          <ProductCard img={img_cate1} />
-          <ProductCard img={img_cate2} />
-          <ProductCard img={img_cate3} />
+          <ProductCard img={img_product1} />
+          <ProductCard img={img_product2} />
+          <ProductCard img={img_product3} />
         </div>
       </div>
     </div>

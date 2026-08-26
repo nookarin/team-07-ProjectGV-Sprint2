@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect } from "react"; //เก็บสถานะที่ React กำลังใช้แสดงหน้าเว็บ, สั่งให้ React ทำอะไรบางอย่าง หลังจาก Component ถูกโหลด
 import {
   Truck,
   X,
@@ -26,41 +26,46 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 
+//ฟังก์ชันจากไฟล์ .js
 import {
-  getInitialCart,
-  saveCart,
-  getSavedPromo,
-  savePromo,
-  validatePromoCode,
-  resetToDefaultCart,
-  DEFAULT_SHIPPING,
+  getInitialCart, //โหลด Cart
+  saveCart, //บันทึก Cart
+  getSavedPromo, //โหลด Promo
+  savePromo, //บันทึก Promo
+  validatePromoCode, //ตรวจ Promo
+  resetToDefaultCart, //Reset Cart
+  DEFAULT_SHIPPING, //ค่าส่ง
 } from "#lib/cart-service";
 
+//เปิด browser
 export default function CartPage() {
-  const [items, setItems] = useState([]);
-  const [promoInput, setPromoInput] = useState("");
-  const [appliedPromo, setAppliedPromo] = useState(null);
-  const [promoError, setPromoError] = useState("");
+  const [items, setItems] = useState([]);  //Cart ที่กำลังแสดงอยู่บนหน้าจอ(เดี๋ยว useEffect จะไปโหลดของจริงมา)
+  
+  const [promoInput, setPromoInput] = useState(""); //สิ่งที่ผู้ใช้กำลังพิมพ์ในช่อง Promo
+  const [appliedPromo, setAppliedPromo] = useState(null); // Promo ที่ ผ่านการ Apply แล้ว
+  const [promoError, setPromoError] = useState(""); //ข้อความ error
+  
   const [checkoutSuccess, setCheckoutSuccess] = useState(false);
 
   useEffect(() => {
-    const loadedItems = getInitialCart();
-    setItems(loadedItems);
+    const loadedItems = getInitialCart(); //เรียก .js ดูว่ามีสินค้ามั้ย
+    setItems(loadedItems); //แสดงไอเทมใน cart
 
-    const savedPromoCode = getSavedPromo();
-    if (savedPromoCode) {
+    const savedPromoCode = getSavedPromo(); //เรียก .js ดูว่ามีโค้ดมั้ย
+    if (savedPromoCode) { //ถ้ามีเช็คกับ function ใน.js ว่าถูกไหม
       const res = validatePromoCode(savedPromoCode);
-      if (res.valid) {
-        setAppliedPromo(res);
-        setPromoInput(savedPromoCode);
+      if (res.valid) { //ถ้าถูก
+        setAppliedPromo(res); // apply ได้
+        setPromoInput(savedPromoCode); //แสดงในช่อง input
       }
     }
   }, []);
 
+  //ฟังก์ชันที่ทำงานเมื่อกด +, - (id = สินค้าตัวไหน, delta = จะเปลี่ยนจำนวนเท่าไหร่)
   const handleQuantityChange = (id, delta) => {
-    setItems((prevItems) => {
-      const updated = prevItems
-        .map((item) => {
+    setItems((prevItems) => { //Cart ก่อนเปลี่ยน(INITIAL_CART_ITEMS, saved)
+      const updated = prevItems //สร้าง updated
+        .map((item) => { //กำลังวนดูสินค้าทุกตัว
           if (item.id === id) {
             const newQty = item.quantity + delta;
             return newQty > 0 ? { ...item, quantity: newQty } : null;
@@ -69,14 +74,15 @@ export default function CartPage() {
         })
         .filter(Boolean);
 
-      saveCart(updated);
-      return updated;
+      saveCart(updated); //localStorage อัปเดต
+      return updated; //React แสดงจำนวนใหม่
     });
   };
 
+  //ลบสินค้า
   const handleRemoveItem = (id) => {
     setItems((prevItems) => {
-      const updated = prevItems.filter((item) => item.id !== id);
+      const updated = prevItems.filter((item) => item.id !== id); //เอาทุกตัวที่ไม่ใช่ ID ที่กดลบไว้
       saveCart(updated);
       return updated;
     });
@@ -89,7 +95,7 @@ export default function CartPage() {
 
   const handleResetDemo = () => {
     const { items: resetItems, promoCode } = resetToDefaultCart();
-    setItems(resetItems);
+    setItems(resetItems); //เอา INITIAL_CART_ITEMS, GEAR30 กลับไปแสดง
     const res = validatePromoCode(promoCode);
     setAppliedPromo(res);
     setPromoInput(promoCode);
@@ -99,7 +105,7 @@ export default function CartPage() {
 
   const handleApplyPromo = (e) => {
     e.preventDefault();
-    if (!promoInput.trim()) return;
+    if (!promoInput.trim()) return; //ถ้าเกิด event กด apply แล้วห้ามกลับไปเป็น default/refresh
 
     const res = validatePromoCode(promoInput);
     if (res.valid) {
@@ -118,16 +124,17 @@ export default function CartPage() {
     setPromoError("");
   };
 
-  // Price calculations
+  // คำนวณราคา
   const subtotal = items.reduce(
     (sum, item) => sum + item.unitPrice * item.quantity,
     0
   );
+
   const totalItemCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
-  const discount = appliedPromo ? appliedPromo.discount : 0;
-  const shipping = items.length > 0 ? DEFAULT_SHIPPING : 0;
-  const grandTotal = Math.max(0, subtotal - discount + shipping);
+  const discount = appliedPromo ? appliedPromo.discount : 0; //ถ้ามี Promo → ใช้ส่วนลดของ Promo, ถ้าไม่มี → ลด $0
+  const shipping = items.length > 0 ? DEFAULT_SHIPPING : 0; //ถ้ามีสินค้า → มีค่าส่ง, ถ้า Cart ว่าง → ค่าส่ง $0
+  const grandTotal = Math.max(0, subtotal - discount + shipping);  //Math.max(0, ...) ป้องกันไม่ให้ยอดติดลบ
 
   const handleProceedToCheckout = () => {
     setCheckoutSuccess(true);
@@ -353,7 +360,7 @@ export default function CartPage() {
                   <Input
                     type="text"
                     value={promoInput}
-                    onChange={(e) => setPromoInput(e.target.value)}
+                    onChange={(e) => setPromoInput(e.target.value)} //ทุกครั้งที่ช่อง Input เปลี่ยน เอาค่าที่ผู้ใช้พิมพ์มาเก็บไว้ใน promoInput
                     placeholder="Enter code (e.g. GEAR30)"
                     className="bg-[#18152e] border-[#2e264f] text-white text-sm px-3.5 py-2.5 rounded-xl flex-1 focus:border-purple-500 font-mono tracking-wider placeholder-slate-500 uppercase h-auto"
                   />
