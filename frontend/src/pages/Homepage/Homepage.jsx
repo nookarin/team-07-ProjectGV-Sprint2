@@ -43,7 +43,7 @@ const Homepage = () => {
                 }
               >
                 <div>
-                  <h1 className="font-black text-7xl text-shadow-[0px_0px_20px_#22D3EE]">
+                  <h1 className="font-black text-7xl text-shadow-[0px_0px_20px_#A78BFA]">
                     PRECISION TO VICTORY.
                   </h1>
                   <p>
@@ -71,6 +71,11 @@ const Homepage = () => {
             ></video>
           </CarouselItem>
           <CarouselItem>
+            <div className="absolute w-full h-full flex flex-col justify-center items-center text-white">
+              <h6 className="font-light text-md">NEW ARRIVALS</h6>
+              <h2>GearVerse Magnetic Keyboard MK II</h2>
+              <p>Light up your typing</p>
+            </div>
             <video
               className="border w-full h-175 object-cover"
               src={video_banner2}
