@@ -23,6 +23,7 @@ import { Heart, ShoppingCart } from "lucide-react";
 import ProductCard from "#components/Homepage/ProductCard";
 import CategoryCard from "#components/Homepage/CategoryCard";
 import Autoplay from "embla-carousel-autoplay";
+import { Badge } from "#components/ui/badge";
 const Homepage = () => {
   return (
     <div className="bg-[#0A0A0F]">
@@ -35,37 +36,23 @@ const Homepage = () => {
       >
         <CarouselContent>
           <CarouselItem>
-            <Card
-              className={
-                "ring-0 absolute -translate-x-1/2 left-1/2 top-1/2 -translate-y-1/2"
-              }
-            >
-              <CardContent
+            <div className="absolute w-full h-full flex flex-col justify-center items-center text-white">
+              <h1 className="font-black text-7xl text-shadow-[0px_0px_20px_#A78BFA]">
+                PRECISION TO VICTORY.
+              </h1>
+              <p>
+                Precision gear designed for ultimate control. Upgrade
+                today.A78BFA
+              </p>
+              <Button
+                variant="outline"
                 className={
-                  "h-80 flex flex-col items-center justify-between text-center text-white"
+                  "rounded-lg mt-20 px-8 py-5 shadow-lg shadow-[#A78BFA] inset-shadow-sm inset-shadow-[#A78BFA]"
                 }
               >
-                <div>
-                  <h1 className="font-black text-7xl text-shadow-[0px_0px_20px_#A78BFA]">
-                    PRECISION TO VICTORY.
-                  </h1>
-                  <p>
-                    Precision gear designed for ultimate control. Upgrade
-                    today.A78BFA
-                  </p>
-                </div>
-                <div>
-                  <Button
-                    variant="outline"
-                    className={
-                      "rounded-lg px-8 py-5 shadow-lg shadow-[#A78BFA] inset-shadow-sm inset-shadow-[#A78BFA]"
-                    }
-                  >
-                    SHOP NOW {">"}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+                SHOP NOW {"⮞"}
+              </Button>
+            </div>
             <video
               className="border w-full h-175 object-cover"
               src={video_banner1}
@@ -75,9 +62,17 @@ const Homepage = () => {
           </CarouselItem>
           <CarouselItem>
             <div className="absolute w-full h-full flex flex-col justify-center items-center text-white">
-              <h6 className="font-light text-md">NEW ARRIVALS</h6>
-              <h2>GearVerse Magnetic Keyboard MK II</h2>
-              <p>Light up your typing</p>
+              <div>
+                <Badge variant="outline" className={"bg-red-500/25"}>
+                  NEW ARRIVAL
+                </Badge>
+                <h2 className="font-extrabold text-6xl tracking-wide text-shadow-lg text-shadow-pink-500 my-2">
+                  GearVerse Magnetic Keyboard MK II
+                </h2>
+                <p className="uppercase font-bold text-xl">
+                  Light up your typing
+                </p>
+              </div>
             </div>
             <video
               className="border w-full h-175 object-cover"
@@ -87,6 +82,27 @@ const Homepage = () => {
             ></video>
           </CarouselItem>
           <CarouselItem>
+            <div className="absolute w-full h-full flex flex-col gap-3 justify-center items-center text-white">
+              <p className="font-extrabold tracking-wider text-xl text-shadow-xs text-shadow-pink-600">SPECIAL OFFER</p>
+              <h1 className="font-black text-6xl bg-[#c42976] p-4 rounded-2xl shadow-2xl shadow-[#bd427f]">
+                BACK TO SCHOOL
+              </h1>
+              <h3 className="text-4xl font-semibold">
+                GET{" "}
+                <span className="text-5xl font-extrabold text-pink-400 underline">
+                  70%
+                </span>{" "}
+                OFF
+              </h3>
+              {/* <Button
+                variant="outline"
+                className={
+                  "rounded-lg mt-20 px-8 py-5 shadow-lg shadow-[#A78BFA] inset-shadow-sm inset-shadow-[#A78BFA]"
+                }
+              >
+                SHOP NOW {"⮞"}
+              </Button> */}
+            </div>
             <video
               className="border w-full h-175 object-cover"
               src={video_banner3}
