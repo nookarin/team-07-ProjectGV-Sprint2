@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Carousel,
   CarouselContent,
@@ -24,9 +24,16 @@ import ProductSecondaryCard from "#components/Homepage/ProductSecondaryCard";
 import CategoryCard from "#components/Homepage/CategoryCard";
 import Autoplay from "embla-carousel-autoplay";
 import { Badge } from "#components/ui/badge";
+import fluidCursor from "../../contexts/use-FluidCursor";
 const Homepage = () => {
+  useEffect(() => {
+    fluidCursor();
+  }, []);
   return (
     <div className="bg-gbg-3">
+      <div className="fixed top-0 left-0 z-2 pointer-events-none">
+        <canvas id="fluid" className="w-screen h-screen" />
+      </div>
       <Carousel
         plugins={[
           Autoplay({
@@ -47,7 +54,7 @@ const Homepage = () => {
               <Button
                 variant="outline"
                 className={
-                  "rounded-lg mt-20 px-8 py-5 shadow-lg shadow-gpurptext-gpurple-2 inset-shadow-sm inset-shadow-gpurptext-gpurple-2"
+                  "rounded-lg mt-20 px-8 py-5 shadow-lg shadow-gpurple-2 text-gpurple-2 inset-shadow-sm inset-shadow-gpurple-1"
                 }
               >
                 SHOP NOW {"⮞"}
@@ -85,7 +92,9 @@ const Homepage = () => {
           </CarouselItem>
           <CarouselItem>
             <div className="absolute w-full h-full flex flex-col gap-3 justify-center items-center text-white">
-              <p className="font-extrabold tracking-wider text-xl text-shadow-xs text-shadow-pink-600">SPECIAL OFFER</p>
+              <p className="font-extrabold tracking-wider text-xl text-shadow-xs text-shadow-pink-600">
+                SPECIAL OFFER
+              </p>
               <h1 className="font-black text-6xl bg-[#c42976] p-4 rounded-2xl shadow-2xl shadow-[#bd427f]">
                 BACK TO SCHOOL
               </h1>
