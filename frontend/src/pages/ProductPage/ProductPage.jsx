@@ -4,13 +4,17 @@ import LogoImg from '../../assets/Artboard1.png';
 import LogoText from '../../assets/Untitled-2.png';
 import confetti from 'canvas-confetti';
 import { soundEngine } from '../../utils/audio';
+import CustomKeyboardImg from '../../assets/custom_keyboard_vct.png';
+import CustomKeyboardLOLDImg from '../../assets/custom_keyboard_lol_collab.png';
+import CustomKeyboardLOLSpecsImg from '../../assets/custom_keyboard_lol_specs_collab.png';
+import CustomMousepadTeemoImg from '../../assets/custom_mousepad_teemo_collab.png';
 
 const ProductPage = () => {
     // Array of placeholder images for gallery
     const images = [
-        "https://images.unsplash.com/photo-1595225476474-87563907a212?q=80&w=2071&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?q=80&w=1888&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1511467687858-23d96c32e4ae?q=80&w=2070&auto=format&fit=crop",
+        CustomKeyboardLOLDImg,
+        CustomKeyboardLOLSpecsImg,
+        CustomMousepadTeemoImg,
         "https://images.unsplash.com/photo-1605315573489-0ac92ec2c419?q=80&w=1961&auto=format&fit=crop"
     ];
 

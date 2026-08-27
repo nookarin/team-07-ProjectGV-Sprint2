@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    background-color: #0A0A0A;
+    color: #D1D1D1;
+  }
+  
+  h1, h2, h3, .font-heading {
+    font-family: 'Space Grotesk', sans-serif;
+    letter-spacing: -0.02em;
+  }
+
+  code, pre, .font-mono {
+    font-family: 'Fira Code', monospace;
+  }
+
+  .font-serif-italic {
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-style: italic;
+  }
+}
+
+/* Sophisticated Dark Studio Surfaces and Accents */
+.dark-panel {
+  background-color: #0F0F0F;
+  border: 1px solid #222222;
+}
+
+.dark-panel-hover:hover {
+  border-color: #333333;
+  background-color: #141414;
+}
+
+.dark-subtle-glow {
+  box-shadow: 0 0 20px -5px rgba(220, 220, 170, 0.15), 0 0 1px 1px rgba(79, 193, 255, 0.1);
+}
+
+.studio-btn-primary {
+  background: linear-gradient(180deg, #1F1F1F 0%, #141414 100%);
+  border: 1px solid #333333;
+  color: #EEEEEE;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08);
+}
+
+.studio-btn-primary:hover {
+  background: linear-gradient(180deg, #282828 0%, #1A1A1A 100%);
+  border-color: #4FC1FF;
+  color: #FFFFFF;
+}
+
+/* Custom Refined Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0A0A0A;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #222222;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #333333;
+}
+
+

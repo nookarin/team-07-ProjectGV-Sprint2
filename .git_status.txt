@@ -1,0 +1,18 @@
+On branch nut-branch
+Your branch is up to date with 'origin/nut-branch'.
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	modified:   frontend/package-lock.json
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	.git_branches.txt
+	.git_branches_r.txt
+	.git_lsremote.txt
+	.git_status.txt
+	frontend/src/utils/
+	frontend/titankeys-temp/
+
+no changes added to commit (use "git add" and/or "git commit -a")
