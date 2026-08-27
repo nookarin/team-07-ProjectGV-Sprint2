@@ -141,16 +141,16 @@ export default function CartPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#090813] text-slate-100 py-10 px-4 sm:px-6 lg:px-12 font-sans antialiased">
+    <div className="min-h-screen bg-[#090813] text-slate-100 py-6 sm:py-10 px-3 sm:px-6 lg:px-12 font-sans antialiased">
       <div className="max-w-7xl mx-auto">
         {/* Main Grid Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Left Column: Cart Items & Info (8 Columns) */}
           <div className="lg:col-span-8 space-y-6">
             {/* Header section */}
-            <div className="flex items-center justify-between pb-2">
+            <div className="flex items-center justify-between gap-3 pb-2">
               <div className="flex items-center gap-3">
-                <h1 className="text-3xl font-extrabold tracking-tight text-white">
+                <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
                   Shopping Cart
                 </h1>
                 <Badge className="bg-[#1e1a33] text-slate-300 hover:bg-[#282345] font-semibold text-xs px-3 py-1 rounded-md border border-[#2f294d]/60">
@@ -207,7 +207,7 @@ export default function CartPage() {
                     >
                       <CardContent className="p-4 sm:p-5 flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
                         {/* Product Thumbnail */}
-                        <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-xl overflow-hidden flex-shrink-0 border border-[#2e264f] relative flex items-center justify-center">
+                        <div className="w-20 h-20 sm:w-28 sm:h-28 rounded-xl overflow-hidden flex-shrink-0 border border-[#2e264f] relative flex items-center justify-center">
                           <img
                             src={item.image}
                             alt={item.name}
@@ -217,7 +217,7 @@ export default function CartPage() {
 
                         {/* Info & Metadata */}
                         <div className="flex-1 min-w-0 space-y-2 text-center sm:text-left">
-                          <h3 className="text-lg font-bold text-white tracking-wide truncate">
+                          <h3 className="text-base sm:text-lg font-bold text-white tracking-wide truncate">
                             {item.name}
                           </h3>
 
@@ -236,7 +236,7 @@ export default function CartPage() {
                         </div>
 
                         {/* Pricing & Controls Container */}
-                        <div className="flex items-center justify-between w-full sm:w-auto gap-4 sm:gap-8 pt-3 sm:pt-0 border-t sm:border-t-0 border-[#231e3d]">
+                        <div className="flex items-center justify-between w-full sm:w-auto gap-2 sm:gap-8 pt-3 sm:pt-0 border-t sm:border-t-0 border-[#231e3d]">
                           {/* Unit Price */}
                           <div className="text-center sm:text-right">
                             <span className="block text-[11px] text-slate-400 uppercase tracking-wider font-semibold">
@@ -356,7 +356,7 @@ export default function CartPage() {
                   Promo Code / Gift Card
                 </label>
 
-                <form onSubmit={handleApplyPromo} className="flex gap-2">
+                <form onSubmit={handleApplyPromo} className="flex flex-col sm:flex-row gap-2">
                   <Input
                     type="text"
                     value={promoInput}
@@ -429,10 +429,10 @@ export default function CartPage() {
 
                 {/* Grand Total */}
                 <div className="flex justify-between items-baseline pt-1">
-                  <span className="text-xl font-extrabold text-white">
+                  <span className="text-lg sm:text-xl font-extrabold text-white">
                     Grand Total
                   </span>
-                  <span className="text-3xl font-black text-white tracking-tight">
+                  <span className="text-2xl sm:text-3xl font-black text-white tracking-tight">
                     ${grandTotal.toFixed(2)}
                   </span>
                 </div>
@@ -463,7 +463,7 @@ export default function CartPage() {
 
         {/* Modal Dialog using shadcn UI Dialog */}
         <Dialog open={checkoutSuccess} onOpenChange={setCheckoutSuccess}>
-          <DialogContent className="bg-[#151229] border-purple-500/30 text-slate-100 rounded-3xl p-8 max-w-md">
+          <DialogContent className="bg-[#151229] border-purple-500/30 text-slate-100 rounded-3xl p-5 sm:p-8 w-[calc(100%-2rem)] max-w-md">
             <DialogHeader className="text-center flex flex-col items-center space-y-4">
               <div className="w-16 h-16 bg-gradient-to-tr from-emerald-500 to-cyan-400 rounded-full flex items-center justify-center text-slate-950 mx-auto shadow-lg shadow-emerald-500/30">
                 <Check className="w-8 h-8 stroke-[3]" />
