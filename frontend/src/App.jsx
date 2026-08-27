@@ -10,6 +10,9 @@ import MyPurchase from "./pages/User/02MyPurchase/MyPurchase";
 import MyReviews from "./pages/User/03MyReviews/MyReviews";
 import MyCancellations from "./pages/User/04MyCancellations/MyCancellations";
 import ProductListPage from "./pages/ProductPage/ProductListPage";
+import LayoutAdmin from "#components/Admin/LayoutAdmin";
+import AdminHomepage from "./pages/Admin/AdminHomepage";
+import AdminDashboard from "#components/Admin/AdminDashboard";
 
 const router = createBrowserRouter([
   {
@@ -25,13 +28,29 @@ const router = createBrowserRouter([
       { path: "my-cancellations", element: <MyCancellations /> },
       { path: "cart-page", element: <CartPage /> },
       { path: "product", element: <ProductPage /> }, // products/:category_id/:product_id
-      { path: "products", element: <ProductListPage />}
+      { path: "products", element: <ProductListPage /> },
     ],
   },
 ]);
 
+const routerAdmin = createBrowserRouter([
+  {
+    path: "/",
+    element: <LayoutAdmin />,
+    children: [{ path: "/", element: <AdminDashboard /> }],
+  },
+]);
+
 function App() {
-  return <RouterProvider router={router} />;
+  return (
+    <>
+      { false ? (
+        <RouterProvider router={router} />
+      ) : (
+        <RouterProvider router={routerAdmin} />
+      )}
+    </>
+  );
 }
 
 export default App;
