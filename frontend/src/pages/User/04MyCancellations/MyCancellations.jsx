@@ -9,7 +9,7 @@ const cancellations = [
 
 export default function MyCancellations() {
   return (
-    <main className="min-h-screen bg-black px-4 py-12 font-sans text-[#DDD6FE] sm:px-8 lg:px-14 lg:py-[72px]">
+    <main className="min-h-screen bg-[#090813] px-4 py-12 font-sans text-[#DDD6FE] sm:px-8 lg:px-14 lg:py-[72px]">
       <div className="mx-auto grid max-w-[920px] gap-12 lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-[60px]">
         <AccountSidebar active="/my-cancellations" />
         <section aria-labelledby="cancellations-heading">
