@@ -1,0 +1,6 @@
+  origin/HEAD -> origin/main
+  origin/faii
+  origin/feat/homepage
+  origin/kie
+  origin/main
+  origin/nook

@@ -1,0 +1,7 @@
+* main
+  remotes/origin/HEAD -> origin/main
+  remotes/origin/faii
+  remotes/origin/feat/homepage
+  remotes/origin/kie
+  remotes/origin/main
+  remotes/origin/nook

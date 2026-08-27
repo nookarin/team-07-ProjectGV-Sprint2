@@ -1,0 +1,5 @@
+-rw-r--r-- 1 ACER 197121 721309 Aug 27 10:27 c:/Users/ACER/coding/jsd13/final-project/frontend/src/assets/custom_keyboard_lol_collab.png
+-rw-r--r-- 1 ACER 197121 712870 Aug 27 10:07 c:/Users/ACER/coding/jsd13/final-project/frontend/src/assets/custom_keyboard_lol_logo.png
+-rw-r--r-- 1 ACER 197121 604978 Aug 27 10:27 c:/Users/ACER/coding/jsd13/final-project/frontend/src/assets/custom_keyboard_lol_specs_collab.png
+-rw-r--r-- 1 ACER 197121 643303 Aug 27 10:01 c:/Users/ACER/coding/jsd13/final-project/frontend/src/assets/custom_keyboard_vct.png
+-rw-r--r-- 1 ACER 197121 437406 Aug 27 10:27 c:/Users/ACER/coding/jsd13/final-project/frontend/src/assets/custom_mousepad_teemo_collab.png

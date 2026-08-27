@@ -1,0 +1,6 @@
+{
+  "name": "TitanKeys Elite Store",
+  "description": "Premium cyberpunk gaming keyboard e-commerce product page inspired by GearVerse.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
