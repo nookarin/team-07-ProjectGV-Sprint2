@@ -48,5 +48,8 @@
     "#components/*": "./src/components/*.jsx",
     "#lib/*": "./src/lib/*.js",
     "#hooks/*": "./src/hooks/*.js"
+  },
+  "allowScripts": {
+    "youtube-dl-exec@3.1.13": true
   }
 }

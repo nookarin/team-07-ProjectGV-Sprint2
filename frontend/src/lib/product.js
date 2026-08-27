@@ -1,3 +1,5 @@
+// placeholder
+
 const PRODUCT = [
       {
     id: "1",
