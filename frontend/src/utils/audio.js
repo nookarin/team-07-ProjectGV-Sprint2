@@ -3,6 +3,7 @@
 class SoundEngine {
     constructor() {
         this.ctx = null;
+        this.currentAudio = null;
     }
 
     initCtx() {
@@ -19,6 +20,12 @@ class SoundEngine {
 
     // Play a click/thock sound based on switch profile
     playSwitchSound(type = 'linear') {
+        if (this.currentAudio) {
+            this.currentAudio.pause();
+            this.currentAudio.currentTime = 0;
+            this.currentAudio = null;
+        }
+
         try {
             // First, attempt to play a real audio recording if it exists in the public directory
             let audioSource = '';
@@ -32,6 +39,7 @@ class SoundEngine {
 
             if (audioSource) {
                 const audio = new Audio(audioSource);
+                this.currentAudio = audio;
                 audio.volume = 0.5;
 
                 let fallbackTriggered = false;
