@@ -1,13 +1,25 @@
+import { useState } from "react";
 import bgImage from "../../assets/bg-2-edited.jpg";
-import userIcon from "../../../public/icons/account-svgrepo-com.svg";
-import emailIcon from "../../../public/icons/email-1572-svgrepo-com.svg";
-import confirmPasswordIcon from "../../../public/icons/password-account-security-reset-safety-svgrepo-com.svg";
-import passwordIcon from "../../../public/icons/password-lock-solid-svgrepo-com.svg";
+import {
+  LuUserRoundPen,
+  LuSpellCheck,
+  LuMail,
+  LuEye,
+  LuEyeClosed,
+} from "react-icons/lu";
+import { PiLockKeyBold } from "react-icons/pi";
 
 export default function Register() {
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [Password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
   return (
     <div
-      style={{ backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(${bgImage})` }}
+      style={{
+        backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(${bgImage})`,
+      }}
       className="min-h-screen bg-cover bg-center bg-no-repeat flex items-center justify-center p-4"
     >
       <div className="bg-[#000000]/50 backdrop-blur-lg  flex flex-col justify-center gap-8 items-center p-10 m-20 rounded-2xl ">
@@ -23,13 +35,12 @@ export default function Register() {
                 First name
               </label>
               <div className="relative w-full">
-                <img
-                  src={userIcon}
-                  alt="user icon"
+                <LuUserRoundPen
                   className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 brightness-0 invert opacity-80"
+                  alt="user icon"
                 />
                 <input
-                  className="px-4 pl-10 py-2 rounded-md bg-[#2A2A45] text-white autofill:shadow-[0_0_0_30px_#2A2A45_inset] 
+                  className=" pl-10 py-2 rounded-md bg-[#2A2A45] text-white autofill:shadow-[0_0_0_30px_#2A2A45_inset] 
              autofill:[-webkit-text-fill-color:white]"
                   id="firstname"
                   type="text"
@@ -41,13 +52,12 @@ export default function Register() {
                 Last name
               </label>
               <div className="relative w-full">
-                <img
-                  src={userIcon}
-                  alt="user icon"
+                <LuUserRoundPen
                   className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 brightness-0 invert opacity-80"
+                  alt="user icon"
                 />
                 <input
-                  className="px-4 pl-10 py-2 rounded-md bg-[#2A2A45] text-white autofill:shadow-[0_0_0_30px_#2A2A45_inset] 
+                  className=" pl-10 py-2 rounded-md bg-[#2A2A45] text-white autofill:shadow-[0_0_0_30px_#2A2A45_inset] 
              autofill:[-webkit-text-fill-color:white]"
                   id="lastname"
                   type="text"
@@ -60,13 +70,12 @@ export default function Register() {
               Email Address
             </label>
             <div className="relative w-full">
-              <img
-                src={emailIcon}
-                alt="email icon"
+              <LuMail
                 className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 brightness-0 invert opacity-80"
+                alt="email icon"
               />
               <input
-                className="px-4 pl-10 py-2 rounded-md bg-[#2A2A45] text-white w-full autofill:shadow-[0_0_0_30px_#2A2A45_inset] 
+                className="pl-10 py-2 rounded-md bg-[#2A2A45] text-white w-full autofill:shadow-[0_0_0_30px_#2A2A45_inset] 
              autofill:[-webkit-text-fill-color:white]"
                 id="email"
                 type="email"
@@ -78,17 +87,29 @@ export default function Register() {
               Password
             </label>
             <div className="relative w-full">
-              <img
-                src={passwordIcon}
-                alt="password icon"
+              <PiLockKeyBold
                 className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 brightness-0 invert opacity-80"
+                alt="password icon"
               />
               <input
-                className="px-4 pl-10 py-2 rounded-md bg-[#2A2A45] text-white w-full autofill:shadow-[0_0_0_30px_#2A2A45_inset] 
+                className="pr-10 pl-10 py-2 rounded-md bg-[#2A2A45] text-white w-full autofill:shadow-[0_0_0_30px_#2A2A45_inset] 
              autofill:[-webkit-text-fill-color:white]"
                 id="password"
-                type="password"
+                type={showPassword ? "text" : "password"}
+                value={Password}
+                onChange={(e) => setPassword(e.target.value)}
               ></input>
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-white/80 hover:text-white focus:outline-none"
+              >
+                {showPassword ? (
+                  <LuEyeClosed className="w-5 h-5" />
+                ) : (
+                  <LuEye className="w-5 h-5" />
+                )}
+              </button>
             </div>
           </div>
           <div className="flex flex-col">
@@ -96,17 +117,29 @@ export default function Register() {
               Confirm Password
             </label>
             <div className="relative w-full">
-              <img
-                src={confirmPasswordIcon}
-                alt="confirm password icon"
+              <LuSpellCheck
                 className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 brightness-0 invert opacity-80"
+                alt="checked password icon"
               />
               <input
-                className="px-4 pl-10 py-2 rounded-md bg-[#2A2A45] text-white w-full autofill:shadow-[0_0_0_30px_#2A2A45_inset] 
+                className="pr-10 pl-10 py-2 rounded-md bg-[#2A2A45] text-white w-full autofill:shadow-[0_0_0_30px_#2A2A45_inset] 
              autofill:[-webkit-text-fill-color:white]"
                 id="confirm-password"
-                type="password"
+                type={showConfirmPassword ? "text" : "password"}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
               ></input>
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword((prev) => !prev)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-white/80 hover:text-white focus:outline-none"
+              >
+                {showConfirmPassword ? (
+                  <LuEyeClosed className="w-5 h-5" />
+                ) : (
+                  <LuEye className="w-5 h-5" />
+                )}
+              </button>
             </div>
           </div>
           <label className="flex items-center gap-2 text-white">
@@ -119,7 +152,7 @@ export default function Register() {
             </span>
           </label>
           <button
-            className="px-4 py-2 text-white bg-[#8B5CF6] rounded-md cursor-pointer"
+            className="px-4 py-2 text-white bg-gradient-to-r from-[#ec4899] via-[#a855f7] to-[#06b6d4] rounded-md cursor-pointer"
             type="button"
           >
             INITIALIZE ACCOUNT
