@@ -6,16 +6,23 @@ import confetti from 'canvas-confetti';
 import { soundEngine } from '../../utils/audio';
 import CustomKeyboardImg from '../../assets/custom_keyboard_vct.png';
 import CustomKeyboardLOLDImg from '../../assets/custom_keyboard_lol_collab.png';
+import CustomKeyboardLOLWhiteImg from '../../assets/custom_keyboard_lol_white.png';
+import CustomKeyboardLOLPurpleImg from '../../assets/custom_keyboard_lol_purple.png';
+import CustomKeyboardLOLPinkImg from '../../assets/custom_keyboard_lol_pink.png';
 import CustomKeyboardLOLSpecsImg from '../../assets/custom_keyboard_lol_specs_collab.png';
 import CustomMousepadTeemoImg from '../../assets/custom_mousepad_teemo_collab.png';
+import CustomMousepadTeemoRunImg from '../../assets/custom_mousepad_teemo_run.png?v=3';
 
 const ProductPage = () => {
     // Array of placeholder images for gallery
     const images = [
-        CustomKeyboardLOLDImg,
-        CustomKeyboardLOLSpecsImg,
-        CustomMousepadTeemoImg,
-        "https://images.unsplash.com/photo-1605315573489-0ac92ec2c419?q=80&w=1961&auto=format&fit=crop"
+        CustomKeyboardLOLDImg,        // 0 (Black)
+        CustomKeyboardLOLWhiteImg,    // 1 (White)
+        CustomKeyboardLOLPurpleImg,   // 2 (Purple)
+        CustomKeyboardLOLPinkImg,     // 3 (Pink)
+        CustomKeyboardLOLSpecsImg,    // 4
+        CustomMousepadTeemoImg,       // 5
+        CustomMousepadTeemoRunImg     // 6
     ];
 
     const colors = [
@@ -58,7 +65,7 @@ const ProductPage = () => {
             {/* Top Announcement Banner */}
             <div className="bg-[#0A0A0A] border-b border-[#1C1C24] py-1.5 px-4 text-center text-[10px] font-medium tracking-wide text-[#8A8A93] flex items-center justify-center gap-2">
                 <Star className="w-3 h-3 text-[#00FFFF] fill-[#00FFFF]" />
-                <span>STUDIO PRECISION 2026: GET 20% OFF ON TITANKEYS ELITE WITH CODE <strong className="text-[#00FFFF] font-mono font-semibold">GEAR15</strong></span>
+                <span>STUDIO PRECISION 2026: GET 20% OFF ON LEAGUE OF LEGENDS X GEARVERSE WITH CODE <strong className="text-[#00FFFF] font-mono font-semibold">GEAR15</strong></span>
             </div>
 
 
@@ -74,8 +81,8 @@ const ProductPage = () => {
                             <div className="absolute inset-0 bg-gradient-to-r from-[#A78BFA]/10 to-[#00FFFF]/5 opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none"></div>
                             <img
                                 src={activeImage}
-                                alt="TitanKeys Elite"
-                                className="w-full h-full object-cover opacity-90 group-hover:scale-105 transition-transform duration-700 ease-out"
+                                alt="League of Legends X GEARVERSE"
+                                className="w-full h-full object-contain opacity-90 group-hover:scale-105 transition-transform duration-700 ease-out"
                             />
                         </div>
 
@@ -88,7 +95,7 @@ const ProductPage = () => {
                                     className={`w-full aspect-video rounded-[8px] overflow-hidden border-2 cursor-pointer transition-all hover:opacity-100 ${activeImage === img ? 'border-[#00FFFF] opacity-100' : 'border-[#2a2a35] opacity-50 hover:border-[#A78BFA]'
                                         }`}
                                 >
-                                    <img src={img} alt={`Thumbnail ${idx}`} className="w-full h-full object-cover" />
+                                    <img src={img} alt={`Thumbnail ${idx}`} className="w-full h-full object-contain bg-black/40" />
                                 </div>
                             ))}
                         </div>
@@ -99,7 +106,7 @@ const ProductPage = () => {
                         {/* Title & Price */}
                         <div className="flex flex-col gap-3">
                             <div className="flex items-center gap-4">
-                                <h1 className="text-[28px] font-bold leading-none text-white tracking-wide">TitanKeys Elite</h1>
+                                <h1 className="text-[28px] font-bold leading-none text-white tracking-wide">League of Legends X GEARVERSE</h1>
                                 <div className="px-2 py-0.5 border border-[#00FFFF] bg-[#00FFFF]/10 rounded-[2px] mt-1 hidden sm:block">
                                     <span className="text-[8px] font-black tracking-widest text-[#00FFFF]">IN STOCK</span>
                                 </div>
