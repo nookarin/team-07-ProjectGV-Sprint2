@@ -28,7 +28,7 @@ const router = createBrowserRouter([
       { path: "my-cancellations", element: <MyCancellations /> },
       { path: "cart-page", element: <CartPage /> },
       { path: "product", element: <ProductPage /> }, // products/:category_id/:product_id
-      { path: "products", element: <ProductListPage /> },
+      { path: "products/:id", element: <ProductListPage /> },
     ],
   },
 ]);

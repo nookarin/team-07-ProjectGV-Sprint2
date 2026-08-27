@@ -30,7 +30,10 @@ import {
 import NavbarAuthenticate from "./NavbarAuthenticate";
 import NavbarUnauthen from "./NavbarUnauthen";
 
+const category = ['keyboard', 'mouse', 'headset', 'accessory']
+
 const Navbar = () => {
+  
   return (
     <nav className="bg-gbg-2 w-full h-16 flex items-center justify-between px-10 text-white relative z-10 shadow-xl shadow-gpurple-4/80">
       <Link to={"/"} className="flex items-center gap-4">
@@ -49,8 +52,12 @@ const Navbar = () => {
           </NavigationMenuItem>
           <NavigationMenuItem>
             <NavigationMenuTrigger>COLLECTIONS</NavigationMenuTrigger>
-            <NavigationMenuContent>
-              <NavigationMenuLink>Link</NavigationMenuLink>
+            <NavigationMenuContent className={'text-white'}>
+              { category.map((item) => {
+                return (
+                  <NavigationMenuLink><Link to={`products/${item}`}>{item}</Link></NavigationMenuLink>
+                )
+              })}
             </NavigationMenuContent>
           </NavigationMenuItem>
           <NavigationMenuItem>
