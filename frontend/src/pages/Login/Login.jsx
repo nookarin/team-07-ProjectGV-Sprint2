@@ -20,7 +20,7 @@ export default function Login() {
         <div className="text-white font-extrabold text-5xl [-webkit-text-stroke:0.5px_#22D3EE] text-shadow-[0_0_32px_#22D3EE]">
           WELCOME
         </div>
-        <div className="text-[#22D3EE]">Access Your Armory</div>
+        <div className="text-[#22D3EE]">Customer Login</div>
         <form className="flex flex-col gap-8 w-full p-4">
           <div className="flex flex-col">
             <label className="text-white" for="email">
