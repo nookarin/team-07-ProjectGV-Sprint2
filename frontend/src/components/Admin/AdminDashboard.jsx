@@ -1,3 +1,5 @@
+// Add ability to add product picture pleaseeee
+
 import { useState } from "react";
 import {
   CalendarDays,
