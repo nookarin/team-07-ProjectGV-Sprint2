@@ -13,6 +13,7 @@ import ProductListPage from "./pages/ProductPage/ProductListPage";
 import LayoutAdmin from "#components/Admin/LayoutAdmin";
 import AdminHomepage from "./pages/Admin/AdminHomepage";
 import AdminDashboard from "#components/Admin/AdminDashboard";
+import Login from "./pages/Login/Login";
 
 const router = createBrowserRouter([
   {
@@ -21,6 +22,7 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <Homepage /> },
       { path: "register", element: <Register /> },
+      { path: "login", element: <Login /> },
       { path: "edit-profile", element: <PersonalInfo /> },
       { path: "edit-profile/addresses", element: <Addresses /> },
       { path: "my-purchases", element: <MyPurchase /> },
@@ -44,7 +46,7 @@ const routerAdmin = createBrowserRouter([
 function App() {
   return (
     <>
-      { true ? (
+      {true ? (
         <RouterProvider router={router} />
       ) : (
         <RouterProvider router={routerAdmin} />
