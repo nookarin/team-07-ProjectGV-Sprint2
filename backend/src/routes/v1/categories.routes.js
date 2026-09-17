@@ -4,7 +4,7 @@ import { Category } from "../../models/category.model.js";
 export const categoryRouter = Router();
 
 // GET / - Fetch all categories (Admin & User)
-categoryRouter.get("/", async (req, res) => {
+categoryRouter.get("/", async (req, res, next) => {
     try {
         const categories = await Category.find();
         return res.status(200).json({
@@ -13,13 +13,12 @@ categoryRouter.get("/", async (req, res) => {
             data: categories
         });
     } catch (error) {
-        console.error("GET /categories error:", error);
-        return res.status(500).json({ success: false, message: error.message });
+        next(error)
     }
 });
 
 // GET /:id - Get single category by ID
-categoryRouter.get("/:id", async (req, res) => {
+categoryRouter.get("/:id", async (req, res, next) => {
     try {
         const category = await Category.findById(req.params.id);
         if (!category) {
@@ -27,8 +26,7 @@ categoryRouter.get("/:id", async (req, res) => {
         }
         return res.status(200).json({ success: true, data: category });
     } catch (error) {
-        console.error("GET /categories/:id error:", error);
-        return res.status(500).json({ success: false, message: error.message });
+       next(error)
     }
 });
 
@@ -38,8 +36,7 @@ categoryRouter.post("/", async (req, res) => {
         const category = await Category.create(req.body);
         return res.status(201).json({ success: true, data: category });
     } catch (error) {
-        console.error("POST /categories error:", error);
-        return res.status(400).json({ success: false, message: error.message });
+       next(error)
     }
 });
 
@@ -56,8 +53,7 @@ categoryRouter.put("/:id", async (req, res) => {
         }
         return res.status(200).json({ success: true, data: category });
     } catch (error) {
-        console.error("PUT /categories/:id error:", error);
-        return res.status(400).json({ success: false, message: error.message });
+        next(error)
     }
 });
 
@@ -70,7 +66,6 @@ categoryRouter.delete("/:id", async (req, res) => {
         }
         return res.status(200).json({ success: true, message: "Category deleted successfully", data: category });
     } catch (error) {
-        console.error("DELETE /categories/:id error:", error);
-        return res.status(500).json({ success: false, message: error.message });
+       next(error)
     }
 });
