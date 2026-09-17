@@ -42,7 +42,7 @@ const router = createBrowserRouter([
       { path: "product", element: <ProductPage /> }, // products/:category_id/:product_id
       { path: "products/:id", element: <ProductListPage /> },
       { path: "/sale", element: <SalePage /> },
-
+      { path: "*", element: <Homepage /> },
     ],
   },
 ]);
@@ -55,14 +55,14 @@ const routerAdmin = createBrowserRouter([
       { path: "/", element: <AdminDashboard /> },
       { path: "/admin-sandbox", element: <AdminSandbox /> }, // test reusable component here.
       { path: "/users", element: <UserManager /> },
-      { path: '/promotion', element: <PromotionPage />}
+      { path: "/promotion", element: <PromotionPage /> },
+      { path: "*", element: <AdminDashboard /> },
     ],
   },
 ]);
 
 function App() {
   const { user } = useAuth();
-  console.log(user)
   return (
     <>
       {user?.role === "admin" ? (

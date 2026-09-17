@@ -7,8 +7,7 @@ import {
   toPayload,
   validateProduct,
 } from "./productFormUtils";
-
-const API_URL = import.meta.env.VITE_API_URL;
+import { useAuth } from "@/contexts/Authentication/AuthContext";
 
 function FieldError({ id, message }) {
   if (!message) return null;
@@ -29,7 +28,7 @@ export default function ProductForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
-
+  const { url } = useAuth();
   function updateField(event) {
     const { name, value } = event.target;
     setForm((current) => ({ ...current, [name]: value }));
@@ -54,12 +53,13 @@ export default function ProductForm({
     setIsSubmitting(true);
     setSubmitError("");
     try {
-      const res = await fetch(`${API_URL}/products`, {
+      const res = await fetch(`${url}/products`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(toPayload(form)),
       });
       const result = await res.json();
+      console.log(result)
       if (!res.ok) throw new Error(result.message || "Failed to add product");
 
       const product = fromDoc(result.data);

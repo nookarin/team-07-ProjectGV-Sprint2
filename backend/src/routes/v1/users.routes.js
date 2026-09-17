@@ -20,19 +20,19 @@ userRouter.get("/", async (req, res, next) => {
 });
 
 // get user by id
-userRouter.get("/:userId", async (req, res, next) => {
-  try {
-    const userData = await User.findById(req.params.userId);
-    if (!userData) {
-      return res
-        .status(404)
-        .json({ success: false, message: "User not found!" });
-    }
-    return res.status(200).json({ success: true, userData });
-  } catch (error) {
-    next(error);
-  }
-});
+// userRouter.get("/:userId", async (req, res, next) => {
+//   try {
+//     const userData = await User.findById(req.params.userId);
+//     if (!userData) {
+//       return res
+//         .status(404)
+//         .json({ success: false, message: "User not found!" });
+//     }
+//     return res.status(200).json({ success: true, userData });
+//   } catch (error) {
+//     next(error);
+//   }
+// });
 
 //register user
 userRouter.post("/register", async (req, res, next) => {
@@ -169,16 +169,16 @@ userRouter.patch("/:userId/address", async (req, res, next) => {
 });
 
 // delete address
-userRouter.delete("/:userId/address/:addressId", async (req, res, next)=> {
+userRouter.delete("/:userId/address/:addressId", async (req, res, next) => {
   try {
     const deletedAddress = await User.findByIdAndDelete(req.params.addressId);
-    if(!deletedAddress){
-      return res.status(400).json({success: false, message: ""})
+    if (!deletedAddress) {
+      return res.status(400).json({ success: false, message: "" });
     }
   } catch (error) {
-    next(error)
+    next(error);
   }
-})
+});
 
 //delete user
 userRouter.delete("/:userId", async (req, res, next) => {
@@ -202,7 +202,6 @@ userRouter.delete("/:userId", async (req, res, next) => {
 //get current user from cookie
 userRouter.get("/me", protect, async (req, res, next) => {
   try {
-
     const user = await User.findById(req.user.user._id).select("-password");
 
     if (!user) {
@@ -237,7 +236,7 @@ userRouter.post("/login", async (req, res, next) => {
     }
 
     const user = await User.findOne({ email }).select("+password");
-    console.log("this is", user)
+    console.log("this is", user);
 
     if (!user) {
       return res
@@ -256,12 +255,10 @@ userRouter.post("/login", async (req, res, next) => {
       expiresIn: "1h",
     });
 
-    const isProd = process.env.NODE_ENV === "production";
-
     res.cookie("accessToken", token, {
       httpOnly: true,
-      secure: isProd,
-      sameSite: isProd ? "none" : "lax",
+      secure: true,
+      sameSite: "none",
       path: "/",
       maxAge: 60 * 60 * 1000,
     });
@@ -285,13 +282,11 @@ userRouter.post("/login", async (req, res, next) => {
 // user logout
 userRouter.post("/logout", (req, res, next) => {
   try {
-    const isProd = process.env.NODE_ENV === "production";
     res.clearCookie("accessToken", {
       httpOnly: true,
-      secure: isProd,
-      sameSite: isProd ? "none" : "lax",
+      secure: true,
+      sameSite: "none",
       path: "/",
-      maxAge: 60 * 60 * 1000,
     });
     return res.status(200).json({
       success: true,
@@ -302,5 +297,3 @@ userRouter.post("/logout", (req, res, next) => {
     next(error);
   }
 });
-
-

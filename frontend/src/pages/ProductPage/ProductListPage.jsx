@@ -4,6 +4,7 @@ import ProductCard from "#components/ProductCard/ProductCard";
 import { useParams } from "react-router-dom";
 import { DollarSign } from "lucide-react";
 import axios from "axios";
+import { useAuth } from "@/contexts/Authentication/AuthContext";
 
 const mock_tags = [
   "wireless",
@@ -17,7 +18,7 @@ const mock_tags = [
 
 const ProductListPage = () => {
   const param = useParams();
-  const url = import.meta.env.VITE_API_URL;
+  const { url } = useAuth()
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(null);
   const [price, setPrice] = useState({

@@ -17,7 +17,6 @@ export default function Login() {
 
   const onChangeHandler = (e) => {
     setData({ ...data, [e.target.name]: e.target.value });
-    console.log(data);
   };
 
   const handleSubmit = async (e) => {
