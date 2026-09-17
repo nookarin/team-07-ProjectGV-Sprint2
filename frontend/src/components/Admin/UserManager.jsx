@@ -540,14 +540,15 @@ export default function UserManager() {
                       <td className="max-w-56 px-6 py-4 text-slate-400">
                         {user.address?.length ? (
                           <div className="flex flex-wrap gap-1.5">
-                            {user.address.map((line) => (
+                            {/* {user.address.map((line) => (
                               <span
                                 key={line}
                                 className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-xs text-slate-300"
                               >
                                 {line}
                               </span>
-                            ))}
+                            ))} */}
+                            <p>address</p>
                           </div>
                         ) : (
                           "—"
