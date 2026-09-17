@@ -31,11 +31,13 @@ app.use((err, req, res, next) => {
 
 async function start() {
   try {
+
     await connectDB();
 
     app.listen(port, () => {
       console.log(`Server running on port: ${port} 🏃‍♀️`);
     });
+
   } catch (err) {
     console.error("Failed to connect to MongoDB:", err.message);
     process.exit(1);
