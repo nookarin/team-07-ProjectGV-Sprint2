@@ -21,7 +21,6 @@ const port = process.env.PORT || 3000;
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors(corsOptions));
-app.options('*', cors()); // Enable preflight requests
 
 app.use("/api", apiRoutes);
 
