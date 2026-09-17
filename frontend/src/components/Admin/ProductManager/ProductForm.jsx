@@ -128,7 +128,7 @@ export default function ProductForm({
             name="description"
             value={form.description}
             onChange={updateField}
-            className={`${fieldClass("description")} min-h-28 resize-y`}
+            className={`${fieldClass("description")} min-h-52 resize-y`}
             placeholder="Describe features, compatibility, and highlights"
             aria-invalid={Boolean(errors.description)}
             aria-describedby={errors.description ? "description-error" : undefined}
@@ -178,7 +178,7 @@ export default function ProductForm({
           <FieldError id="quantity-error" message={errors.quantity} />
         </div>
 
-        <div>
+        {/* <div>
           <label htmlFor="date" className="flex items-center gap-2 text-sm font-semibold text-slate-200">
             <CalendarDays className="size-4 text-violet-300" />
             Date
@@ -194,7 +194,7 @@ export default function ProductForm({
             aria-describedby={errors.date ? "date-error" : undefined}
           />
           <FieldError id="date-error" message={errors.date} />
-        </div>
+        </div> */}
 
         <div>
           <label htmlFor="category" className="flex items-center gap-2 text-sm font-semibold text-slate-200">

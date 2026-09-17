@@ -1,7 +1,13 @@
 import { useState } from "react";
 import { ChevronDown, ChevronUp, Gamepad2 } from "lucide-react";
 
-export default function ProductList({ products, loading, loadError, visibleCount = 1 }) { // change visible entry that is not hiding
+export default function ProductList({
+  products,
+  loading,
+  loadError,
+  visibleCount = 1,
+}) {
+  // change visible entry that is not hiding
   const [showAll, setShowAll] = useState(false);
   const visibleProducts = showAll ? products : products.slice(0, visibleCount);
   const hasMore = products.length > visibleCount;
@@ -44,7 +50,9 @@ export default function ProductList({ products, loading, loadError, visibleCount
                 className="mx-auto size-10 text-slate-600"
                 aria-hidden="true"
               />
-              <p className="mt-4 font-semibold text-slate-300">No products yet</p>
+              <p className="mt-4 font-semibold text-slate-300">
+                No products yet
+              </p>
               <p className="mt-1 text-sm text-slate-500">
                 Complete the form to add your first item.
               </p>
@@ -52,7 +60,7 @@ export default function ProductList({ products, loading, loadError, visibleCount
           </div>
         ) : (
           <>
-            {visibleProducts.map((product) => (
+            {visibleProducts.slice(0, 3).map((product) => (
               <article
                 key={product.id}
                 className="group relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-violet-900/60 via-[#151326] to-cyan-950/50 p-5 transition hover:-translate-y-1 hover:border-violet-400/40"
@@ -63,7 +71,9 @@ export default function ProductList({ products, loading, loadError, visibleCount
                     <span className="rounded-full border border-cyan-300/20 bg-cyan-300/10 px-3 py-1 text-xs font-semibold text-cyan-300">
                       {product.category}
                     </span>
-                    <span className="text-xs text-slate-400">{product.date}</span>
+                    <span className="text-xs text-slate-400">
+                      {product.date}
+                    </span>
                   </div>
                   <div className="mt-3 flex flex-wrap gap-2">
                     {product.tags.map((tag) => (

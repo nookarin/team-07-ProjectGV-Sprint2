@@ -22,7 +22,7 @@ import { useAuth } from "@/contexts/Authentication/AuthContext";
 const NavbarAdmin = () => {
   const { logout } = useAuth();
   return (
-    <nav className="flex items-center justify-between border px-6 py-4 relative shadow-xl shadow-gpurple-5/20">
+    <nav className="flex items-center justify-between border px-6 py-4 relative shadow-xl shadow-gpurple-5/20 z-50 backdrop-blur-2xl">
       <div className="flex items-center w-1/3">
         <Link to={"/"} className="flex items-center gap-4">
           <img className="w-10 h-10" src={LogoImg} alt="logo" />
