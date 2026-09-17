@@ -12,9 +12,6 @@ const corsOptions = {
   credentials: true,
 };
 
- // URL ของ Frontend ที่ต้องการอนุญาต // allowing vercel domains
-// origin: "http://localhost:5173", // URL ของ Frontend ที่ต้องการอนุญาต (old code before deploy)
-
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -24,8 +21,6 @@ app.use(cors(corsOptions));
 
 app.use("/api", apiRoutes);
 
-
-
 //Centralize error handling middleware
 app.use((err, req, res, next) => {
   return res.status(500).json({
@@ -34,7 +29,6 @@ app.use((err, req, res, next) => {
   });
 });
 
-//==============old code==============
 async function start() {
   try {
     await connectDB();
@@ -47,12 +41,5 @@ async function start() {
     process.exit(1);
   }
 }
-//==============old code==============
-start();
-
-
-//==========new code=======================
-// connectDB().catch((err) => console.error("Failed to connect to MongoDB:", err.message));
-// export default app;
 
 start();
