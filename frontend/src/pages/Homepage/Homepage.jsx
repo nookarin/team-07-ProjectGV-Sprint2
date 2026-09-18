@@ -11,6 +11,7 @@ import CategoryCard from "#components/Homepage/CategoryCard";
 import fluidCursor from "../../contexts/use-FluidCursor";
 import BannerCarousel from "#components/Homepage/BannerCarousel";
 import HeaderSection from "#components/Homepage/HeaderSection";
+import BotpressChat from "#components/Botpress/BotpressChat";
 
 const category = [
   { name: "headphone", img: img_cate1 },
@@ -48,7 +49,15 @@ const Homepage = () => {
     fluidCursor();
   }, []);
   return (
+    
     <div className="relative z-10">
+      <div>
+      {/* เนื้อหาเว็บไซต์ของคุณ */}
+      <h1>GearVerse Web App</h1>
+
+      {/* เรียกใช้งานแชทบอท */}
+      <BotpressChat />
+      </div>
       <BannerCarousel />
       <div className="w-3/4 mx-auto my-10">
         <HeaderSection name={"categories"} />
