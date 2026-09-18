@@ -10,6 +10,7 @@ import { Badge } from "#components/ui/badge";
 import video_banner1 from "../../assets/video-banner/banner3.mov";
 import video_banner2 from "../../assets/video-banner/banner2.mov";
 import video_banner3 from "../../assets/video-banner/banner1.mp4";
+import Autoplay from "embla-carousel-autoplay";
 
 const bannerData = [
   {
@@ -75,52 +76,54 @@ const bannerData = [
 ];
 
 const BannerSlide = ({ banner, index }) => {
-  const { api } = useCarousel();
-  const videoRef = useRef(null);
-  const [isActive, setIsActive] = useState(false);
+  // const { api } = useCarousel();
+  // const videoRef = useRef(null);
+  // const [isActive, setIsActive] = useState(false);
 
-  useEffect(() => {
-    if (!api) return;
+  // useEffect(() => {
+  //   if (!api) return;
 
-    const update = () => setIsActive(api.selectedScrollSnap() === index);
-    update();
-    api.on("select", update);
-    api.on("reInit", update);
+  //   const update = () => setIsActive(api.selectedScrollSnap() === index);
+  //   update();
+  //   api.on("select", update);
+  //   api.on("reInit", update);
 
-    return () => {
-      api.off("select", update);
-      api.off("reInit", update);
-    };
-  }, [api, index]);
+  //   return () => {
+  //     api.off("select", update);
+  //     api.off("reInit", update);
+  //   };
+  // }, [api, index]);
 
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
+  // useEffect(() => {
+  //   const video = videoRef.current;
+  //   if (!video) return;
 
-    if (isActive) {
-      video.currentTime = 0;
-      video.play();
-    } else {
-      video.pause();
-    }
-  }, [isActive]);
+  //   if (isActive) {
+  //     video.currentTime = 0;
+  //     video.play();
+  //   } else {
+  //     video.pause();
+  //   }
+  // }, [isActive]);
 
-  const handleEnded = () => {
-    if (videoRef.current) videoRef.current.currentTime = 0;
-    api.scrollNext();
-  };
+  // const handleEnded = () => {
+  //   if (videoRef.current) videoRef.current.currentTime = 0;
+  //   api.scrollNext();
+  // };
 
   return (
     <CarouselItem>
       {banner.overlay}
       <video
-        ref={videoRef}
+        // ref={videoRef}
         className="border w-full h-175 object-cover"
         src={banner.src}
         muted
-        playsInline
-        preload="auto"
-        onEnded={handleEnded}
+        autoPlay
+        loop
+        // playsInline
+        // preload="auto"
+        // onEnded={handleEnded}
       ></video>
     </CarouselItem>
   );
@@ -128,7 +131,7 @@ const BannerSlide = ({ banner, index }) => {
 
 const BannerCarousel = () => {
   return (
-    <Carousel>
+    <Carousel plugins={[Autoplay({ delay: 4000 })]}>
       <CarouselContent>
         {bannerData.map((banner, index) => (
           <BannerSlide key={banner.id} banner={banner} index={index} />
