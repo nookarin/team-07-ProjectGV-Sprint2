@@ -19,21 +19,6 @@ userRouter.get("/", async (req, res, next) => {
   }
 });
 
-// get user by id
-// userRouter.get("/:userId", async (req, res, next) => {
-//   try {
-//     const userData = await User.findById(req.params.userId);
-//     if (!userData) {
-//       return res
-//         .status(404)
-//         .json({ success: false, message: "User not found!" });
-//     }
-//     return res.status(200).json({ success: true, userData });
-//   } catch (error) {
-//     next(error);
-//   }
-// });
-
 //register user
 userRouter.post("/register", async (req, res, next) => {
   try {
@@ -118,8 +103,8 @@ userRouter.patch("/:userId", async (req, res, next) => {
 // add address
 userRouter.patch("/:userId/address", async (req, res, next) => {
   try {
-    const { address } = req.body;
-
+    const address = req.body;
+    console.log(req.body)
     const userData = await User.findOne({ _id: req.params.userId });
 
     for (let i = 0; i < userData.address.length; i++) {
@@ -164,6 +149,7 @@ userRouter.patch("/:userId/address", async (req, res, next) => {
       .status(200)
       .json({ success: true, message: "Updated address successfully!" });
   } catch (error) {
+    console.log(error)
     next(error);
   }
 });
@@ -224,6 +210,22 @@ userRouter.get("/me", protect, async (req, res, next) => {
   }
 });
 
+userRouter.get("/auth/:id", protect, async (req, res, next) => {
+  try {
+    console.log(req.params)
+    const user = await User.findById(req.params.id).select("-password");
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found!" });
+    }
+    return res.status(200).json({ success: true, user });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+});
+
 //user login
 userRouter.post("/login", async (req, res, next) => {
   try {
@@ -251,14 +253,20 @@ userRouter.post("/login", async (req, res, next) => {
         .json({ success: false, message: "Incorrect password!" });
     }
 
-    const token = jwt.sign({ userId: user._id }, process.env.SECRET_KEY, {
-      expiresIn: "1h",
-    });
+const token = jwt.sign({ userId: user._id }, process.env.SECRET_KEY, {
+    expiresIn: "1h",
+  });
+
+    const isSecure =
+      req.secure ||
+      String(req.headers["x-forwarded-proto"] || "")
+        .split(",")[0]
+        .trim() === "https";
 
     res.cookie("accessToken", token, {
       httpOnly: true,
-      secure: true,
-      sameSite: "none",
+      secure: isSecure,
+      sameSite: isSecure ? "none" : "lax",
       path: "/",
       maxAge: 60 * 60 * 1000,
     });
@@ -282,10 +290,16 @@ userRouter.post("/login", async (req, res, next) => {
 // user logout
 userRouter.post("/logout", (req, res, next) => {
   try {
+    const isSecure =
+      req.secure ||
+      String(req.headers["x-forwarded-proto"] || "")
+        .split(",")[0]
+        .trim() === "https";
+
     res.clearCookie("accessToken", {
       httpOnly: true,
-      secure: true,
-      sameSite: "none",
+      secure: isSecure,
+      sameSite: isSecure ? "none" : "lax",
       path: "/",
     });
     return res.status(200).json({

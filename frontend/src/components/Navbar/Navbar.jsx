@@ -45,7 +45,7 @@ const Navbar = () => {
   const [click, setClick] = useState(false)
   const { loading, user } = useAuth();
   return (
-    <nav className="bg-gbg-2 w-full h-16 flex items-center justify-between px-10 text-white relative z-20 shadow-xl shadow-gpurple-4/80">
+    <nav className="bg-gbg-2 w-full h-16 flex items-center justify-between px-10 text-white relative z-20 shadow-2xl shadow-gpurple-4/50">
       <Link to={"/"} className="flex items-center gap-4 w-1/3">
         <img className="w-10 h-10" src={LogoImg} alt="logo" />
         <img className="w-40" src={LogoText} alt="logo text" />

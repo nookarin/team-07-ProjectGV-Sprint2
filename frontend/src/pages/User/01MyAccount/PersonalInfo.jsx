@@ -1,23 +1,50 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import nookAvatar from "../../../assets/nook.jpg";
 import AccountSidebar from "../AccountSidebar";
+import { useAuth } from "@/contexts/Authentication/AuthContext";
+import axios from "axios";
 
 const profileRows = [
-  { label: "Username:", value: "Nook Doe", editable: true },
-  { label: "Email:", value: "johndoe@email.com" },
-  { label: "Password:", value: "••••••••••••••••••", editable: true },
+  { label: "Username:" },
+  { label: "Email:" },
+  { label: "Password:", editable: true },
   { label: "Phone Number:", value: "099-546-3219", editable: true },
-  { label: "Date of Birth:", value: "26-04-2001" },
+  { label: "Date of Birth:" },
 ];
 
 export default function PersonalInfo() {
+  const { user, url } = useAuth();
   const [avatar, setAvatar] = useState(nookAvatar);
+  const [loading, setLoading] = useState(null);
+  const [data, setData] = useState({
+    username: "",
+    email: "",
+    password: "",
+    firstname: "",
+    lastname: "",
+    phone_number: "",
+    date_of_birth: "",
+  });
   const fileInput = useRef(null);
 
   function selectAvatar(event) {
     const file = event.target.files?.[0];
     if (file) setAvatar(URL.createObjectURL(file));
   }
+
+  const fetchUser = async () => {
+    setLoading(true);
+    const response = await axios.get(`${url}/users/auth/${user._id}`, {
+      withCredentials: true,
+    });
+    setData(response.data.user);
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    if (!user) return;
+    fetchUser();
+  }, [user]);
 
   return (
     <main className="min-h-screen bg-[#090813] px-4 py-12 font-sans text-[#DDD6FE] sm:px-8 lg:px-14 lg:py-[72px]">
@@ -30,22 +57,32 @@ export default function PersonalInfo() {
           </h1>
 
           <dl>
-            {profileRows.map(({ label, value, editable }) => (
-              <div
-                key={label}
-                className="grid min-h-12 grid-cols-[116px_1fr_38px] items-center border-b border-[#2A2A45] px-3 text-[13px]"
-              >
-                <dt className="font-semibold text-[#8B5CF6]">{label}</dt>
-                <dd className="font-semibold">{value}</dd>
-                <dd>
-                  {editable && (
-                    <button type="button" className="text-[#22D3EE] transition-colors hover:text-[#A5F3FC]">
-                      Edit
-                    </button>
-                  )}
-                </dd>
+            {!loading ? (
+              <div className="flex flex-col gap-5 min-h-12 px-3 text-[13px] font-semibold">
+                <div className="flex pb-4 border-b border-gbase-1">
+                  <p className="w-1/3 text-gpurple-3">Username:</p>
+                  <p>{data.username}</p>
+                </div>
+                <div className="flex pb-4 border-b border-gbase-1">
+                  <p className="w-1/3 text-gpurple-3">Firstname:</p>
+                  <p className="capitalize">{data.firstname}</p>
+                </div>
+                <div className="flex pb-4 border-b border-gbase-1">
+                  <p className="w-1/3 text-gpurple-3">Lastname:</p>
+                  <p className="capitalize">{data.lastname}</p>
+                </div>
+                <div className="flex pb-4 border-b border-gbase-1">
+                  <p className="w-1/3 text-gpurple-3">Email:</p>
+                  <p>{data.email}</p>
+                </div>
+                <div className="flex pb-4 border-b border-gbase-1">
+                  <p className="w-1/3 text-gpurple-3">Password:</p>
+                  <p>••••••••••••••••••</p>
+                </div>
               </div>
-            ))}
+            ) : (
+              <p>Loading...</p>
+            )}
           </dl>
 
           <button
@@ -56,13 +93,22 @@ export default function PersonalInfo() {
           </button>
         </section>
 
-        <section className="flex flex-col items-center lg:pt-0" aria-label="Profile picture">
+        <section
+          className="flex flex-col items-center lg:pt-0"
+          aria-label="Profile picture"
+        >
           <img
             src={avatar}
             alt="John Doe profile"
             className="h-[148px] w-[148px] rounded-[25px] border-2 border-[#A78BFA] object-cover"
           />
-          <input ref={fileInput} type="file" accept="image/*" onChange={selectAvatar} className="hidden" />
+          <input
+            ref={fileInput}
+            type="file"
+            accept="image/*"
+            onChange={selectAvatar}
+            className="hidden"
+          />
           <button
             type="button"
             onClick={() => fileInput.current?.click()}
@@ -70,13 +116,7 @@ export default function PersonalInfo() {
           >
             Select Image
           </button>
-
-            
-
         </section>
-
-
-
       </div>
     </main>
   );

@@ -3,7 +3,7 @@ import { AuthContext } from "./AuthContext";
 import axios from "axios";
 
 export function AuthProvider({ children }) {
-  const url = import.meta.env.VITE_API_URL //|| 'http://localhost:3000/api/v1'
+  const url = 'http://localhost:3000/api/v1' //import.meta.env.VITE_API_URL //||
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState(null);
@@ -14,11 +14,9 @@ export function AuthProvider({ children }) {
       const response = await axios.post(`${url}/users/login`, data, {
         withCredentials: true,
       });
-      console.log(response);
       setUser(response.data.user);
       setLoading(false);
     } catch (error) {
-      console.log(error);
       setLoading(false);
     }
   };
@@ -40,7 +38,6 @@ export function AuthProvider({ children }) {
         const response = await fetch(`${url}/users/me`, {
           credentials: "include",
         });
-        console.log(response)
         if (response.ok) {
           const res = await response.json();
           setUser(res.user);

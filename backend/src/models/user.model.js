@@ -45,7 +45,7 @@ const userSchema = new mongoose.Schema(
           isDefault: { type: Boolean, default: false },
         },
       ],
-      default: [{}], // <--- ใส่ [{}] เพื่อสั่งให้สร้าง Object เปล่า 1 ตัวลง Array ( Mongoose จะดึง Default แต่ละ Field มาเติมให้เอง )
+      // default: [{}], // <--- ใส่ [{}] เพื่อสั่งให้สร้าง Object เปล่า 1 ตัวลง Array ( Mongoose จะดึง Default แต่ละ Field มาเติมให้เอง )
     },
   },
   {
