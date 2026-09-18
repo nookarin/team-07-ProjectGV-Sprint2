@@ -18,6 +18,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "#components/ui/button";
 import { toast } from "sonner";
+import { MailIcon, PhoneIcon, MessageSquareIcon } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "#components/ui/avatar";
 
 const initial_address = {
   firstname: "",
@@ -35,6 +37,8 @@ export default function () {
   const [addresses, setAddresses] = useState([]);
   const [data, setData] = useState(initial_address);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+
   const onChangeHandler = (e) => {
     setData({ ...data, [e.target.name]: e.target.value });
   };
@@ -63,13 +67,9 @@ export default function () {
     }
   };
 
-  const editAddressHandler = () => {
+  const editAddressHandler = () => {};
 
-  }
-
-  const submitEditHandler = async () => {
-    
-  }
+  const submitEditHandler = async () => {};
 
   const fetchData = async () => {
     setLoading(true);
@@ -278,14 +278,83 @@ export default function () {
                         </div>
                       </div>
                     </div>
-
-                    <button
-                      type="button"
-                      onClick={() => editAddressHandler()}
-                      className="shrink-0 text-xs font-semibold text-[#22D3EE] transition-colors hover:text-[#A5F3FC]"
-                    >
-                      Edit
-                    </button>
+                    <Dialog>
+                      <DialogTrigger
+                        render={
+                          <Button className="cursor-pointer text-gcyan-light hover:text-gcyan-neon hover:bg-gbase-1" />
+                        }
+                      >
+                        Edit
+                      </DialogTrigger>
+                      <DialogContent className="data-open:slide-in-from-right-8 data-closed:slide-out-to-right-8 data-open:zoom-in-100 data-closed:zoom-out-100 duration-300 [[data-slot=dialog-overlay]:has(~_&)]:duration-300 bg-gbase-4 text-white">
+                        <div className="flex items-center gap-3">
+                          <div className="flex flex-col gap-0.5">
+                            <DialogTitle className="text-sm font-semibold leading-none">
+                              {item.firstname}
+                              {item.lastname}
+                            </DialogTitle>
+                            <DialogDescription className="text-xs">
+                              Product Manager at Notion
+                            </DialogDescription>
+                          </div>
+                        </div>
+                        <div className="flex flex-col gap-2 rounded-lg bg-muted dark:bg-muted/50 p-3">
+                          <div className="flex items-center gap-2 text-muted-foreground">
+                            <MailIcon size={14} />
+                            <span className="text-xs">
+                              jessica.lee@notion.so
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2 text-muted-foreground">
+                            <PhoneIcon size={14} />
+                            <span className="text-xs">+1 (415) 867-5309</span>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-3 gap-2 text-center">
+                          {[
+                            { label: "Projects", value: "38" },
+                            { label: "Tasks", value: "210" },
+                            { label: "Reviews", value: "4.9" },
+                          ].map((stat) => (
+                            <div
+                              key={stat.label}
+                              className="rounded-lg bg-muted dark:bg-muted/50 p-2"
+                            >
+                              <p className="font-semibold text-sm">
+                                {stat.value}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {stat.label}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                        <div className="flex gap-2">
+                          <DialogClose
+                            render={
+                              <Button className="flex-1 cursor-pointer hover:bg-gbase-1" />
+                            }
+                          >
+                            Close
+                          </DialogClose>
+                          <DialogClose
+                            render={
+                              <Button className="flex-1 cursor-pointer bg-red-600 hover:bg-red-500" />
+                            }
+                          >
+                            Delete
+                          </DialogClose>
+                          <DialogClose
+                            render={
+                              <Button className="flex-1 cursor-pointer bg-gpurple-4 hover:bg-gpurple-3" />
+                            }
+                          >
+                            <MessageSquareIcon size={14} />
+                            Message
+                          </DialogClose>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
                   </div>
                 </article>
               ))
