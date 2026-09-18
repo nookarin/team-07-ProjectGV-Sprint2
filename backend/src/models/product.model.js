@@ -1,49 +1,58 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose from "mongoose";
 
-const productSchema = new mongoose.Schema({
-    product_name: { 
-        type: String, 
-        required: [true, "Product name is required"], 
-        trim: true 
+const productSchema = new mongoose.Schema(
+  {
+    product_name: {
+      type: String,
+      required: true,
+      trim: true,
     },
-    description: { 
-        type: String, 
-        default: "" 
+
+    description: {
+      type: String,
+      default: "",
     },
-    price: { 
-        type: Number, 
-        required: [true, "Price is required"], 
-        min: [0, "Price cannot be negative"] 
+
+    price: {
+      type: Number,
+      required: true,
+      min: 0,
     },
-    stock: { 
-        type: Number, 
-        default: 0, 
-        min: [0, "Stock cannot be negative"] 
+
+    stock: {
+      type: Number,
+      required: true,
+      default: 0,
+      min: 0,
     },
-    category_id: { 
-        type: Schema.ObjectId, 
-        ref: "Category",
-        default: null
+
+    category_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Category",
+      required: true,
     },
-    subcategory_id: { 
-        type: Schema.ObjectId,
-        ref: "SubCategory",
-        default: null
+
+    subcategory_ids: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Subcategory",
+      },
+    ],
+
+    weight: {
+      type: Number,
+      default: 0,
+      min: 0,
     },
-    weight: { 
-        type: Number, 
-        default: 0 
+
+    image_url: {
+      type: String,
+      default: "",
     },
-    image: { 
-        type: mongoose.Schema.Types.Mixed, 
-        default: "" 
-    },
-    is_active: { 
-        type: Boolean, 
-        default: true 
-    }
-}, {
-    timestamps: true
-});
+  },
+  {
+    timestamps: true,
+  }
+);
 
 export const Product = mongoose.model("Product", productSchema);
