@@ -8,11 +8,17 @@ export const categoryRouter = Router();
 categoryRouter.get("/", async (req, res, next) => {
   try {
     const categories = await Category.find();
+
     if (categories.length === 0) {
       return res
-        .status(400)
-        .json({ success: false, message: "Category's data is empty!" });
+        .status(200)
+        .json({
+          success: false,
+          message: "Category's data is empty!",
+          categories,
+        });
     }
+
     return res.status(200).json({
       success: true,
       count: categories.length,
@@ -27,11 +33,13 @@ categoryRouter.get("/", async (req, res, next) => {
 categoryRouter.get("/:id", async (req, res, next) => {
   try {
     const category = await Category.findById(req.params.id);
+
     if (!category) {
       return res
         .status(404)
         .json({ success: false, message: "Category not found!" });
     }
+
     return res.status(200).json({ success: true, category });
   } catch (error) {
     next(error);
@@ -55,6 +63,7 @@ categoryRouter.post("/", async (req, res, next) => {
 
     return res.status(201).json({
       success: true,
+      message: "Create category successfully!",
       category,
     });
   } catch (error) {
@@ -118,12 +127,12 @@ categoryRouter.delete("/:id", async (req, res, next) => {
       });
     }
 
-    await Category.findByIdAndDelete(req.params.id);
+    const deletedCategory = await Category.findByIdAndDelete(req.params.id);
 
     return res.status(200).json({
       success: true,
       message: "Category deleted successfully",
-      category,
+      deletedCategory,
     });
   } catch (error) {
     next(error);
