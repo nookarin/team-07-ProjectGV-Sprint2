@@ -1,71 +1,114 @@
 import { Router } from "express";
 import { Product } from "../../models/product.model.js";
+import { Subcategory } from "../../models/subcategory.model.js";
 import { Category } from "../../models/category.model.js";
 
 export const productRouter = Router();
 
-// GET / - Fetch all products (User & Admin)
-productRouter.get("/", async (req, res) => {
+// GET all peoducts
+productRouter.get("/", async (req, res, next) => {
   try {
-    const products = await Product.find({ is_active: true }).populate(
-      "category_id",
-      "category_name",
+    const { category } = req.query;
+
+    const filter = {};
+
+    if (category) {
+      const categoryData = await Category.findOne({
+        category_name: category,
+      });
+
+      if (!categoryData) {
+        return res.status(404).json({
+          success: false,
+          message: "Category not found!",
+        });
+      }
+
+      // แปลงจาก category name ที่ใช้ query เป็น id เนื่องจากตอนส่ง req body มีแค่ category_id
+      // ไม่ใช้ populate เพราะ product ที่ไม่ได้ query จะถูกส่งมาด้วย แต่ category จะเป็น null ในขณะที่ product ที่ query มาจะมีชื่อ category มาด้วยไม่เป็นค่า null
+      filter.category_id = categoryData._id;
+    }
+
+    const products = await Product.find(filter).populate(
+      "category_id subcategory_ids",
     );
+
+    if (products.length === 0) {
+      return res.status(200).json({
+        success: false,
+        message: "Product's data is empty!",
+      });
+    }
+
     return res.status(200).json({
       success: true,
       count: products.length,
-      data: products,
+      products,
     });
   } catch (error) {
-    console.error("GET /products error:", error);
-    return res.status(500).json({ success: false, message: error.message });
+    next(error);
   }
 });
 
-// GET /:id - Get single product by ID
-productRouter.get("/:id", async (req, res) => {
+// GET product by id
+productRouter.get("/:id", async (req, res, next) => {
   try {
     const product = await Product.findById(req.params.id).populate(
-      "category_id",
-      "category_name",
+      "category_id subcategory_ids",
     );
     if (!product) {
       return res
         .status(404)
-        .json({ success: false, message: "Product not found" });
+        .json({ success: false, message: "Product not found!" });
     }
-    return res.status(200).json({ success: true, data: product });
+    return res.status(200).json({ success: true, product });
   } catch (error) {
-    console.error("GET /products/:id error:", error);
-    return res.status(500).json({ success: false, message: error.message });
+    next(error);
   }
 });
 
-// POST / - Create (save) a new product to store (Admin)
-productRouter.post("/", async (req, res) => {
+// POST product
+productRouter.post("/", async (req, res, next) => {
   try {
-    const { category, product_name, description, price, stock } = req.body;
-    console.log(category.toLowerCase());
-    const categoryId = await Category.find({
-      category_name: category.toLowerCase(),
-    });
-    if (!categoryId[0]) {
-      const response = await Category.create({
-        category_name: category.toLowerCase(),
+    const {
+      product_name,
+      description,
+      price,
+      stock,
+      category_id,
+      subcategory_ids,
+      weight,
+      image_url,
+    } = req.body;
+
+    if (
+      !product_name ||
+      !description ||
+      price === null ||
+      stock === null ||
+      !category_id
+    ) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Product's name, description, price, stock and category_id are required!",
       });
-      const product = await Product.create({
-        product_name,
-        description,
-        price,
-        stock,
-        category_id: response._id,
-        createdAt: new Date(),
+    }
+
+    // หากมี subcategory_ids ส่งมา
+    if (subcategory_ids) {
+      const subcategories = await Subcategory.find({
+        _id: { $in: subcategory_ids },
+        category_ids: category_id,
       });
-      return res.status(201).json({
-        success: true,
-        message: "Created Product successfully.",
-        data: product,
-      });
+
+      // หากมี subcategory ใดไม่อยู่ใน category ที่เลือก
+      if (subcategories.length !== subcategory_ids.length) {
+        return res.status(400).json({
+          success: false,
+          message: "Some subcategories do not belong to this category!",
+        });
+      }
     }
 
     const product = await Product.create({
@@ -73,22 +116,24 @@ productRouter.post("/", async (req, res) => {
       description,
       price,
       stock,
-      category_id: categoryId[0]._id,
-      createdAt: new Date(),
+      category_id,
+      subcategory_ids,
+      weight,
+      image_url,
     });
+
     return res.status(201).json({
       success: true,
-      message: "Created Product successfully.",
-      data: product,
+      message: "Created Product successfully!",
+      product,
     });
   } catch (error) {
-    console.error("POST /products error:", error);
-    return res.status(400).json({ success: false, message: error.message });
+    next(error);
   }
 });
 
 // PUT /:id - Update product within system (Admin)
-productRouter.put("/:id", async (req, res) => {
+productRouter.put("/:id", async (req, res, next) => {
   try {
     const product = await Product.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
@@ -101,13 +146,12 @@ productRouter.put("/:id", async (req, res) => {
     }
     return res.status(200).json({ success: true, data: product });
   } catch (error) {
-    console.error("PUT /products/:id error:", error);
-    return res.status(400).json({ success: false, message: error.message });
+    next(error);
   }
 });
 
 // DELETE /:id - Remove product from system (Admin)
-productRouter.delete("/:id", async (req, res) => {
+productRouter.delete("/:id", async (req, res, next) => {
   try {
     const product = await Product.findByIdAndDelete(req.params.id);
     if (!product) {
@@ -121,7 +165,6 @@ productRouter.delete("/:id", async (req, res) => {
       data: product,
     });
   } catch (error) {
-    console.error("DELETE /products/:id error:", error);
-    return res.status(500).json({ success: false, message: error.message });
+    next(error);
   }
 });
