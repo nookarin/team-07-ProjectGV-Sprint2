@@ -1,4 +1,4 @@
-import { MapPin } from "lucide-react";
+import { MapPin, MapPinIcon, SaveCheck, UserRoundIcon } from "lucide-react";
 import AccountSidebar from "../AccountSidebar";
 import { useEffect, useState } from "react";
 import axios from "axios";
@@ -31,13 +31,13 @@ const initial_address = {
   province: "",
   zipCode: "",
 };
-export default function () {
+export default function Addresses() {
   const { url, user } = useAuth();
   const [loading, setLoading] = useState(null);
   const [addresses, setAddresses] = useState([]);
   const [data, setData] = useState(initial_address);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
 
   const onChangeHandler = (e) => {
     setData({ ...data, [e.target.name]: e.target.value });
@@ -67,9 +67,24 @@ export default function () {
     }
   };
 
-  const editAddressHandler = () => {};
+  const editAddressHandler = (item) => {
+    setData({
+      firstname: item.firstname || "",
+      lastname: item.lastname || "",
+      houseNo: item.houseNo || "",
+      street: item.street || "",
+      subdistrict: item.subdistrict || "",
+      district: item.district || "",
+      province: item.province || "",
+      zipCode: item.zipCode ?? "",
+    });
+    setEditOpen(true);
+  };
 
-  const submitEditHandler = async () => {};
+  const submitEditHandler = async (e) => {
+    e.preventDefault();
+    console.log(data);
+  };
 
   const fetchData = async () => {
     setLoading(true);
@@ -102,7 +117,7 @@ export default function () {
                 }
               />
 
-              <DialogContent className="sm:max-w-sm w-250 text-white bg-gbase-1 shadow-2xl shadow-gpurple-5">
+              <DialogContent className="sm:max-w-sm w-250 min-w-150 text-white bg-gbase-1 shadow-2xl shadow-gpurple-5">
                 <form onSubmit={addAddress}>
                   <DialogHeader className={"mb-4"}>
                     <DialogTitle>+ Add Address</DialogTitle>
@@ -111,42 +126,52 @@ export default function () {
                     </DialogDescription>
                   </DialogHeader>
                   <FieldGroup>
-                    <Field>
-                      <Label htmlFor="firstname">Firstname</Label>
-                      <Input
-                        id="firstname"
-                        name="firstname"
-                        placeholder="Firstname"
-                        className={"border-gpurple-2 rounded-xl"}
-                        onChange={onChangeHandler}
-                        required
-                      />
-                      <Label htmlFor="lastname">Lastname</Label>
-                      <Input
-                        id="lastname"
-                        name="lastname"
-                        placeholder="Lastname"
-                        className={"border-gpurple-2 rounded-xl"}
-                        onChange={onChangeHandler}
-                        required
-                      />
+                    <Field className={"grid grid-cols-2 gap-4"}>
+                      <div>
+                        <Label htmlFor="firstname">Firstname</Label>
+                        <Input
+                          id="firstname"
+                          name="firstname"
+                          placeholder="Firstname"
+                          className={"border-gpurple-2 rounded-xl mt-2.5"}
+                          onChange={onChangeHandler}
+                          required
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="lastname">Lastname</Label>
+                        <Input
+                          id="lastname"
+                          name="lastname"
+                          placeholder="Lastname"
+                          className={"border-gpurple-2 rounded-xl mt-2.5"}
+                          onChange={onChangeHandler}
+                          required
+                        />
+                      </div>
                     </Field>
                     <Field>
-                      <Label htmlFor="houseNo">House No.</Label>
-                      <Input
-                        id="houseNo"
-                        name="houseNo"
-                        className={"border-gpurple-2 rounded-xl"}
-                        onChange={onChangeHandler}
-                        required
-                      />
-                      <Label htmlFor="street">Street</Label>
-                      <Input
-                        id="street"
-                        name="street"
-                        className={"border-gpurple-2 rounded-xl"}
-                        onChange={onChangeHandler}
-                      />
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="houseNo">House No.</Label>
+                          <Input
+                            id="houseNo"
+                            name="houseNo"
+                            className={"border-gpurple-2 rounded-xl mt-2.5"}
+                            onChange={onChangeHandler}
+                            required
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="street">Street</Label>
+                          <Input
+                            id="street"
+                            name="street"
+                            className={"border-gpurple-2 rounded-xl mt-2.5"}
+                            onChange={onChangeHandler}
+                          />
+                        </div>
+                      </div>
                       <Label htmlFor="subdistrict">Sub District</Label>
                       <Input
                         id="subdistrict"
@@ -162,23 +187,29 @@ export default function () {
                         onChange={onChangeHandler}
                         required
                       />
-                      <Label htmlFor="province">Province</Label>
-                      <Input
-                        id="province"
-                        name="province"
-                        className={"border-gpurple-2 rounded-xl"}
-                        onChange={onChangeHandler}
-                        required
-                      />
-                      <Label htmlFor="zipCode">Zip Code</Label>
-                      <Input
-                        id="zipCode"
-                        name="zipCode"
-                        className={"border-gpurple-2 rounded-xl"}
-                        type={"number"}
-                        onChange={onChangeHandler}
-                        required
-                      />
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="province">Province</Label>
+                          <Input
+                            id="province"
+                            name="province"
+                            className={"border-gpurple-2 rounded-xl mt-2"}
+                            onChange={onChangeHandler}
+                            required
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="zipCode">Zip Code</Label>
+                          <Input
+                            id="zipCode"
+                            name="zipCode"
+                            className={"border-gpurple-2 rounded-xl mt-2"}
+                            type={"number"}
+                            onChange={onChangeHandler}
+                            required
+                          />
+                        </div>
+                      </div>
                     </Field>
                   </FieldGroup>
                   <DialogFooter className={"my-4"}>
@@ -278,56 +309,108 @@ export default function () {
                         </div>
                       </div>
                     </div>
-                    <Dialog>
+                    <Dialog open={editOpen} onOpenChange={setEditOpen}>
                       <DialogTrigger
                         render={
-                          <Button className="cursor-pointer text-gcyan-light hover:text-gcyan-neon hover:bg-gbase-1" />
+                          <Button
+                            onClick={() => editAddressHandler(item)}
+                            className="cursor-pointer text-gcyan-light hover:text-gcyan-neon hover:bg-gbase-1"
+                          />
                         }
                       >
                         Edit
                       </DialogTrigger>
-                      <DialogContent className="data-open:slide-in-from-right-8 data-closed:slide-out-to-right-8 data-open:zoom-in-100 data-closed:zoom-out-100 duration-300 [[data-slot=dialog-overlay]:has(~_&)]:duration-300 bg-gbase-4 text-white">
+                      <DialogContent className="data-open:slide-in-from-right-8 data-closed:slide-out-to-right-8 data-open:zoom-in-100 data-closed:zoom-out-100 duration-300 [[data-slot=dialog-overlay]:has(~_&)]:duration-300 bg-gbase-4 text-white min-w-140">
                         <div className="flex items-center gap-3">
                           <div className="flex flex-col gap-0.5">
                             <DialogTitle className="text-sm font-semibold leading-none">
-                              {item.firstname}
-                              {item.lastname}
+                              Editing Address {index + 1}
                             </DialogTitle>
-                            <DialogDescription className="text-xs">
+                            {/* <DialogDescription className="text-xs">
                               Product Manager at Notion
-                            </DialogDescription>
+                            </DialogDescription> */}
                           </div>
                         </div>
                         <div className="flex flex-col gap-2 rounded-lg bg-muted dark:bg-muted/50 p-3">
                           <div className="flex items-center gap-2 text-muted-foreground">
-                            <MailIcon size={14} />
-                            <span className="text-xs">
-                              jessica.lee@notion.so
+                            <UserRoundIcon size={14} />
+                            <span>
+                              {data.firstname || item.firstname}{" "}
+                              {data.lastname || item.lastname}
                             </span>
+                          </div>
+                          <div className="flex items-center gap-2 text-muted-foreground">
+                            <MapPinIcon size={14} />
+                            <div className="flex gap-2">
+                              <label htmlFor="houseNo">No.</label>
+                              <input
+                                type="text"
+                                className="w-14"
+                                value={data.houseNo}
+                                name="houseNo"
+                                onChange={onChangeHandler}
+                              />
+                            </div>
+
+                            <div className="flex gap-2">
+                              <label htmlFor="street">Street</label>
+                              <input
+                                type="text"
+                                className="w-20"
+                                value={data.street}
+                                name="street"
+                                onChange={onChangeHandler}
+                              />
+                            </div>
+                            <div className="flex gap-2">
+                              <label htmlFor="subdistrict">Subdistrict</label>
+                              <input
+                                type="text"
+                                name="subdistrict"
+                                value={data.subdistrict}
+                                onChange={onChangeHandler}
+                              />
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2 text-muted-foreground">
+                            <MapPinIcon size={14} />
+                            <div className="flex gap-2">
+                              <label htmlFor="district">District</label>
+                              <input
+                                type="text"
+                                value={data.district}
+                                name="district"
+                                className="w-24"
+                                onChange={onChangeHandler}
+                              />
+                            </div>
+
+                            <div className="flex gap-2">
+                              <label htmlFor="province">Province</label>
+                              <input
+                                type="text"
+                                value={data.province}
+                                name="province"
+                                className="w-24"
+                                onChange={onChangeHandler}
+                              />
+                            </div>
+                            <div className="flex gap-2">
+                              <label htmlFor="zipCode">Zipcode</label>
+                              <input
+                                type="text"
+                                value={data.zipCode}
+                                name="zipCode"
+                                className="w-24"
+                                onChange={onChangeHandler}
+                              />
+                            </div>
                           </div>
                           <div className="flex items-center gap-2 text-muted-foreground">
                             <PhoneIcon size={14} />
                             <span className="text-xs">+1 (415) 867-5309</span>
                           </div>
-                        </div>
-                        <div className="grid grid-cols-3 gap-2 text-center">
-                          {[
-                            { label: "Projects", value: "38" },
-                            { label: "Tasks", value: "210" },
-                            { label: "Reviews", value: "4.9" },
-                          ].map((stat) => (
-                            <div
-                              key={stat.label}
-                              className="rounded-lg bg-muted dark:bg-muted/50 p-2"
-                            >
-                              <p className="font-semibold text-sm">
-                                {stat.value}
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                {stat.label}
-                              </p>
-                            </div>
-                          ))}
                         </div>
                         <div className="flex gap-2">
                           <DialogClose
@@ -346,11 +429,15 @@ export default function () {
                           </DialogClose>
                           <DialogClose
                             render={
-                              <Button className="flex-1 cursor-pointer bg-gpurple-4 hover:bg-gpurple-3" />
+                              <Button
+                                type="submit"
+                                onClick={submitEditHandler}
+                                className="flex-1 cursor-pointer bg-gpurple-4 hover:bg-gpurple-3"
+                              />
                             }
                           >
-                            <MessageSquareIcon size={14} />
-                            Message
+                            <SaveCheck size={14} />
+                            Save
                           </DialogClose>
                         </div>
                       </DialogContent>
