@@ -2,13 +2,13 @@ const useFluidCursor = () => {
   const canvas = document.getElementById('fluid');
   resizeCanvas();
   let config = {
-    SIM_RESOLUTION: 128,
-    DYE_RESOLUTION: 1440,
+    SIM_RESOLUTION: 96,
+    DYE_RESOLUTION: 720,
     CAPTURE_RESOLUTION: 512,
     DENSITY_DISSIPATION: 8,
     VELOCITY_DISSIPATION: 2,
     PRESSURE: 0.1,
-    PRESSURE_ITERATIONS: 20,
+    PRESSURE_ITERATIONS: 12,
     CURL: 3,
     SPLAT_RADIUS: 0.05,
     SPLAT_FORCE: 6000,
@@ -822,17 +822,35 @@ const useFluidCursor = () => {
   }
   updateKeywords();
   initFramebuffers();
+
   let lastUpdateTime = Date.now();
-  let colorUpdateTimer = 0.0;
-  function update() {
-    const dt = calcDeltaTime();
-    if (resizeCanvas()) initFramebuffers();
-    updateColors(dt);
-    applyInputs();
-    step(dt);
-    render(null);
-    requestAnimationFrame(update);
-  }
+let colorUpdateTimer = 0.0;
+let loopId = null;
+let running = true;
+
+function update() {
+  if (!running) return;
+  const dt = calcDeltaTime();
+  if (resizeCanvas()) initFramebuffers();
+  updateColors(dt);
+  applyInputs();
+  step(dt);
+  render(null);
+  loopId = requestAnimationFrame(update);
+}
+loopId = requestAnimationFrame(update);
+
+  // let lastUpdateTime = Date.now();
+  // let colorUpdateTimer = 0.0;
+  // function update() {
+  //   const dt = calcDeltaTime();
+  //   if (resizeCanvas()) initFramebuffers();
+  //   updateColors(dt);
+  //   applyInputs();
+  //   step(dt);
+  //   render(null);
+  //   requestAnimationFrame(update);
+  // }
   function calcDeltaTime() {
     let now = Date.now();
     let dt = (now - lastUpdateTime) / 1000;
@@ -1180,10 +1198,14 @@ const useFluidCursor = () => {
       return { width: max, height: min };
     else return { width: min, height: max };
   }
-  function scaleByPixelRatio(input) {
-    const pixelRatio = window.devicePixelRatio || 1;
+    function scaleByPixelRatio(input) {
+    const pixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
     return Math.floor(input * pixelRatio);
   }
+  // function scaleByPixelRatio(input) {
+  //   const pixelRatio = window.devicePixelRatio || 1;
+  //   return Math.floor(input * pixelRatio);
+  // }
   function hashCode(s) {
     if (s.length == 0) return 0;
     let hash = 0;
