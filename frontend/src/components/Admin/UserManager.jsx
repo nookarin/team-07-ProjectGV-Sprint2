@@ -45,7 +45,7 @@ const initialForm = {
   password: "",
   phoneNumber: "",
   role: "user",
-  address: "",
+  address: [],
 };
 
 function fullName(user) {
@@ -65,6 +65,73 @@ function formatDate(value) {
   });
 }
 
+const ADDRESS_FIELDS = [
+  { key: "firstname", label: "First name", placeholder: "e.g. Kim" },
+  { key: "lastname", label: "Last name", placeholder: "e.g. Winter" },
+  { key: "houseNo", label: "House no.", placeholder: "e.g. 123" },
+  { key: "street", label: "Street", placeholder: "e.g. Rama 9 Rd" },
+  { key: "subdistrict", label: "Subdistrict", placeholder: "e.g. Khlong Toei" },
+  { key: "district", label: "District", placeholder: "e.g. Watthana" },
+  { key: "province", label: "Province", placeholder: "e.g. Bangkok" },
+  { key: "zipCode", label: "Zip code", placeholder: "e.g. 10110" },
+];
+
+function emptyAddress() {
+  return {
+    firstname: "",
+    lastname: "",
+    houseNo: "",
+    street: "",
+    subdistrict: "",
+    district: "",
+    province: "",
+    zipCode: "",
+    isDefault: false,
+  };
+}
+
+function formatAddress(value) {
+  if (!value) return "";
+  return [value.houseNo, value.street, value.subdistrict, value.district, value.province, value.zipCode]
+    .map((part) => (part == null ? "" : String(part)).trim())
+    .filter(Boolean)
+    .join(", ");
+}
+
+function nonEmptyAddresses(addresses) {
+  return (Array.isArray(addresses) ? addresses : []).filter((addr) => formatAddress(addr) !== "");
+}
+
+function hasAddresses(addresses) {
+  return nonEmptyAddresses(addresses).length > 0;
+}
+
+function toAddressPayload(addresses) {
+  return (Array.isArray(addresses) ? addresses : [])
+    .map((addr) => ({
+      firstname: (addr.firstname ?? "").trim() || undefined,
+      lastname: (addr.lastname ?? "").trim() || undefined,
+      houseNo: (addr.houseNo ?? "").trim() || undefined,
+      street: (addr.street ?? "").trim() || undefined,
+      subdistrict: (addr.subdistrict ?? "").trim() || undefined,
+      district: (addr.district ?? "").trim() || undefined,
+      province: (addr.province ?? "").trim() || undefined,
+      zipCode: (addr.zipCode ?? "").trim() === "" ? undefined : Number(addr.zipCode),
+      isDefault: Boolean(addr.isDefault),
+    }))
+    .filter(
+      (addr) =>
+        addr.firstname ||
+        addr.lastname ||
+        addr.houseNo ||
+        addr.street ||
+        addr.subdistrict ||
+        addr.district ||
+        addr.province ||
+        addr.zipCode != null,
+    );
+}
+
 function fromDoc(doc) {
   return {
     firstname: doc.firstname ?? "",
@@ -74,7 +141,17 @@ function fromDoc(doc) {
     password: "",
     phoneNumber: doc.phoneNumber != null ? String(doc.phoneNumber) : "",
     role: doc.role ?? "user",
-    address: (doc.address ?? []).join(", "),
+    address: nonEmptyAddresses(doc.address).map((addr) => ({
+      firstname: addr.firstname ?? "",
+      lastname: addr.lastname ?? "",
+      houseNo: addr.houseNo != null ? String(addr.houseNo) : "",
+      street: addr.street ?? "",
+      subdistrict: addr.subdistrict ?? "",
+      district: addr.district ?? "",
+      province: addr.province ?? "",
+      zipCode: addr.zipCode != null ? String(addr.zipCode) : "",
+      isDefault: Boolean(addr.isDefault),
+    })),
   };
 }
 
@@ -87,10 +164,7 @@ function toPayload(form) {
     password: form.password || undefined,
     phoneNumber: form.phoneNumber.trim() === "" ? undefined : Number(form.phoneNumber),
     role: form.role,
-    address: form.address
-      .split(",")
-      .map((part) => part.trim())
-      .filter(Boolean),
+    address: toAddressPayload(form.address),
   };
 }
 
@@ -259,6 +333,24 @@ export default function UserManager() {
     if (formErrors[name]) {
       setFormErrors((current) => ({ ...current, [name]: undefined }));
     }
+  }
+
+  function addAddress() {
+    setForm((current) => ({ ...current, address: [...current.address, emptyAddress()] }));
+  }
+
+  function removeAddress(index) {
+    setForm((current) => ({
+      ...current,
+      address: current.address.filter((_, i) => i !== index),
+    }));
+  }
+
+  function updateAddressField(index, field, value) {
+    setForm((current) => ({
+      ...current,
+      address: current.address.map((addr, i) => (i === index ? { ...addr, [field]: value } : addr)),
+    }));
   }
 
   async function handleSubmit(event) {
@@ -538,17 +630,30 @@ export default function UserManager() {
                         </Badge>
                       </td>
                       <td className="max-w-56 px-6 py-4 text-slate-400">
-                        {user.address?.length ? (
-                          <div className="flex flex-wrap gap-1.5">
-                            {/* {user.address.map((line) => (
-                              <span
-                                key={line}
-                                className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-xs text-slate-300"
-                              >
-                                {line}
-                              </span>
-                            ))} */}
-                            <p>address</p>
+                        {hasAddresses(user.address) ? (
+                          <div className="space-y-1.5">
+                            {nonEmptyAddresses(user.address)
+                              .slice(0, 2)
+                              .map((addr, index) => (
+                                <div key={index} className="flex items-center gap-1.5">
+                                  {addr.isDefault && (
+                                    <span className="rounded border border-violet-400/40 bg-violet-500/10 px-1 py-px text-[10px] font-semibold text-violet-300">
+                                      Default
+                                    </span>
+                                  )}
+                                  <p
+                                    className="truncate rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-xs text-slate-300"
+                                    title={formatAddress(addr)}
+                                  >
+                                    {formatAddress(addr)}
+                                  </p>
+                                </div>
+                              ))}
+                            {nonEmptyAddresses(user.address).length > 2 && (
+                              <p className="px-2 text-xs text-slate-500">
+                                +{nonEmptyAddresses(user.address).length - 2} more
+                              </p>
+                            )}
                           </div>
                         ) : (
                           "—"
@@ -704,15 +809,67 @@ export default function UserManager() {
                   <FieldError message={formErrors.phoneNumber} />
                 </div>
                 <div className="sm:col-span-2">
-                  <Label htmlFor="address" className="text-slate-200">Address</Label>
-                  <input
-                    id="address"
-                    name="address"
-                    value={form.address}
-                    onChange={updateField}
-                    className={fieldClass("address")}
-                    placeholder="e.g. 123 Rama Rd, Bangkok, Thailand"
-                  />
+                  <Label className="text-slate-200">Addresses</Label>
+                  {form.address.map((addr, index) => (
+                    <fieldset
+                      key={index}
+                      className="mt-3 rounded-2xl border border-white/10 bg-[#090813] p-4"
+                    >
+                      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                        <Label className="text-sm font-semibold text-slate-300">
+                          Address {index + 1}
+                        </Label>
+                        <label className="flex cursor-pointer items-center gap-2 text-xs font-medium text-slate-400">
+                          <input
+                            type="checkbox"
+                            checked={Boolean(addr.isDefault)}
+                            onChange={(event) =>
+                              updateAddressField(index, "isDefault", event.target.checked)
+                            }
+                            className="size-4 accent-violet-500"
+                          />
+                          Set as default
+                        </label>
+                      </div>
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        {ADDRESS_FIELDS.map(({ key, label, placeholder }) => (
+                          <div key={key}>
+                            <Label className="text-xs text-slate-400">{label}</Label>
+                            <input
+                              inputMode={key === "zipCode" ? "numeric" : undefined}
+                              value={addr[key] ?? ""}
+                              onChange={(event) => updateAddressField(index, key, event.target.value)}
+                              className={fieldClass(`address-${index}-${key}`)}
+                              placeholder={placeholder}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeAddress(index)}
+                        className="mt-3 gap-2 text-rose-400 hover:text-rose-300"
+                      >
+                        <Trash2 className="size-4" /> Remove Address
+                      </Button>
+                    </fieldset>
+                  ))}
+                  {form.address.length === 0 && (
+                    <p className="mt-3 text-sm text-slate-500">
+                      No addresses added yet.
+                    </p>
+                  )}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={addAddress}
+                    className="mt-3 gap-2"
+                  >
+                    <Plus className="size-4" /> Add Address
+                  </Button>
                 </div>
               </div>
 
