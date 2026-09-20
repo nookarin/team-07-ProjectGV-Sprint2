@@ -51,13 +51,10 @@ const Homepage = () => {
   return (
     
     <div className="relative z-10">
-      <div>
-      {/* เนื้อหาเว็บไซต์ของคุณ */}
-      <h1>GearVerse Web App</h1>
 
       {/* เรียกใช้งานแชทบอท */}
       <BotpressChat />
-      </div>
+      
       <BannerCarousel />
       <div className="w-3/4 mx-auto my-10">
         <HeaderSection name={"categories"} />
@@ -67,7 +64,7 @@ const Homepage = () => {
           })}
         </div>
       </div>
-      <div className="w-3/4 mx-auto py-10">
+      <div className="w-3/4 mx-auto py-10">ฏนื 
         <HeaderSection name={"trending gear"} />
         <div className="grid grid-cols-3 gap-12 text-white">
           {mock_item.map((item, index) => {

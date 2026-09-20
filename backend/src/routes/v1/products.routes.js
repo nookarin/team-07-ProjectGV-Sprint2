@@ -1,9 +1,16 @@
 import { Router } from "express";
+import multer from "multer";
 import { Product } from "../../models/product.model.js";
 import { Subcategory } from "../../models/subcategory.model.js";
 import { Category } from "../../models/category.model.js";
+import { cloudinary } from "../../config/cloudinary.js";
 
 export const productRouter = Router();
+
+const uploadImages = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024, files: 10 },
+}).array("images", 10);
 
 // GET all peoducts
 productRouter.get("/", async (req, res, next) => {
@@ -125,6 +132,57 @@ productRouter.post("/", async (req, res, next) => {
     return res.status(201).json({
       success: true,
       message: "Created Product successfully!",
+      product,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// POST /:id/images - Upload product images to Cloudinary and link them to the product.
+// The first uploaded image becomes the main product picture.
+productRouter.post("/:id/images", uploadImages, async (req, res, next) => {
+  try {
+    if (!req.files || req.files.length === 0) {
+      return res
+        .status(400)
+        .json({ success: false, message: "No image files provided!" });
+    }
+
+    if (!process.env.CLOUDINARY_CLOUD_NAME) {
+      return res.status(500).json({
+        success: false,
+        message: "Cloudinary is not configured on the server!",
+      });
+    }
+
+    const product = await Product.findById(req.params.id);
+    if (!product) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Product not found!" });
+    }
+
+    const uploadedUrls = [];
+    for (const file of req.files) {
+      const upload = await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { folder: "gearverse/products", resource_type: "image" },
+          (error, result) => (error ? reject(error) : resolve(result)),
+        );
+        stream.end(file.buffer);
+      });
+      uploadedUrls.push(upload.secure_url);
+    }
+
+    product.images = uploadedUrls;
+    product.image_url = uploadedUrls[0];
+    await product.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Images uploaded successfully!",
+      images: product.images,
       product,
     });
   } catch (error) {
