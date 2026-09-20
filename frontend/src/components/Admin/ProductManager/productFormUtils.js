@@ -16,13 +16,13 @@ export const initialProductForm = {
   tags: "",
 };
 
-export function toPayload(form) {
+export function toPayload(form, categoryId) {
   return {
     product_name: form.name,
     description: form.description,
     price: Number(form.price),
     stock: Number(form.quantity),
-    category: form.category,
+    category_id: categoryId,
     tags: form.tags
       .split(",")
       .map((tag) => tag.trim())
@@ -38,9 +38,13 @@ export function fromDoc(doc) {
     description: doc.description,
     price: doc.price,
     quantity: doc.stock,
-    category: doc.category,
+    category: doc.category_id?.category_name ?? doc.category ?? "",
+    categoryId: doc.category_id?._id ?? doc.categoryId ?? "",
     tags: doc.tags ?? [],
     date: doc.date ? new Date(doc.date).toISOString().slice(0, 10) : "",
+    image_url: doc.image_url ?? "",
+    images: Array.isArray(doc.images) ? doc.images : [],
+    createdAt: doc.createdAt || doc._id || "",
   };
 }
 

@@ -67,6 +67,20 @@ export default function ProductList({
               >
                 <div className="absolute -right-8 -top-8 size-28 rounded-full bg-violet-500/15 blur-2xl" />
                 <div className="relative">
+                  {(product.images?.[0] || product.image_url) && (
+                    <div className="relative mb-4">
+                      <img
+                        src={product.images?.[0] || product.image_url}
+                        alt={product.name}
+                        className="h-44 w-full rounded-2xl border border-white/10 object-cover"
+                      />
+                      {product.images && product.images.length > 1 && (
+                        <span className="absolute right-2 bottom-2 rounded-full bg-black/70 px-2 py-0.5 text-xs font-semibold text-white">
+                          +{product.images.length - 1}
+                        </span>
+                      )}
+                    </div>
+                  )}
                   <div className="flex items-start justify-between gap-4">
                     <span className="rounded-full border border-cyan-300/20 bg-cyan-300/10 px-3 py-1 text-xs font-semibold text-cyan-300">
                       {product.category}

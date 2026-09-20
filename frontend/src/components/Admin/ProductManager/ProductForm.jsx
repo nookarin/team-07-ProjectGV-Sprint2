@@ -1,5 +1,11 @@
-import { useState } from "react";
-import { CalendarDays, CircleDollarSign, PackagePlus, Tag } from "lucide-react";
+import { useEffect, useState } from "react";
+import {
+  CircleDollarSign,
+  ImagePlus,
+  PackagePlus,
+  Tag,
+  X,
+} from "lucide-react";
 import {
   DEFAULT_CATEGORIES,
   fromDoc,
@@ -8,6 +14,7 @@ import {
   validateProduct,
 } from "./productFormUtils";
 import { useAuth } from "@/contexts/Authentication/AuthContext";
+import { readJson } from "@/lib/api";
 
 function FieldError({ id, message }) {
   if (!message) return null;
@@ -21,14 +28,54 @@ function FieldError({ id, message }) {
 
 export default function ProductForm({
   onProductAdded,
+  onProductUpdated,
+  onCancelEdit,
+  editingProduct = null,
   categories = DEFAULT_CATEGORIES,
 }) {
-  const [form, setForm] = useState(initialProductForm);
+  const isEdit = Boolean(editingProduct);
+  const [form, setForm] = useState(() =>
+    editingProduct
+      ? {
+          name: editingProduct.name,
+          description: editingProduct.description,
+          price: editingProduct.price,
+          quantity: editingProduct.quantity,
+          date: editingProduct.date,
+          category: editingProduct.category,
+          tags: (editingProduct.tags ?? []).join(", "),
+        }
+      : initialProductForm,
+  );
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [serverCategories, setServerCategories] = useState([]);
+  const [files, setFiles] = useState([]);
   const { url } = useAuth();
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadCategories() {
+      try {
+        const res = await fetch(`${url}/categories`);
+        const result = await readJson(res);
+        if (res.ok && Array.isArray(result.categories)) {
+          if (!cancelled) setServerCategories(result.categories);
+        }
+      } catch {
+        // Categories stay empty; validation surfaces a helpful error
+      }
+    }
+
+    loadCategories();
+    return () => {
+      cancelled = true;
+    };
+  }, [url]);
+
   function updateField(event) {
     const { name, value } = event.target;
     setForm((current) => ({ ...current, [name]: value }));
@@ -40,9 +87,55 @@ export default function ProductForm({
     setSuccessMessage("");
   }
 
+  function handleFilesChange(event) {
+    const selected = Array.from(event.target.files ?? []);
+    if (selected.length === 0) return;
+    const added = selected.map((item) => ({
+      id: `${item.name}-${item.size}-${Date.now()}-${Math.random()}`,
+      file: item,
+      preview: URL.createObjectURL(item),
+    }));
+    setFiles((current) => [...current, ...added]);
+    setSubmitError("");
+    setSuccessMessage("");
+    event.target.value = "";
+  }
+
+  function removeFile(index) {
+    setFiles((current) => {
+      const next = [...current];
+      const [removed] = next.splice(index, 1);
+      if (removed) URL.revokeObjectURL(removed.preview);
+      return next;
+    });
+  }
+
+  function clearFiles() {
+    setFiles((current) => {
+      current.forEach((item) => URL.revokeObjectURL(item.preview));
+      return [];
+    });
+  }
+
+  async function attachImages(productId) {
+    const formData = new FormData();
+    files.forEach((item) => formData.append("images", item.file));
+    const res = await fetch(`${url}/products/${productId}/images`, {
+      method: "POST",
+      body: formData,
+    });
+    const result = await readJson(res);
+    if (!res.ok) throw new Error(result.message || "Failed to upload images");
+    return result;
+  }
+
   async function handleSubmit(event) {
     event.preventDefault();
-    const nextErrors = validateProduct(form);
+
+    const values = form.date
+      ? form
+      : { ...form, date: new Date().toISOString().slice(0, 10) };
+    const nextErrors = validateProduct(values);
 
     if (Object.keys(nextErrors).length > 0) {
       setErrors(nextErrors);
@@ -50,23 +143,58 @@ export default function ProductForm({
       return;
     }
 
+    const category = serverCategories.find(
+      (current) => current.category_name === values.category,
+    );
+    if (!category) {
+      setErrors((current) => ({
+        ...current,
+        category: "Please select a category available on the server",
+      }));
+      return;
+    }
+
     setIsSubmitting(true);
     setSubmitError("");
     try {
-      const res = await fetch(`${url}/products`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(toPayload(form)),
-      });
-      const result = await res.json();
-      console.log(result)
-      if (!res.ok) throw new Error(result.message || "Failed to add product");
+      const res = await fetch(
+        isEdit ? `${url}/products/${editingProduct.id}` : `${url}/products`,
+        {
+          method: isEdit ? "PUT" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(toPayload(values, category._id)),
+        },
+      );
+      const result = await readJson(res);
+      if (!res.ok)
+        throw new Error(
+          result.message || (isEdit ? "Failed to update product" : "Failed to add product"),
+        );
 
-      const product = fromDoc(result.data);
-      setForm(initialProductForm);
-      setErrors({});
-      setSuccessMessage(`${product.name} was added successfully.`);
-      onProductAdded?.(product);
+      let finalProduct = {
+        ...fromDoc(isEdit ? result.data : result.product),
+        category: values.category,
+      };
+      if (files.length > 0 && finalProduct.id) {
+        const uploadResult = await attachImages(finalProduct.id);
+        finalProduct = fromDoc(uploadResult.product);
+      }
+
+      clearFiles();
+      if (isEdit) {
+        setSuccessMessage(`${finalProduct.name} was updated successfully.`);
+        onProductUpdated?.(finalProduct);
+        if (onCancelEdit) {
+          onCancelEdit();
+          return;
+        }
+        setForm(initialProductForm);
+      } else {
+        setForm(initialProductForm);
+        setErrors({});
+        setSuccessMessage(`${finalProduct.name} was added successfully.`);
+        onProductAdded?.(finalProduct);
+      }
     } catch (error) {
       setSubmitError(error.message);
       setSuccessMessage("");
@@ -74,6 +202,11 @@ export default function ProductForm({
       setIsSubmitting(false);
     }
   }
+
+  const categoryOptions =
+    serverCategories.length > 0
+      ? serverCategories.map(({ category_name }) => category_name).sort()
+      : categories;
 
   const fieldClass = (field) =>
     `mt-2 w-full rounded-xl border bg-[#11101d] px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-600 focus:ring-2 focus:ring-violet-500/30 ${
@@ -91,9 +224,25 @@ export default function ProductForm({
             <PackagePlus aria-hidden="true" />
           </div>
           <div>
-            <h2 className="text-xl font-bold">Add a product</h2>
-            <p className="mt-1 text-sm text-slate-300">All fields are required.</p>
+            <h2 className="text-xl font-bold">
+              {isEdit ? "Edit product" : "Add a product"}
+            </h2>
+            <p className="mt-1 text-sm text-slate-300">
+              {isEdit
+                ? `Editing "${editingProduct.name}".`
+                : "All fields are required."}
+            </p>
           </div>
+          {isEdit && onCancelEdit && (
+            <button
+              type="button"
+              onClick={onCancelEdit}
+              className="ml-auto flex items-center gap-2 rounded-xl border border-white/15 px-3 py-2 text-sm font-semibold text-slate-200 transition hover:border-rose-400/40 hover:text-rose-300"
+            >
+              <X className="size-4" />
+              Cancel
+            </button>
+          )}
         </div>
       </div>
 
@@ -134,6 +283,63 @@ export default function ProductForm({
             aria-describedby={errors.description ? "description-error" : undefined}
           />
           <FieldError id="description-error" message={errors.description} />
+        </div>
+
+        <div className="sm:col-span-2">
+          <label
+            htmlFor="product-images"
+            className="flex items-center gap-2 text-sm font-semibold text-slate-200"
+          >
+            <ImagePlus className="size-4 text-violet-300" />
+            Product images{" "}
+            <span className="text-xs font-normal text-slate-500">(optional)</span>
+          </label>
+          <div className="mt-2 grid grid-cols-2 gap-4 sm:grid-cols-3">
+            {files.map((item, index) => (
+              <div key={item.id} className="relative">
+                <img
+                  src={item.preview}
+                  alt={`Product preview ${index + 1}`}
+                  className="aspect-square w-full rounded-xl border border-white/10 object-cover"
+                />
+                {index === 0 && (
+                  <span className="absolute left-2 top-2 rounded-full bg-violet-500/90 px-2 py-0.5 text-[10px] font-bold text-white">
+                    MAIN
+                  </span>
+                )}
+                <button
+                  type="button"
+                  onClick={() => removeFile(index)}
+                  className="absolute -right-2 -top-2 grid size-6 place-items-center rounded-full bg-rose-500 text-white transition hover:bg-rose-400"
+                  aria-label={`Remove image ${index + 1}`}
+                >
+                  <X className="size-4" />
+                </button>
+              </div>
+            ))}
+            <label
+              htmlFor="product-images"
+              className="grid aspect-square cursor-pointer place-items-center rounded-xl border border-dashed border-white/15 bg-[#090813] text-slate-500 transition hover:border-violet-400/40 hover:text-slate-300"
+            >
+              <div className="flex flex-col items-center gap-1">
+                <ImagePlus className="size-6" />
+                <span className="text-xs">Add image</span>
+              </div>
+            </label>
+          </div>
+          <input
+            id="product-images"
+            name="images"
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={handleFilesChange}
+            className="hidden"
+          />
+          <p className="mt-2 text-xs text-slate-500">
+            JPG, PNG or WEBP up to 5&nbsp;MB each (max 10). The first image is
+            the main product picture.
+          </p>
         </div>
 
         <div>
@@ -211,7 +417,7 @@ export default function ProductForm({
             aria-describedby={errors.category ? "category-error" : undefined}
           >
             <option value="">Select a category</option>
-            {categories.map((category) => (
+            {categoryOptions.map((category) => (
               <option key={category} value={category}>
                 {category}
               </option>
@@ -262,7 +468,13 @@ export default function ProductForm({
             className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 px-5 py-3.5 font-bold transition hover:from-violet-500 hover:to-fuchsia-500 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:ring-offset-2 focus:ring-offset-[#11101d] disabled:cursor-not-allowed disabled:opacity-60"
           >
             <PackagePlus className="size-5" aria-hidden="true" />
-            {isSubmitting ? "Adding..." : "Add Product"}
+            {isSubmitting
+              ? isEdit
+                ? "Updating..."
+                : "Adding..."
+              : isEdit
+                ? "Update Product"
+                : "Add Product"}
           </button>
         </div>
       </form>
