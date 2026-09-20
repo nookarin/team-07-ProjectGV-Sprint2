@@ -8,7 +8,7 @@ import img_product2 from "../../assets/image-product/Gemini_Generated_Image_cfuk
 import img_product3 from "../../assets/image-product/Gemini_Generated_Image_waq5aswaq5aswaq5.jpg";
 import ProductSecondaryCard from "#components/Homepage/ProductSecondaryCard";
 import CategoryCard from "#components/Homepage/CategoryCard";
-import fluidCursor from "../../contexts/use-FluidCursor";
+// import fluidCursor from "../../contexts/use-FluidCursor";
 import BannerCarousel from "#components/Homepage/BannerCarousel";
 import HeaderSection from "#components/Homepage/HeaderSection";
 import BotpressChat from "#components/Botpress/BotpressChat";
@@ -45,9 +45,9 @@ const mock_item = [
 ];
 
 const Homepage = () => {
-  useEffect(() => {
-    fluidCursor();
-  }, []);
+  // useEffect(() => {
+  //   fluidCursor();
+  // }, []);
   return (
     
     <div className="relative z-10">

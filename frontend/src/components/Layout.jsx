@@ -8,8 +8,14 @@ import fluidCursor from "../contexts/use-FluidCursor";
 
 const Layout = () => {
   useEffect(() => {
-    fluidCursor();
-  }, []);
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if (window.innerWidth < 768 && 'ontouchstart' in window) return; // portrait phone
+  const destroy = fluidCursor();
+  return destroy;
+}, []); // responsive fluidCursor, if not pic = no fluidCursor
+  // useEffect(() => {
+  //   fluidCursor();
+  // }, []);
   return (
     <>
       <Navbar />
