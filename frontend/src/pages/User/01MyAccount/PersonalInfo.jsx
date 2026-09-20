@@ -3,6 +3,8 @@ import nookAvatar from "../../../assets/nook.jpg";
 import AccountSidebar from "../AccountSidebar";
 import { useAuth } from "@/contexts/Authentication/AuthContext";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 const profileRows = [
   { label: "Username:" },
@@ -13,7 +15,8 @@ const profileRows = [
 ];
 
 export default function PersonalInfo() {
-  const { user, url } = useAuth();
+  const { user, url, logout } = useAuth();
+  const navigate = useNavigate();
   const [avatar, setAvatar] = useState(nookAvatar);
   const [loading, setLoading] = useState(null);
   const [data, setData] = useState({
@@ -39,6 +42,17 @@ export default function PersonalInfo() {
     });
     setData(response.data.user);
     setLoading(false);
+  };
+
+  const handleDelete = async () => {
+    const response = await axios.delete(`${url}/users/${user._id}`);
+    logout();
+    navigate("/");
+    console.log(response);
+    toast.success(response.data.message, {
+      richColors: true,
+      duration: 5000,
+    });
   };
 
   useEffect(() => {
@@ -87,6 +101,7 @@ export default function PersonalInfo() {
 
           <button
             type="button"
+            onClick={() => handleDelete()}
             className="ml-3 mt-4 min-w-45 rounded-lg bg-[#9D174D] px-8 py-2.5 text-[13px] font-bold text-white transition-colors hover:bg-[#EC4899]"
           >
             Delete Account

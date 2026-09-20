@@ -1,4 +1,10 @@
-import { MapPin, MapPinIcon, SaveCheck, UserRoundIcon } from "lucide-react";
+import {
+  MapPin,
+  MapPinIcon,
+  SaveCheck,
+  Star,
+  UserRoundIcon,
+} from "lucide-react";
 import AccountSidebar from "../AccountSidebar";
 import { useEffect, useState } from "react";
 import axios from "axios";
@@ -38,6 +44,7 @@ export default function Addresses() {
   const [data, setData] = useState(initial_address);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
+  const [selectedAddress, setSelectedAddress] = useState(null);
 
   const onChangeHandler = (e) => {
     setData({ ...data, [e.target.name]: e.target.value });
@@ -55,8 +62,9 @@ export default function Addresses() {
         },
       );
       console.log(response);
-      toast.success(response, {
+      toast.success(response.data.message, {
         richColors: true,
+        duration: 5000,
       });
     } catch (error) {
       console.log(error.response.data);
@@ -64,26 +72,52 @@ export default function Addresses() {
         richColors: true,
         duration: 5000,
       });
+    } finally {
+      fetchData();
     }
   };
 
   const editAddressHandler = (item) => {
     setData({
-      firstname: item.firstname || "",
-      lastname: item.lastname || "",
-      houseNo: item.houseNo || "",
-      street: item.street || "",
-      subdistrict: item.subdistrict || "",
-      district: item.district || "",
-      province: item.province || "",
-      zipCode: item.zipCode ?? "",
+      firstname: item.firstname,
+      lastname: item.lastname,
+      houseNo: item.houseNo,
+      street: item.street,
+      subdistrict: item.subdistrict,
+      district: item.district,
+      province: item.province,
+      zipCode: item.zipCode,
     });
     setEditOpen(true);
+    setSelectedAddress(item);
   };
 
-  const submitEditHandler = async (e) => {
+  const saveEditHandler = async (e) => {
     e.preventDefault();
-    console.log(data);
+    console.log(data, selectedAddress);
+    const response = await axios.patch(
+      `${url}/users/${user._id}/address/${selectedAddress._id}`,
+      data,
+    );
+
+    fetchData();
+    toast.success(response.data.message, {
+      richColors: true,
+      duration: 5000,
+    });
+  };
+
+  const deleteAddressHandler = async (e) => {
+    e.preventDefault();
+    const response = await axios.delete(
+      `${url}/users/${user._id}/address/${selectedAddress._id}`,
+    );
+    fetchData();
+    toast.success(response.data.message, {
+      richColors: true,
+      duration: 5000,
+    });
+    setSelectedAddress(null);
   };
 
   const fetchData = async () => {
@@ -407,10 +441,12 @@ export default function Addresses() {
                               />
                             </div>
                           </div>
-                          <div className="flex items-center gap-2 text-muted-foreground">
-                            <PhoneIcon size={14} />
+                          {/* <div className="flex items-center gap-2 text-muted-foreground">
+                            <Star size={14} />
                             <span className="text-xs">+1 (415) 867-5309</span>
-                          </div>
+                            <input type="checkbox" />
+                            <p>Set as default</p>
+                          </div> */}
                         </div>
                         <div className="flex gap-2">
                           <DialogClose
@@ -422,7 +458,12 @@ export default function Addresses() {
                           </DialogClose>
                           <DialogClose
                             render={
-                              <Button className="flex-1 cursor-pointer bg-red-600 hover:bg-red-500" />
+                              <Button
+                                onClick={(e) => {
+                                  deleteAddressHandler(e, item);
+                                }}
+                                className="flex-1 cursor-pointer bg-red-600 hover:bg-red-500"
+                              />
                             }
                           >
                             Delete
@@ -431,7 +472,7 @@ export default function Addresses() {
                             render={
                               <Button
                                 type="submit"
-                                onClick={submitEditHandler}
+                                onClick={saveEditHandler}
                                 className="flex-1 cursor-pointer bg-gpurple-4 hover:bg-gpurple-3"
                               />
                             }

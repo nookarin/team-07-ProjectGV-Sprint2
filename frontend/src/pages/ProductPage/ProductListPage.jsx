@@ -28,7 +28,8 @@ const ProductListPage = () => {
   const fetchData = async () => {
     setLoading(true);
     const response = await axios.get(`${url}/products`);
-    setProducts(response.data.data);
+    console.log(response.data.products)
+    setProducts(response.data.products);
     setLoading(false);
   };
   useEffect(() => {
@@ -94,9 +95,9 @@ const ProductListPage = () => {
           {!loading &&
             products.map((product, index) => {
               return (
-                <>
-                  <ProductCard product={product} img={img_product1} key={index} />
-                </>
+                <div key={index}>
+                  <ProductCard product={product} img={img_product1} />
+                </div>
               );
             })}
         </div>

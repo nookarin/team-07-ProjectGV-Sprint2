@@ -1,7 +1,7 @@
 import CartPage from "./pages/ShoppingCart/CartPage";
 import Register from "./pages/Register/Register";
 import Homepage from "./pages/Homepage/Homepage";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, Route, RouterProvider } from "react-router-dom";
 import Layout from "#components/Layout";
 import ProductPage from "./pages/ProductPage/ProductPage";
 import PersonalInfo from "./pages/User/01MyAccount/PersonalInfo";
@@ -23,6 +23,23 @@ import { useAuth } from "./contexts/Authentication/AuthContext";
 import { useEffect } from "react";
 
 const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <Layout />,
+    children: [
+      { index: true, element: <Homepage /> },
+      { path: "register", element: <Register /> },
+      { path: "login", element: <Login /> },
+      { path: "cart", element: <CartPage /> },
+      { path: "product", element: <ProductPage /> }, // products/:category_id/:product_id
+      { path: "products/:id", element: <ProductListPage /> },
+      { path: "/sale", element: <SalePage /> },
+      { path: "*", element: <Homepage /> },
+    ],
+  },
+]);
+
+const routerAuthen = createBrowserRouter([
   {
     path: "/",
     element: <Layout />,
@@ -67,6 +84,8 @@ function App() {
     <>
       {user?.role === "admin" ? (
         <RouterProvider router={routerAdmin} />
+      ) : user?.role === "user" ? (
+        <RouterProvider router={routerAuthen} />
       ) : (
         <RouterProvider router={router} />
       )}

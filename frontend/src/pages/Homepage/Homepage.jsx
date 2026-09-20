@@ -53,7 +53,7 @@ const Homepage = () => {
     <div className="relative z-10">
       <div>
       {/* เนื้อหาเว็บไซต์ของคุณ */}
-      <h1>GearVerse Web App</h1>
+      {/* <h1>GearVerse Web App</h1> */}
 
       {/* เรียกใช้งานแชทบอท */}
       <BotpressChat />

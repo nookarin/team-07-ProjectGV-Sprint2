@@ -104,7 +104,7 @@ userRouter.patch("/:userId", async (req, res, next) => {
 userRouter.patch("/:userId/address", async (req, res, next) => {
   try {
     const address = req.body;
-    console.log(req.body)
+    console.log(req.body);
     const userData = await User.findOne({ _id: req.params.userId });
 
     for (let i = 0; i < userData.address.length; i++) {
@@ -119,6 +119,10 @@ userRouter.patch("/:userId/address", async (req, res, next) => {
             "This address has already been saved. Please enter a new address!",
         });
       }
+    }
+
+    if(userData.address.length <= 1) {
+      address.isDefault = true
     }
 
     if (address.isDefault) {
@@ -147,9 +151,57 @@ userRouter.patch("/:userId/address", async (req, res, next) => {
 
     return res
       .status(200)
-      .json({ success: true, message: "Updated address successfully!" });
+      .json({ success: true, message: "Added new address successfully!" });
   } catch (error) {
-    console.log(error)
+    console.log(error);
+    next(error);
+  }
+});
+
+userRouter.patch("/:userId/address/:addressId", async (req, res, next) => {
+  try {
+    const { userId, addressId } = req.params;
+    const {
+      firstname,
+      lastname,
+      houseNo,
+      street,
+      subdistrict,
+      district,
+      province,
+      zipCode,
+    } = req.body;
+    const user = await User.findByIdAndUpdate(
+      userId,
+      {
+        $set: {
+          "address.$[elem].firstname": firstname,
+          "address.$[elem].lastname": lastname,
+          "address.$[elem].houseNo": houseNo,
+          "address.$[elem].street": street,
+          "address.$[elem].subdistrict": subdistrict,
+          "address.$[elem].province": province,
+          "address.$[elem].zipCode": zipCode,
+          "address.$[elem].district": district,
+        },
+      },
+      {
+        arrayFilters: [{ "elem._id": addressId }],
+      },
+    );
+    if (!user) {
+      return res.json({
+        success: false,
+        message: "User not found.",
+      });
+    }
+
+    return res.json({
+      success: true,
+      message: "Updated address successfully.",
+    });
+  } catch (error) {
+    console.log(error);
     next(error);
   }
 });
@@ -157,10 +209,25 @@ userRouter.patch("/:userId/address", async (req, res, next) => {
 // delete address
 userRouter.delete("/:userId/address/:addressId", async (req, res, next) => {
   try {
-    const deletedAddress = await User.findByIdAndDelete(req.params.addressId);
+    const { userId, addressId } = req.params;
+    console.log(req.params);
+    const deletedAddress = await User.findByIdAndUpdate(
+      { _id: userId },
+      {
+        $pull: { address: { _id: addressId } },
+      },
+    );
+    console.log(deletedAddress);
     if (!deletedAddress) {
-      return res.status(400).json({ success: false, message: "" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Cannot delete this address" });
     }
+
+    return res.json({
+      success: true,
+      message: "Delete address successfully.",
+    });
   } catch (error) {
     next(error);
   }
@@ -212,7 +279,7 @@ userRouter.get("/me", protect, async (req, res, next) => {
 
 userRouter.get("/auth/:id", protect, async (req, res, next) => {
   try {
-    console.log(req.params)
+    console.log(req.params);
     const user = await User.findById(req.params.id).select("-password");
     if (!user) {
       return res
@@ -253,9 +320,9 @@ userRouter.post("/login", async (req, res, next) => {
         .json({ success: false, message: "Incorrect password!" });
     }
 
-const token = jwt.sign({ userId: user._id }, process.env.SECRET_KEY, {
-    expiresIn: "1h",
-  });
+    const token = jwt.sign({ userId: user._id }, process.env.SECRET_KEY, {
+      expiresIn: "1h",
+    });
 
     const isSecure =
       req.secure ||

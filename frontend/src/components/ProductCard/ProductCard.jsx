@@ -13,12 +13,16 @@ const ProductCard = ({ img, product }) => {
       >
         KEYBOARD
       </Badge>
-      <Link to={'/product'}>
+      <Link to={"/product"}>
         <img className="rounded-t-2xl h-80 object-cover" src={img} alt="" />
       </Link>
       <div className="w-[80%] mx-auto my-4 text-white">
         <h3 className="font-bold text-xl">{product.product_name}</h3>
-        <p className="text-sm font-light mt-4">{product.description}</p>
+        <p className="text-sm font-light mt-4">
+          {product.description.length > 150
+            ? `${product.description.slice(0, 150)}...`
+            : product.description}
+        </p>
       </div>
       <div className="text-start gap-0.5 mx-4 mt-10 flex items-center">
         <Star size={16} className="fill-amber-500 stroke-amber-500" />
