@@ -91,8 +91,11 @@ const NavbarAuthenticate = ({ setClick, click }) => {
             >
               <ShoppingBag size={20} color="#22D3EE" />
             </NavigationMenuTrigger>
-            <NavigationMenuContent>
-              <NavigationMenuLink>Link</NavigationMenuLink>
+            <NavigationMenuContent className={'text-white'}>
+              <div>
+                <p>asdsadas</p>
+              </div>
+              <NavigationMenuLink className={'cursor-pointer'}>See More</NavigationMenuLink>
             </NavigationMenuContent>
           </NavigationMenuItem>
           <NavigationMenuItem>
