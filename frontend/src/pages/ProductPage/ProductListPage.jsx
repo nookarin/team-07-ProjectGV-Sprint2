@@ -34,9 +34,8 @@ const ProductListPage = () => {
     setLoading(false);
   };
   useEffect(() => {
-    console.log(param);
     fetchData();
-  }, [filter]);
+  }, [filter, param.id]);
   return (
     <div className="min-h-screen relative z-10">
       <div className="h-60 border flex flex-col justify-center items-center border-gbase-1 bg-linear-to-br from-gbg-1 0% via-50% via-gbase-3 to-gpurple-5/40">
