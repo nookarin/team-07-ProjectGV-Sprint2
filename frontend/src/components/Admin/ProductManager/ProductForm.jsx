@@ -366,7 +366,7 @@ export default function ProductForm({
         <div>
           <label htmlFor="quantity" className="flex items-center gap-2 text-sm font-semibold text-slate-200">
             <PackagePlus className="size-4 text-violet-300" />
-            Quantity
+            Stock
           </label>
           <input
             id="quantity"
