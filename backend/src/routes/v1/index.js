@@ -10,6 +10,7 @@ import { kbswitchRouter } from "./kb-switch.routes.js";
 import { keycapRouter } from "./keycap.routes.js";
 import { wishlistRouter } from "./wishlists.routes.js";
 import { subcategoryRouter } from "./subcategories.routes.js";
+import { chatbotRouter } from "./chatbot.routes.js";
 
 export const router = Router();
 
@@ -24,3 +25,4 @@ router.use("/colors", colorRouter);
 router.use("/kbswitch", kbswitchRouter);
 router.use("/keycaps", keycapRouter);
 router.use("/wishlists", wishlistRouter);
+router.use("/chatbot", chatbotRouter);
