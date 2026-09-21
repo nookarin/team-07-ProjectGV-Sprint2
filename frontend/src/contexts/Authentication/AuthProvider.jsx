@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { AuthContext } from "./AuthContext";
 import axios from "axios";
+import LoadingScreen from "@/components/LoadingScreen";
+
+// Full-screen loader rendered while a page is only rendered after auth check/login completes.
 
 export function AuthProvider({ children }) {
   const url = 'http://localhost:3000/api/v1' // import.meta.env.VITE_API_URL //
@@ -59,7 +62,8 @@ export function AuthProvider({ children }) {
   }, [url]);
   return (
     <AuthContext.Provider value={{ user, loading, err, url, login, logout }}>
-      {children}
+      {/* Show loading screen during auth check/login; only render the page when done */}
+      {loading ? <LoadingScreen /> : children}
     </AuthContext.Provider>
   );
 }
