@@ -16,18 +16,17 @@ export const initialProductForm = {
   tags: "",
 };
 
-export function toPayload(form, categoryId) {
+// Tags are now kept as subcategory_ids.
+// subcategoryIds must be resolved by the caller from the tag names
+// that match the subcategories of the selected category.
+export function toPayload(form, categoryId, subcategoryIds = []) {
   return {
     product_name: form.name,
     description: form.description,
     price: Number(form.price),
     stock: Number(form.quantity),
     category_id: categoryId,
-    tags: form.tags
-      .split(",")
-      .map((tag) => tag.trim())
-      .filter(Boolean),
-    date: form.date,
+    subcategory_ids: subcategoryIds,
   };
 }
 
@@ -40,7 +39,16 @@ export function fromDoc(doc) {
     quantity: doc.stock,
     category: doc.category_id?.category_name ?? doc.category ?? "",
     categoryId: doc.category_id?._id ?? doc.categoryId ?? "",
-    tags: doc.tags ?? [],
+    // Tags map to subcategory names. Requires subcategory_ids to be populated.
+    tags: Array.isArray(doc.subcategory_ids)
+      ? doc.subcategory_ids
+          .map((sub) =>
+            sub && typeof sub === "object" && sub.subcategory_name
+              ? sub.subcategory_name
+              : null,
+          )
+          .filter(Boolean)
+      : doc.tags ?? [],
     date: doc.date ? new Date(doc.date).toISOString().slice(0, 10) : "",
     image_url: doc.image_url ?? "",
     images: Array.isArray(doc.images) ? doc.images : [],

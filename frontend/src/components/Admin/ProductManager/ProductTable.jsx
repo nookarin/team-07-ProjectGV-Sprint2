@@ -23,16 +23,68 @@ function formatDate(value) {
   });
 }
 
+// Palette used by the "Available Tags" panel. Every category gets one colour
+// (cycle through the list) so tags can be told apart at a glance.
+const TAG_COLORS = [
+  {
+    dot: "bg-violet-400",
+    idle: "border-violet-400/30 bg-violet-500/10 text-violet-300 hover:border-violet-400/60 hover:bg-violet-500/20",
+    active: "border-violet-400 bg-violet-500/30 text-violet-100",
+  },
+  {
+    dot: "bg-cyan-400",
+    idle: "border-cyan-400/30 bg-cyan-500/10 text-cyan-300 hover:border-cyan-400/60 hover:bg-cyan-500/20",
+    active: "border-cyan-400 bg-cyan-500/30 text-cyan-100",
+  },
+  {
+    dot: "bg-emerald-400",
+    idle: "border-emerald-400/30 bg-emerald-500/10 text-emerald-300 hover:border-emerald-400/60 hover:bg-emerald-500/20",
+    active: "border-emerald-400 bg-emerald-500/30 text-emerald-100",
+  },
+  {
+    dot: "bg-amber-400",
+    idle: "border-amber-400/30 bg-amber-500/10 text-amber-300 hover:border-amber-400/60 hover:bg-amber-500/20",
+    active: "border-amber-400 bg-amber-500/30 text-amber-100",
+  },
+  {
+    dot: "bg-rose-400",
+    idle: "border-rose-400/30 bg-rose-500/10 text-rose-300 hover:border-rose-400/60 hover:bg-rose-500/20",
+    active: "border-rose-400 bg-rose-500/30 text-rose-100",
+  },
+];
+
 export default function ProductTable({ products, onEdit, onDelete }) {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
   const [sort, setSort] = useState("newest");
+  // Tags selected in the "Available Tags" panel. Empty set = no tag filter.
+  const [activeTags, setActiveTags] = useState(() => new Set());
 
   const categories = useMemo(
     () =>
       ["All", ...new Set(products.map((p) => p.category).filter(Boolean))].sort(),
     [products],
   );
+
+  // Collect every tag grouped by its product's category. Categories are sorted
+  // alphabetically so their assigned colours stay stable between renders.
+  const tagsByCategory = useMemo(() => {
+    const byCategory = new Map();
+    products.forEach((product) => {
+      product.tags.forEach((tag) => {
+        if (!byCategory.has(product.category)) {
+          byCategory.set(product.category, new Set());
+        }
+        byCategory.get(product.category).add(tag);
+      });
+    });
+    return [...byCategory.entries()]
+      .sort(([first], [second]) => String(first).localeCompare(String(second)))
+      .map(([categoryName, tags]) => ({
+        category: categoryName,
+        tags: [...tags].sort(),
+      }));
+  }, [products]);
 
   const visible = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -44,7 +96,11 @@ export default function ProductTable({ products, onEdit, onDelete }) {
         product.tags.some((tag) => tag.toLowerCase().includes(query));
       const matchCategory =
         category === "All" || product.category === category;
-      return matchQuery && matchCategory;
+      // Keep only products that have at least one of the selected tags.
+      const matchTags =
+        activeTags.size === 0 ||
+        product.tags.some((tag) => activeTags.has(tag));
+      return matchQuery && matchCategory && matchTags;
     });
 
     switch (sort) {
@@ -77,14 +133,26 @@ export default function ProductTable({ products, onEdit, onDelete }) {
         );
     }
     return list;
-  }, [products, search, category, sort]);
+  }, [products, search, category, sort, activeTags]);
 
-  const hasActiveFilters = search.trim() || category !== "All" || sort !== "newest";
+  const hasActiveFilters =
+    search.trim() || category !== "All" || sort !== "newest" || activeTags.size > 0;
 
   function resetFilters() {
     setSearch("");
     setCategory("All");
     setSort("newest");
+    setActiveTags(new Set());
+  }
+
+  // Toggle a tag on/off in the "Available Tags" filter.
+  function toggleTag(tag) {
+    setActiveTags((current) => {
+      const next = new Set(current);
+      if (next.has(tag)) next.delete(tag);
+      else next.add(tag);
+      return next;
+    });
   }
 
   return (
@@ -129,6 +197,58 @@ export default function ProductTable({ products, onEdit, onDelete }) {
           </select>
         </div>
       </div>
+
+      {tagsByCategory.length > 0 && (
+        <div className="rounded-2xl border border-white/10 bg-[#11101d] p-4">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-semibold text-slate-200">Available Tags</p>
+            {activeTags.size > 0 && (
+              <button
+                type="button"
+                onClick={() => setActiveTags(new Set())}
+                className="text-xs font-semibold text-violet-300 transition hover:text-violet-200"
+              >
+                Clear ({activeTags.size})
+              </button>
+            )}
+          </div>
+          <div className="mt-3 space-y-3">
+            {tagsByCategory.map((group, index) => {
+              const color = TAG_COLORS[index % TAG_COLORS.length];
+              return (
+                <div
+                  key={group.category}
+                  className="flex flex-wrap items-center gap-2"
+                >
+                  <span className="flex min-w-24 items-center gap-1.5 text-xs font-medium text-slate-400">
+                    <span className={`size-2 rounded-full ${color.dot}`} />
+                    {group.category || "Uncategorized"}
+                  </span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {group.tags.map((tag) => {
+                      const active = activeTags.has(tag);
+                      return (
+                        <button
+                          key={tag}
+                          type="button"
+                          onClick={() => toggleTag(tag)}
+                          aria-pressed={active}
+                          className={`rounded-full border px-3 py-1 text-xs font-semibold transition ${
+                            active ? color.active : color.idle
+                          }`}
+                        >
+                          {active ? "✓ " : "+ "}
+                          {tag}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       <div className="flex items-center justify-between px-1">
         <p className="text-sm text-slate-400">
