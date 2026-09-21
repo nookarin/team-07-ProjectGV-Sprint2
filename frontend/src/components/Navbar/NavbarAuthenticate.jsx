@@ -30,13 +30,13 @@ const NavbarAuthenticate = ({ setClick, click }) => {
     <div className="w-1/5 flex justify-end">
       <NavigationMenu>
         <NavigationMenuList className={"flex gap-2"}>
-          <NavigationMenuItem>
+          {/* <NavigationMenuItem>
             <NavigationMenuLink
               className={"border border-gbase-1 rounded-lg h-10"}
             >
               <Search size={20} color="#22D3EE" />
             </NavigationMenuLink>
-          </NavigationMenuItem>
+          </NavigationMenuItem> */}
           <NavigationMenuItem>
             <NavigationMenuTrigger
               className={"border border-gbase-1 rounded-lg h-10"}
@@ -99,7 +99,7 @@ const NavbarAuthenticate = ({ setClick, click }) => {
             </NavigationMenuContent>
           </NavigationMenuItem>
           <NavigationMenuItem>
-            <NavigationMenuLink>USD/THB</NavigationMenuLink>
+            <NavigationMenuLink className={'cursor-pointer'}>USD/THB</NavigationMenuLink>
           </NavigationMenuItem>
         </NavigationMenuList>
       </NavigationMenu>

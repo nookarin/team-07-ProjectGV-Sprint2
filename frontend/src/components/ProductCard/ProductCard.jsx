@@ -14,7 +14,7 @@ const ProductCard = ({ img, product }) => {
       >
         {product.category_id.category_name}
       </Badge>
-      <Link to={'/product'}>
+      <Link to={`/product/${product._id}`}>
         <img className="rounded-t-2xl w-full h-100 object-cover border-b border-gbase-1" src={img ? img : img_default} alt="" />
       </Link>
       <div className="w-[80%] h-30 mx-auto my-4 text-white">
@@ -33,12 +33,6 @@ const ProductCard = ({ img, product }) => {
         <div>
           <p className="text-3xl font-bold tracking-wide">฿{product.price}</p>
         </div>
-        {/* <div className="flex w-40 justify-between items-center border-2 rounded-xl border-gpurple-2">
-          <p className="text-gpurple-2 w-full font-bold textxl p-2">$149.99</p>
-          <button className="bg-gpurple-2 p-2 rounded-e-lg">
-            <ShoppingCart />
-          </button>
-        </div> */}
         <div className="flex gap-2">
           <Button className="border border-gbase-1 bg-gbase-3 rounded-lg p-2">
             <Heart

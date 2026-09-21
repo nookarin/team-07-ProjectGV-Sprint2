@@ -17,7 +17,7 @@ const NavbarUnauthen = () => {
     <div className="w-1/5 flex justify-end ">
       <NavigationMenu>
         <NavigationMenuList className={"flex gap-2"}>
-          <NavigationMenuItem>
+          {/* <NavigationMenuItem>
             <NavigationMenuLink
               className={`border border-gbase-2 rounded-lg h-10 ${click && "w-80 justify-between"}`}
             >
@@ -31,7 +31,7 @@ const NavbarUnauthen = () => {
                 <Search color="#22D3EE" strokeWidth={3} />
               </div>
             </NavigationMenuLink>
-          </NavigationMenuItem>
+          </NavigationMenuItem> */}
           <NavigationMenuItem>
             <NavigationMenuLink
               className={

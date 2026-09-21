@@ -2,6 +2,7 @@ import ProductCard from "#components/ProductCard/ProductCard";
 import { useAuth } from "@/contexts/Authentication/AuthContext";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
+import { Ring } from "#components/ring";
 
 const AllProductPage = () => {
   const { url } = useAuth();
@@ -19,7 +20,7 @@ const AllProductPage = () => {
     fetchData();
   }, []);
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen relative z-10">
       <header className="h-60 border flex flex-col justify-center items-center border-gbase-1 bg-linear-to-br from-gbg-1 0% via-50% via-gbase-3 to-gpurple-5/40">
         <div className="text-white text-center">
           {/* <h3 className="font-bold tracking-widest">PRODUCTS</h3> */}
@@ -40,7 +41,7 @@ const AllProductPage = () => {
               );
             })
           ) : (
-            <p>Loading...</p>
+            <Ring className={'size-20'}/>
           )}
         </div>
       </div>
