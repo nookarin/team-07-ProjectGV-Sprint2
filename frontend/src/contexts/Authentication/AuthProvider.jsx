@@ -3,23 +3,27 @@ import { AuthContext } from "./AuthContext";
 import axios from "axios";
 
 export function AuthProvider({ children }) {
-  const url = import.meta.env.VITE_API_URL //|| 'http://localhost:3000/api/v1'
+  const url = 'http://localhost:3000/api/v1' // import.meta.env.VITE_API_URL //
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState(null);
 
   const login = async (data) => {
     setLoading(true);
+    setErr(null);
     try {
       const response = await axios.post(`${url}/users/login`, data, {
         withCredentials: true,
       });
-      console.log(response);
+      console.log(response.data.message);
       setUser(response.data.user);
       setLoading(false);
+      return true
     } catch (error) {
       console.log(error);
+      setErr(error.response?.data?.message || error.message);
       setLoading(false);
+      return false
     }
   };
 

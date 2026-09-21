@@ -13,6 +13,68 @@ const uploadImages = multer({
 }).array("images", 10);
 
 // GET all peoducts
+productRouter.get("/:category", async (req, res, next) => {
+  try {
+    const { category } = req.params;
+    const { name } = req.query
+    const filter = {};
+
+    if (category) {
+      const categoryData = await Category.findOne({
+        category_name: category,
+      });
+
+      if (!categoryData) {
+        return res.status(404).json({
+          success: false,
+          message: "Category not found!",
+        });
+      }
+      console.log(categoryData)
+      // แปลงจาก category name ที่ใช้ query เป็น id เนื่องจากตอนส่ง req body มีแค่ category_id
+      // ไม่ใช้ populate เพราะ product ที่ไม่ได้ query จะถูกส่งมาด้วย แต่ category จะเป็น null ในขณะที่ product ที่ query มาจะมีชื่อ category มาด้วยไม่เป็นค่า null
+      filter.category_id = categoryData._id;
+    }
+
+    const products = await Product.find(filter).populate(
+      "category_id subcategory_ids",
+    );
+
+    if (products.length === 0) {
+      return res.status(200).json({
+        success: false,
+        message: "Product's data is empty!",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      count: products.length,
+      products,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+
+// GET product by id
+productRouter.get("/:category", async (req, res, next) => {
+  try {
+    const product = await Product.findById(req.params.id).populate(
+      "category_id subcategory_ids",
+    );
+    if (!product) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Product not found!" });
+    }
+    return res.status(200).json({ success: true, product });
+  } catch (error) {
+    next(error);
+  }
+});
+
 productRouter.get("/", async (req, res, next) => {
   try {
     const { category } = req.query;
@@ -52,23 +114,6 @@ productRouter.get("/", async (req, res, next) => {
       count: products.length,
       products,
     });
-  } catch (error) {
-    next(error);
-  }
-});
-
-// GET product by id
-productRouter.get("/:id", async (req, res, next) => {
-  try {
-    const product = await Product.findById(req.params.id).populate(
-      "category_id subcategory_ids",
-    );
-    if (!product) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Product not found!" });
-    }
-    return res.status(200).json({ success: true, product });
   } catch (error) {
     next(error);
   }

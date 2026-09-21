@@ -18,22 +18,25 @@ const mock_tags = [
 
 const ProductListPage = () => {
   const param = useParams();
-  const { url } = useAuth()
+  const { url } = useAuth();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(null);
+  const [filter, setFilter] = useState("");
   const [price, setPrice] = useState({
     min: 0,
-    max: 0
-  })
+    max: 20000,
+  });
   const fetchData = async () => {
     setLoading(true);
-    const response = await axios.get(`${url}/products`);
-    setProducts(response.data.data);
-    setLoading(false);
+    const response = await axios.get(`${url}/products/${param.id}/name=${filter}`);
+    console.log(response)
+    // setProducts(response.data.products);
+    // setLoading(false);
   };
   useEffect(() => {
+    console.log(param);
     fetchData();
-  }, []);
+  }, [filter]);
   return (
     <div className="min-h-screen relative z-10">
       <div className="h-60 border flex flex-col justify-center items-center border-gbase-1 bg-linear-to-br from-gbg-1 0% via-50% via-gbase-3 to-gpurple-5/40">
@@ -51,6 +54,7 @@ const ProductListPage = () => {
           <input
             type="text"
             id="name"
+            onChange={(e) => setFilter(e.target.value)}
             className="border border-gbase-2 bg-gbase-3/30 rounded-lg mt-2 py-1 px-2"
           />
         </div>
@@ -60,12 +64,20 @@ const ProductListPage = () => {
             <div className="flex items-center">
               <div className="flex items-center border border-gbase-2 bg-gbase-3/30 px-2 py-1 rounded-lg">
                 <DollarSign size={14} color="gray" />
-                <input type="number" className="outline-0" placeholder="min price" />
+                <input
+                  type="number"
+                  className="outline-0"
+                  placeholder="min price"
+                />
               </div>
               <span className="mx-2">-</span>
               <div className="flex items-center border border-gbase-2 bg-gbase-3/30 px-2 py-1 rounded-lg">
                 <DollarSign size={14} color="gray" />
-                <input type="number" className="outline-0" placeholder="max price" />
+                <input
+                  type="number"
+                  className="outline-0"
+                  placeholder="max price"
+                />
               </div>
             </div>
           </div>
@@ -95,7 +107,11 @@ const ProductListPage = () => {
             products.map((product, index) => {
               return (
                 <>
-                  <ProductCard product={product} img={img_product1} key={index} />
+                  <ProductCard
+                    product={product}
+                    img={img_product1}
+                    key={index}
+                  />
                 </>
               );
             })}
