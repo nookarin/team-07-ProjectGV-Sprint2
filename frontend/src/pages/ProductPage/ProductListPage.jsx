@@ -22,19 +22,28 @@ const ProductListPage = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(null);
   const [filter, setFilter] = useState("");
+  const [tags, setTags] = useState([]);
   const [price, setPrice] = useState({
     min: 0,
     max: 20000,
   });
   const fetchData = async () => {
     setLoading(true);
-    const response = await axios.get(`${url}/products/${param.id}?name=${filter}`);
-    console.log(response)
+    const response = await axios.get(
+      `${url}/products/${param.id}?name=${filter}`,
+    );
     setProducts(response.data.products);
     setLoading(false);
   };
+
+  const fetchTags = async () => {
+    const response = await axios.get(`${url}/subcategories`);
+    console.log(response.data.subcategories, "TEST")
+    setTags(response.data.subcategories);
+  };
   useEffect(() => {
     fetchData();
+    fetchTags();
   }, [filter, param.id]);
   return (
     <div className="min-h-screen relative z-10">
@@ -86,33 +95,35 @@ const ProductListPage = () => {
           <div className="flex flex-col gap-2">
             <label htmlFor="">Tags:</label>
             <div className="flex gap-2">
-              {mock_tags.map((tag, index) => {
+              {
+              tags?.map((tag, index) => {
                 return (
-                  <p
+                  <button
                     key={index}
                     className="border border-gpurple-2/40 px-2 py-1 rounded-xl bg-gpink-3/30"
                   >
-                    {tag}
-                  </p>
+                    {tag.subcategory_name}
+                  </button>
                 );
-              })}
+              })
+              }
             </div>
           </div>
         </div>
       </aside>
       <div className="w-9/12 py-14 mx-auto">
         <div className="grid grid-cols-3 gap-20">
-          {!loading ?
+          {!loading ? (
             products?.map((product, index) => {
               return (
                 <div key={index}>
-                  <ProductCard
-                    product={product}
-                    img={img_product1}
-                  />
+                  <ProductCard product={product} img={product.image_url} />
                 </div>
               );
-            }): <p>Loading...</p>}
+            })
+          ) : (
+            <p>Loading...</p>
+          )}
         </div>
       </div>
     </div>

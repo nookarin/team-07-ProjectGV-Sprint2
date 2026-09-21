@@ -31,6 +31,32 @@ const router = createBrowserRouter([
       { index: true, element: <Homepage /> },
       { path: "register", element: <Register /> },
       { path: "login", element: <Login /> },
+      // { path: "edit-profile", element: <PersonalInfo /> },
+      // { path: "edit-profile/addresses", element: <Addresses /> },
+      // { path: "my-purchases", element: <MyPurchase /> },
+      // { path: "my-purchases/order-status", element: <OrderStatus /> },
+      // { path: "my-purchases/:orderId", element: <OrderStatus /> },
+      // { path: "order-status", element: <OrderStatus /> },
+      // { path: "my-reviews", element: <MyReviews /> },
+      // { path: "my-cancellations", element: <MyCancellations /> },
+      { path: "cart", element: <CartPage /> },
+      { path: "products/:category_id/:product_id", element: <ProductPage /> }, // products/:category_id/:product_id
+      { path: "products", element: <AllProductPage /> },
+      { path: "products/:id", element: <ProductListPage /> },
+      { path: "/sale", element: <SalePage /> },
+      { path: "*", element: <Homepage /> },
+    ],
+  },
+]);
+
+const routerAuthen = createBrowserRouter([
+  {
+    path: "/",
+    element: <Layout />,
+    children: [
+      { index: true, element: <Homepage /> },
+      { path: "register", element: <Register /> },
+      { path: "login", element: <Login /> },
       { path: "edit-profile", element: <PersonalInfo /> },
       { path: "edit-profile/addresses", element: <Addresses /> },
       { path: "my-purchases", element: <MyPurchase /> },
@@ -40,7 +66,7 @@ const router = createBrowserRouter([
       { path: "my-reviews", element: <MyReviews /> },
       { path: "my-cancellations", element: <MyCancellations /> },
       { path: "cart", element: <CartPage /> },
-      // { path: "product", element: <ProductPage /> }, // products/:category_id/:product_id
+      { path: "products/:category_id/:product_id", element: <ProductPage /> }, // products/:category_id/:product_id
       { path: "products", element: <AllProductPage /> },
       { path: "products/:id", element: <ProductListPage /> },
       { path: "/sale", element: <SalePage /> },
@@ -69,6 +95,8 @@ function App() {
     <>
       {user?.role === "admin" ? (
         <RouterProvider router={routerAdmin} />
+      ) : user?.role === "user" ? (
+        <RouterProvider router={routerAuthen} />
       ) : (
         <RouterProvider router={router} />
       )}

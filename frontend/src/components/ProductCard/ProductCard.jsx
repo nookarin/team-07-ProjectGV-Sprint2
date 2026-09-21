@@ -7,7 +7,7 @@ import img_default from "/images/headset.jpg";
 
 const ProductCard = ({ img, product }) => {
   return (
-    <div className="relative border bg-gbg-1/95 border-gpurple-2 text-center rounded-2xl shadow-lg shadow-purple-900/50 text-white">
+    <div className="relative border bg-gbg-1/60 backdrop-blur-2xl border-gpurple-2 text-center rounded-2xl shadow-lg shadow-purple-900/50 text-white">
       <Badge
         variant="outline"
         className={"border-gpurple-2 absolute left-5 top-2 bg-gpurple-4/55"}
@@ -15,7 +15,7 @@ const ProductCard = ({ img, product }) => {
         {product.category_id.category_name}
       </Badge>
       <Link to={'/product'}>
-        <img className="rounded-t-2xl w-full h-100 object-cover" src={img ? img : img_default} alt="" />
+        <img className="rounded-t-2xl w-full h-100 object-cover border-b border-gbase-1" src={img ? img : img_default} alt="" />
       </Link>
       <div className="w-[80%] h-30 mx-auto my-4 text-white">
         <h3 className="font-bold text-xl">{product.product_name}</h3>
