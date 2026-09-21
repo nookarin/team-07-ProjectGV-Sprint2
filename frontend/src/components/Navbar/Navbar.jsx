@@ -42,8 +42,8 @@ import { useAuth } from "@/contexts/Authentication/AuthContext";
 const category = ["keyboard", "mouse", "headset", "accessory"];
 
 const Navbar = () => {
-  const [click, setClick] = useState(false)
-  const { loading, user } = useAuth();
+  const [click, setClick] = useState(false);
+  const { user } = useAuth();
   return (
     <nav className="bg-gbg-2 w-full h-16 flex items-center justify-between px-10 text-white relative z-20 shadow-xl shadow-gpurple-4/80">
       <Link to={"/"} className="flex items-center gap-4 w-1/3">
@@ -64,9 +64,10 @@ const Navbar = () => {
           <NavigationMenuItem>
             <NavigationMenuTrigger>COLLECTIONS</NavigationMenuTrigger>
             <NavigationMenuContent className={"text-white w-56"}>
-              {category.map((item) => {
+              {category.map((item, index) => {
                 return (
                   <NavigationMenuLink
+                    key={index}
                     render={
                       <Link className="capitalize" to={`products/${item}`} />
                     }
@@ -83,7 +84,9 @@ const Navbar = () => {
           </NavigationMenuItem>
           <NavigationMenuItem>
             <NavigationMenuLink
-              className={"border border-pink-300 text-pink-300 h-8 ml-4 rounded-lg"}
+              className={
+                "border border-pink-300 text-pink-300 h-8 ml-4 rounded-lg"
+              }
               render={<Link to={"/sale"} />}
             >
               SALE
@@ -94,7 +97,11 @@ const Navbar = () => {
 
       {/* SEC3 */}
       <div className="w-1/3 flex justify-end">
-        {user ? <NavbarAuthenticate setClick={setClick} click={click} /> : <NavbarUnauthen />}
+        {user ? (
+          <NavbarAuthenticate setClick={setClick} click={click} />
+        ) : (
+          <NavbarUnauthen />
+        )}
       </div>
     </nav>
   );

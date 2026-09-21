@@ -28,10 +28,10 @@ const ProductListPage = () => {
   });
   const fetchData = async () => {
     setLoading(true);
-    const response = await axios.get(`${url}/products/${param.id}/name=${filter}`);
+    const response = await axios.get(`${url}/products/${param.id}?name=${filter}`);
     console.log(response)
-    // setProducts(response.data.products);
-    // setLoading(false);
+    setProducts(response.data.products);
+    setLoading(false);
   };
   useEffect(() => {
     console.log(param);
@@ -103,18 +103,17 @@ const ProductListPage = () => {
       </aside>
       <div className="w-9/12 py-14 mx-auto">
         <div className="grid grid-cols-3 gap-20">
-          {!loading &&
-            products.map((product, index) => {
+          {!loading ?
+            products?.map((product, index) => {
               return (
-                <>
+                <div key={index}>
                   <ProductCard
                     product={product}
                     img={img_product1}
-                    key={index}
                   />
-                </>
+                </div>
               );
-            })}
+            }): <p>Loading...</p>}
         </div>
       </div>
     </div>

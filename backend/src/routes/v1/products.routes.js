@@ -16,9 +16,9 @@ const uploadImages = multer({
 productRouter.get("/:category", async (req, res, next) => {
   try {
     const { category } = req.params;
-    const { name } = req.query
+    const { name } = req.query;
     const filter = {};
-
+    console.log(name);
     if (category) {
       const categoryData = await Category.findOne({
         category_name: category,
@@ -30,16 +30,15 @@ productRouter.get("/:category", async (req, res, next) => {
           message: "Category not found!",
         });
       }
-      console.log(categoryData)
       // แปลงจาก category name ที่ใช้ query เป็น id เนื่องจากตอนส่ง req body มีแค่ category_id
       // ไม่ใช้ populate เพราะ product ที่ไม่ได้ query จะถูกส่งมาด้วย แต่ category จะเป็น null ในขณะที่ product ที่ query มาจะมีชื่อ category มาด้วยไม่เป็นค่า null
       filter.category_id = categoryData._id;
+      filter.product_name = { $regex: name, $options: "i" };
     }
 
     const products = await Product.find(filter).populate(
       "category_id subcategory_ids",
     );
-
     if (products.length === 0) {
       return res.status(200).json({
         success: false,
@@ -56,7 +55,6 @@ productRouter.get("/:category", async (req, res, next) => {
     next(error);
   }
 });
-
 
 // GET product by id
 productRouter.get("/:category", async (req, res, next) => {
