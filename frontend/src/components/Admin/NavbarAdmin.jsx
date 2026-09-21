@@ -19,8 +19,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/Authentication/AuthContext";
+import { useEffect } from "react";
 const NavbarAdmin = () => {
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   return (
     <nav className="flex items-center justify-between border px-6 py-4 relative shadow-xl shadow-gpurple-5/20 z-50 backdrop-blur-2xl">
       <div className="flex items-center w-1/3">
@@ -86,7 +87,7 @@ const NavbarAdmin = () => {
               <AvatarFallback>Name</AvatarFallback>
             </Avatar>{" "}
             <div className="text-start ml-3">
-              <h4 className="font-bold">Kim Winter</h4>
+              <h4 className="font-bold capitalize">{user.username}</h4>
               <p className="text-xs text-[#8B8AA3]">Store Admin</p>
             </div>
           </DropdownMenuTrigger>

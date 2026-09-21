@@ -5,16 +5,7 @@ import { useParams } from "react-router-dom";
 import { DollarSign } from "lucide-react";
 import axios from "axios";
 import { useAuth } from "@/contexts/Authentication/AuthContext";
-
-const mock_tags = [
-  "wireless",
-  "wired",
-  "rgb",
-  "pink",
-  "blue",
-  "orange",
-  "collaboration",
-];
+import { Ring } from "#components/ring";
 
 const ProductListPage = () => {
   const param = useParams();
@@ -38,7 +29,6 @@ const ProductListPage = () => {
 
   const fetchTags = async () => {
     const response = await axios.get(`${url}/subcategories`);
-    console.log(response.data.subcategories, "TEST")
     setTags(response.data.subcategories);
   };
   useEffect(() => {
@@ -95,7 +85,7 @@ const ProductListPage = () => {
           <div className="flex flex-col gap-2">
             <label htmlFor="">Tags:</label>
             <div className="flex gap-2">
-              {
+              { !loading ?
               tags?.map((tag, index) => {
                 return (
                   <button
@@ -106,7 +96,7 @@ const ProductListPage = () => {
                   </button>
                 );
               })
-              }
+              : <p>Loading..</p>}
             </div>
           </div>
         </div>
@@ -122,7 +112,7 @@ const ProductListPage = () => {
               );
             })
           ) : (
-            <p>Loading...</p>
+            <Ring className={'size-20'} />
           )}
         </div>
       </div>
