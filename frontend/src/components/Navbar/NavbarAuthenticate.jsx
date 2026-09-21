@@ -76,7 +76,7 @@ const NavbarAuthenticate = ({ setClick, click }) => {
               <hr className="w-full my-2 border-[#ffffff1f]" />
               {/* // add logout link under here */}
               <NavigationMenuLink
-                className={"text-white gap-4 hover:bg-gbase-3"}
+                className={"text-white gap-4 hover:bg-gbase-3 cursor-pointer"}
                 onClick={handleLogout}
               >
                 <LogOut color="#6B6B8D" />

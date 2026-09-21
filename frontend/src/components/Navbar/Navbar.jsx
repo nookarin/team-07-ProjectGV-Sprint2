@@ -55,7 +55,7 @@ const Navbar = () => {
         <NavigationMenuList>
           <NavigationMenuItem>
             <NavigationMenuLink
-              render={<Link to={"/product"} />}
+              render={<Link to={"/products"} />}
               className={`active:text-gcyan-light`}
             >
               SHOP

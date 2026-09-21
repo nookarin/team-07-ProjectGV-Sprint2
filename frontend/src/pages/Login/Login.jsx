@@ -5,9 +5,10 @@ import { IoEnter, IoGameControllerOutline } from "react-icons/io5";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/Authentication/AuthContext";
+import { toast } from "sonner";
 
 export default function Login() {
-  const { login } = useAuth();
+  const { login, err, user } = useAuth();
   const navigate = useNavigate();
   const [data, setData] = useState({
     email: "",
@@ -21,8 +22,19 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    login(data);
-    navigate("/");
+    const response = await login(data);
+    if (response) {
+      toast.success("Login successful.", {
+        richColors: true,
+        duration: 5000,
+      });
+      navigate('/')
+    } else {
+      toast.error("Login failed", {
+        richColors: true,
+        duration: 5000,
+      });
+    }
   };
   return (
     <div
@@ -37,6 +49,7 @@ export default function Login() {
           WELCOME
         </div>
         <div className="text-[#22D3EE]">Customer Login</div>
+
         <form
           onSubmit={handleSubmit}
           className="flex flex-col gap-8 w-full p-4"
@@ -101,6 +114,7 @@ export default function Login() {
               </button>
             </div>
           </div>
+
           <button
             className="px-4 py-2 text-white bg-gradient-to-r from-[#ec4899] via-[#a855f7] to-[#06b6d4] rounded-md cursor-pointer"
             type="submit"
@@ -111,6 +125,11 @@ export default function Login() {
             </div>
           </button>
         </form>
+        {err && (
+          <div className="w-full text-center text-red-400 text-sm bg-red-500/10 border border-red-500/30 rounded-md py-2 px-4">
+            {err}
+          </div>
+        )}
         <div className="border-t-2 border-gray-500 w-full pt-8 flex justify-center items-center">
           <span className="text-white">
             Don't have an account?{" "}

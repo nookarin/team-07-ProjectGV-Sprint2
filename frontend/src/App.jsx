@@ -21,6 +21,7 @@ import { TruckElectric } from "lucide-react";
 import PromotionPage from "./pages/Admin/PromotionPage";
 import { useAuth } from "./contexts/Authentication/AuthContext";
 import { useEffect } from "react";
+import AllProductPage from "./pages/ProductPage/AllProductPage";
 
 const router = createBrowserRouter([
   {
@@ -39,7 +40,8 @@ const router = createBrowserRouter([
       { path: "my-reviews", element: <MyReviews /> },
       { path: "my-cancellations", element: <MyCancellations /> },
       { path: "cart", element: <CartPage /> },
-      { path: "product", element: <ProductPage /> }, // products/:category_id/:product_id
+      // { path: "product", element: <ProductPage /> }, // products/:category_id/:product_id
+      { path: "products", element: <AllProductPage /> },
       { path: "products/:id", element: <ProductListPage /> },
       { path: "/sale", element: <SalePage /> },
       { path: "*", element: <Homepage /> },
