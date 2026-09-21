@@ -46,7 +46,7 @@ const NavbarAdmin = () => {
           }
         >
           <LayoutDashboard className="size-4" />
-          Dashboard
+          Product
         </NavLink>
         <NavLink
           to={"/users"}

@@ -1,0 +1,27 @@
+@baseUrl=http://localhost:3001/api/v1/chatbot
+
+### POST chatbot (single message)
+POST {{baseUrl}}
+Content-Type: application/json
+
+{
+    "message": "Hi, what gaming keyboards do you sell?"
+}
+
+### POST chatbot (with history)
+POST {{baseUrl}}
+Content-Type: application/json
+
+{
+    "message": "Which one is best for competitive gaming?",
+    "history": [
+        {
+            "role": "user",
+            "parts": [{ "text": "Hi, what gaming keyboards do you sell?" }]
+        },
+        {
+            "role": "model",
+            "parts": [{ "text": "We sell mechanical gaming keyboards in a range of switch types and colors!" }]
+        }
+    ]
+}

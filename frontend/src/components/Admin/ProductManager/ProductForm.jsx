@@ -52,6 +52,7 @@ export default function ProductForm({
   const [submitError, setSubmitError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [serverCategories, setServerCategories] = useState([]);
+  const [suggestedTags, setSuggestedTags] = useState([]);
   const [files, setFiles] = useState([]);
   const { url } = useAuth();
 
@@ -75,6 +76,62 @@ export default function ProductForm({
       cancelled = true;
     };
   }, [url]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadSuggestedTags() {
+      const selected = serverCategories.find(
+        (current) => current.category_name === form.category,
+      );
+      if (!selected) {
+        if (!cancelled) setSuggestedTags([]);
+        return;
+      }
+
+      try {
+        const res = await fetch(
+          `${url}/subcategories?category_id=${selected._id}`,
+        );
+        const result = await readJson(res);
+        if (res.ok && Array.isArray(result.subcategories)) {
+          if (!cancelled)
+            setSuggestedTags(
+              result.subcategories.map((sub) => sub.subcategory_name),
+            );
+        } else if (!cancelled) {
+          setSuggestedTags([]);
+        }
+      } catch {
+        if (!cancelled) setSuggestedTags([]);
+      }
+    }
+
+    loadSuggestedTags();
+    return () => {
+      cancelled = true;
+    };
+  }, [url, form.category, serverCategories]);
+
+  function toggleSuggestedTag(tag) {
+    const current = form.tags
+      ? form.tags
+          .split(",")
+          .map((item) => item.trim())
+          .filter(Boolean)
+      : [];
+
+    const isPresent = current.some(
+      (item) => item.toLowerCase() === tag.toLowerCase(),
+    );
+    const next = isPresent
+      ? current.filter((item) => item.toLowerCase() !== tag.toLowerCase())
+      : [...current, tag];
+
+    setForm((currentForm) => ({ ...currentForm, tags: next.join(", ") }));
+    setSubmitError("");
+    setSuccessMessage("");
+  }
 
   function updateField(event) {
     const { name, value } = event.target;
@@ -366,7 +423,7 @@ export default function ProductForm({
         <div>
           <label htmlFor="quantity" className="flex items-center gap-2 text-sm font-semibold text-slate-200">
             <PackagePlus className="size-4 text-violet-300" />
-            Quantity
+            Stock
           </label>
           <input
             id="quantity"
@@ -442,6 +499,38 @@ export default function ProductForm({
             aria-describedby={errors.tags ? "tags-error" : undefined}
           />
           <p className="mt-1.5 text-xs text-slate-500">Separate tags with commas (,)</p>
+          {suggestedTags.length > 0 && (
+            <div className="mt-3">
+              <p className="text-xs font-semibold text-slate-400">
+                Suggested tags for this category
+              </p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {suggestedTags.map((tag) => {
+                  const active = form.tags
+                    .split(",")
+                    .map((item) => item.trim().toLowerCase())
+                    .includes(tag.toLowerCase());
+
+                  return (
+                    <button
+                      key={tag}
+                      type="button"
+                      onClick={() => toggleSuggestedTag(tag)}
+                      aria-pressed={active}
+                      className={`rounded-full border px-3 py-1 text-xs font-semibold transition ${
+                        active
+                          ? "border-violet-400 bg-violet-500/20 text-violet-200"
+                          : "border-white/10 bg-[#090813] text-slate-300 hover:border-violet-400/40"
+                      }`}
+                    >
+                      {active ? "✓ " : "+ "}
+                      {tag}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
           <FieldError id="tags-error" message={errors.tags} />
         </div>
 
