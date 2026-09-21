@@ -11,7 +11,6 @@ import CategoryCard from "#components/Homepage/CategoryCard";
 // import fluidCursor from "../../contexts/use-FluidCursor";
 import BannerCarousel from "#components/Homepage/BannerCarousel";
 import HeaderSection from "#components/Homepage/HeaderSection";
-import BotpressChat from "#components/Botpress/BotpressChat";
 
 const category = [
   { name: "headphone", img: img_cate1 },
@@ -45,15 +44,9 @@ const mock_item = [
 ];
 
 const Homepage = () => {
-  // useEffect(() => {
-  //   fluidCursor();
-  // }, []);
   return (
     
     <div className="relative z-10">
-
-      {/* เรียกใช้งานแชทบอท */}
-      <BotpressChat />
       
       <BannerCarousel />
       <div className="w-3/4 mx-auto my-10">
