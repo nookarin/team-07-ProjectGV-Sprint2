@@ -14,9 +14,7 @@ const Layout = () => {
   const destroy = fluidCursor();
   return destroy;
 }, []); // responsive fluidCursor, if not pic = no fluidCursor
-  // useEffect(() => {
-  //   fluidCursor();
-  // }, []);
+
   return (
     <>
       <Navbar />
