@@ -52,7 +52,9 @@ export default function ProductForm({
   const [submitError, setSubmitError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [serverCategories, setServerCategories] = useState([]);
-  const [suggestedTags, setSuggestedTags] = useState([]);
+  // Keep the full subcategory docs (name + _id) so tag names can be
+  // resolved back to subcategory_ids when the form is submitted.
+  const [suggestedSubcategories, setSuggestedSubcategories] = useState([]);
   const [files, setFiles] = useState([]);
   const { url } = useAuth();
 
@@ -85,7 +87,7 @@ export default function ProductForm({
         (current) => current.category_name === form.category,
       );
       if (!selected) {
-        if (!cancelled) setSuggestedTags([]);
+        if (!cancelled) setSuggestedSubcategories([]);
         return;
       }
 
@@ -95,15 +97,12 @@ export default function ProductForm({
         );
         const result = await readJson(res);
         if (res.ok && Array.isArray(result.subcategories)) {
-          if (!cancelled)
-            setSuggestedTags(
-              result.subcategories.map((sub) => sub.subcategory_name),
-            );
+          if (!cancelled) setSuggestedSubcategories(result.subcategories);
         } else if (!cancelled) {
-          setSuggestedTags([]);
+          setSuggestedSubcategories([]);
         }
       } catch {
-        if (!cancelled) setSuggestedTags([]);
+        if (!cancelled) setSuggestedSubcategories([]);
       }
     }
 
@@ -211,6 +210,20 @@ export default function ProductForm({
       return;
     }
 
+    // Resolve each tag name to its subcategory _id so the backend can store
+    // tags as subcategory_ids. Names without a matching subcategory are dropped.
+    const subcategoryIds = values.tags
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean)
+      .map((name) => {
+        const match = suggestedSubcategories.find(
+          (sub) => sub.subcategory_name.toLowerCase() === name.toLowerCase(),
+        );
+        return match ? match._id : undefined;
+      })
+      .filter(Boolean);
+
     setIsSubmitting(true);
     setSubmitError("");
     try {
@@ -219,7 +232,7 @@ export default function ProductForm({
         {
           method: isEdit ? "PUT" : "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(toPayload(values, category._id)),
+          body: JSON.stringify(toPayload(values, category._id, subcategoryIds)),
         },
       );
       const result = await readJson(res);
@@ -499,13 +512,14 @@ export default function ProductForm({
             aria-describedby={errors.tags ? "tags-error" : undefined}
           />
           <p className="mt-1.5 text-xs text-slate-500">Separate tags with commas (,)</p>
-          {suggestedTags.length > 0 && (
+          {suggestedSubcategories.length > 0 && (
             <div className="mt-3">
               <p className="text-xs font-semibold text-slate-400">
                 Suggested tags for this category
               </p>
               <div className="mt-2 flex flex-wrap gap-2">
-                {suggestedTags.map((tag) => {
+                {suggestedSubcategories.map((sub) => {
+                  const tag = sub.subcategory_name;
                   const active = form.tags
                     .split(",")
                     .map((item) => item.trim().toLowerCase())
@@ -513,7 +527,7 @@ export default function ProductForm({
 
                   return (
                     <button
-                      key={tag}
+                      key={sub._id ?? tag}
                       type="button"
                       onClick={() => toggleSuggestedTag(tag)}
                       aria-pressed={active}

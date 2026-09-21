@@ -155,10 +155,16 @@ productRouter.post("/", async (req, res, next) => {
       image_url,
     });
 
+    // Return the product with subcategory_ids populated so the created doc can
+    // be mapped straight back to tag names by the frontend's fromDoc.
+    const populatedProduct = await Product.findById(product._id).populate(
+      "category_id subcategory_ids",
+    );
+
     return res.status(201).json({
       success: true,
       message: "Created Product successfully!",
-      product,
+      product: populatedProduct,
     });
   } catch (error) {
     next(error);
@@ -205,11 +211,16 @@ productRouter.post("/:id/images", uploadImages, async (req, res, next) => {
     product.image_url = uploadedUrls[0];
     await product.save();
 
+    // Return with subcategory_ids populated (this doc also gets mapped by fromDoc).
+    const populatedProduct = await Product.findById(product._id).populate(
+      "category_id subcategory_ids",
+    );
+
     return res.status(200).json({
       success: true,
       message: "Images uploaded successfully!",
       images: product.images,
-      product,
+      product: populatedProduct,
     });
   } catch (error) {
     next(error);
@@ -219,6 +230,24 @@ productRouter.post("/:id/images", uploadImages, async (req, res, next) => {
 // PUT /:id - Update product within system (Admin)
 productRouter.put("/:id", async (req, res, next) => {
   try {
+    const { subcategory_ids } = req.body;
+
+    // Keep the same guarantee as POST: every subcategory must actually
+    // belong to the product's category (tags = subcategories).
+    if (subcategory_ids) {
+      const subcategories = await Subcategory.find({
+        _id: { $in: subcategory_ids },
+        category_ids: req.body.category_id,
+      });
+
+      if (subcategories.length !== subcategory_ids.length) {
+        return res.status(400).json({
+          success: false,
+          message: "Some subcategories do not belong to this category!",
+        });
+      }
+    }
+
     const product = await Product.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true,
@@ -228,7 +257,13 @@ productRouter.put("/:id", async (req, res, next) => {
         .status(404)
         .json({ success: false, message: "Product not found" });
     }
-    return res.status(200).json({ success: true, data: product });
+
+    // Return with subcategory_ids populated so tag names come back too.
+    const populatedProduct = await Product.findById(product._id).populate(
+      "category_id subcategory_ids",
+    );
+
+    return res.status(200).json({ success: true, data: populatedProduct });
   } catch (error) {
     next(error);
   }
