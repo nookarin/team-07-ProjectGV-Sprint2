@@ -56,23 +56,6 @@ productRouter.get("/:category", async (req, res, next) => {
   }
 });
 
-// GET product by id
-productRouter.get("/:category", async (req, res, next) => {
-  try {
-    const product = await Product.findById(req.params.id).populate(
-      "category_id subcategory_ids",
-    );
-    if (!product) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Product not found!" });
-    }
-    return res.status(200).json({ success: true, product });
-  } catch (error) {
-    next(error);
-  }
-});
-
 productRouter.get("/", async (req, res, next) => {
   try {
     const { category } = req.query;
