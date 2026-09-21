@@ -19,21 +19,6 @@ userRouter.get("/", async (req, res, next) => {
   }
 });
 
-// get user by id
-// userRouter.get("/:userId", async (req, res, next) => {
-//   try {
-//     const userData = await User.findById(req.params.userId);
-//     if (!userData) {
-//       return res
-//         .status(404)
-//         .json({ success: false, message: "User not found!" });
-//     }
-//     return res.status(200).json({ success: true, userData });
-//   } catch (error) {
-//     next(error);
-//   }
-// });
-
 //register user
 userRouter.post("/register", async (req, res, next) => {
   try {
@@ -220,6 +205,23 @@ userRouter.get("/me", protect, async (req, res, next) => {
       },
     });
   } catch (error) {
+    next(error);
+  }
+});
+
+userRouter.get("/:userId", protect, async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user.user._id);
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found.",
+      });
+    }
+    return res.json({
+      data: user,
+    });
+  } catch (error) {
+    console.log(error);
     next(error);
   }
 });
