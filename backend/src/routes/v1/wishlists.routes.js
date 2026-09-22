@@ -40,6 +40,15 @@ wishlistRouter.post("/", async (req, res, next) => {
       .status(201)
       .json({ success: true, message: "Created wishlist successfully" });
   } catch (error) {
+    // E11000 is Mongo's duplicate key error. It normally comes from the stale
+    // `user_id` unique index (see dropStaleWishlistIndexes in index.js); surface
+    // a readable message to the client instead of a raw server crash.
+    if (error.code === 11000) {
+      return res.status(409).json({
+        success: false,
+        message: "This product is already in the wishlist or the stale index is blocking the write.",
+      });
+    }
     next(error);
   }
 });
