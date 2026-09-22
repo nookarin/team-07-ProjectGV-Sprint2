@@ -10,6 +10,7 @@ import MyPurchase from "./pages/User/02MyPurchase/MyPurchase";
 import OrderStatus from "./pages/User/02MyPurchase/OrderStatus";
 import MyReviews from "./pages/User/03MyReviews/MyReviews";
 import MyCancellations from "./pages/User/04MyCancellations/MyCancellations";
+import MyWishlist from "./pages/User/05MyWishlist/MyWishlist";
 import ProductListPage from "./pages/ProductPage/ProductListPage";
 import LayoutAdmin from "#components/Admin/LayoutAdmin";
 import AdminDashboard from "#components/Admin/AdminDashboard";
@@ -57,6 +58,7 @@ const routerAuthen = createBrowserRouter([
       { path: "order-status", element: <OrderStatus /> },
       { path: "my-reviews", element: <MyReviews /> },
       { path: "my-cancellations", element: <MyCancellations /> },
+      { path: "wishlists", element: <MyWishlist /> },
       { path: "cart", element: <CartPage /> },
       { path: "products/:category_id/:product_id", element: <ProductPage /> },
       { path: "products", element: <AllProductPage /> },
