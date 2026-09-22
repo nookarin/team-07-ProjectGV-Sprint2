@@ -11,20 +11,21 @@ import { PiLockKeyBold } from "react-icons/pi";
 import { data, Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "@/contexts/Authentication/AuthContext";
+import { toast } from "sonner";
 
 export default function Register() {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [Password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const { url } = useAuth();
   const [data, setData] = useState({
     firstname: "",
     lastname: "",
     email: "",
     password: "",
+    confirmpassword: "",
   });
+
   const register = async (data) => {
     const response = await axios.post(`${url}/users/register`, data);
     if (response.data.success) {
@@ -34,7 +35,27 @@ export default function Register() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    register(data);
+    console.log(e);
+    if (data.confirmpassword !== data.password) {
+      toast.error("Passwords do not match!", {
+        position: "top-center",
+        style: {
+          background: "#12121A",
+          color: "#fb2c36",
+          border: "1px solid #fb2c36",
+          borderRadius: "10px",
+        },
+      });
+    }
+
+    const submitData = {
+      firstname: data.firstname,
+      lastname: data.lastname,
+      email: data.email,
+      password: data.password,
+    };
+
+    register(submitData);
   };
 
   const onChangeHandler = (e) => {
@@ -175,12 +196,14 @@ export default function Register() {
                 id="confirm-password"
                 type={showConfirmPassword ? "text" : "password"}
                 oninput="this.value = this.value.replace(/\s+/g, '');"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
+                value={data.confirmpassword}
+                onChange={onChangeHandler}
+                name="confirmpassword"
                 minlength="6"
                 maxlength="20"
                 required
               ></input>
+
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword((prev) => !prev)}
@@ -192,8 +215,15 @@ export default function Register() {
                   <LuEye className="w-5 h-5 cursor-pointer" />
                 )}
               </button>
+              {data.confirmpassword &&
+                data.password !== data.confirmpassword && (
+                  <p className="absolute left-0 top-full mt-1 text-xs text-red-500">
+                    Passwords do not match!
+                  </p>
+                )}
             </div>
           </div>
+
           <label className="flex items-center gap-2 text-white">
             <input type="checkbox" className="mr-2 cursor-pointer" required />
             <span>
