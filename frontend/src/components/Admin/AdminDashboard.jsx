@@ -64,6 +64,7 @@ export default function AdminDashboard() {
     try {
       const res = await fetch(`${API_URL}/products/${product.id}`, {
         method: "DELETE",
+        credentials: "include",
       });
       const result = await readJson(res);
       if (!res.ok)

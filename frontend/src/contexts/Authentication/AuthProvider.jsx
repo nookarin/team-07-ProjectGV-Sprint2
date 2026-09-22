@@ -6,7 +6,7 @@ import LoadingScreen from "@/components/LoadingScreen";
 // Full-screen loader rendered while a page is only rendered after auth check/login completes.
 
 export function AuthProvider({ children }) {
-  const url = import.meta.env.VITE_API_URL
+  const url = import.meta.env.VITE_API_URL || "http://localhost:3000/api/v1";
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState(null);

@@ -3,13 +3,14 @@ import bcrypt from "bcrypt";
 import { User } from "../../models/user.model.js";
 import jwt from "jsonwebtoken";
 import { protect } from "../../middlewares/protect.js";
+import { authorize } from "../../middlewares/authorize.js";
 
 export const userRouter = Router();
 
-//get all users
-userRouter.get("/", async (req, res, next) => {
+//get all users (admin only)
+userRouter.get("/", protect, authorize(["admin"]), async (req, res, next) => {
   try {
-    const data = await User.find();
+    const data = await User.find().select("-password");
     if (data.length === 0) {
       return res.status(400).json({ message: "User's data is empty!" });
     }
@@ -50,9 +51,20 @@ userRouter.post("/register", async (req, res, next) => {
   }
 });
 
-//update user's data
-userRouter.patch("/:userId", async (req, res, next) => {
+//update user's data (owner or admin only; role can only be changed by admin)
+userRouter.patch("/:userId", protect, async (req, res, next) => {
   try {
+    const currentUser = req.user.user;
+    const isAdmin = currentUser.role === "admin";
+    const isSelf = currentUser._id.toString() === req.params.userId;
+
+    if (!isSelf && !isAdmin) {
+      return res.status(403).json({
+        success: false,
+        message: "Forbidden: you can only update your own account.",
+      });
+    }
+
     const {
       username,
       email,
@@ -66,11 +78,14 @@ userRouter.patch("/:userId", async (req, res, next) => {
     const updateFields = {};
     if (username) updateFields.username = username;
     if (email) updateFields.email = email;
-    if (password) updateFields.password = password;
+    if (password) {
+      const salt = await bcrypt.genSalt(12);
+      updateFields.password = await bcrypt.hash(password, salt);
+    }
     if (firstname) updateFields.firstname = firstname;
     if (lastname) updateFields.lastname = lastname;
     if (phoneNumber) updateFields.phoneNumber = phoneNumber;
-    if (role) updateFields.role = role;
+    if (role && isAdmin) updateFields.role = role;
     if (Object.keys(updateFields).length === 0) {
       return res.status(400).json({
         success: false,
@@ -82,7 +97,7 @@ userRouter.patch("/:userId", async (req, res, next) => {
       req.params.userId,
       updateFields,
       { new: true, runValidators: true },
-    );
+    ).select("-password");
 
     if (!updatedUser) {
       return res
@@ -100,9 +115,20 @@ userRouter.patch("/:userId", async (req, res, next) => {
   }
 });
 
-// add address
-userRouter.patch("/:userId/address", async (req, res, next) => {
+// add address (owner or admin only)
+userRouter.patch("/:userId/address", protect, async (req, res, next) => {
   try {
+    const currentUser = req.user.user;
+    const isAdmin = currentUser.role === "admin";
+    const isSelf = currentUser._id.toString() === req.params.userId;
+
+    if (!isSelf && !isAdmin) {
+      return res.status(403).json({
+        success: false,
+        message: "Forbidden: you can only manage your own address.",
+      });
+    }
+
     const { address } = req.body;
 
     const userData = await User.findOne({ _id: req.params.userId });
@@ -153,20 +179,41 @@ userRouter.patch("/:userId/address", async (req, res, next) => {
   }
 });
 
-// delete address
-userRouter.delete("/:userId/address/:addressId", async (req, res, next) => {
+// delete address (owner or admin only)
+userRouter.delete("/:userId/address/:addressId", protect, async (req, res, next) => {
   try {
-    const deletedAddress = await User.findByIdAndDelete(req.params.addressId);
-    if (!deletedAddress) {
-      return res.status(400).json({ success: false, message: "" });
+    const currentUser = req.user.user;
+    const isAdmin = currentUser.role === "admin";
+    const isSelf = currentUser._id.toString() === req.params.userId;
+
+    if (!isSelf && !isAdmin) {
+      return res.status(403).json({
+        success: false,
+        message: "Forbidden: you can only manage your own address.",
+      });
     }
+
+    const updatedUser = await User.findOneAndUpdate(
+      { _id: req.params.userId },
+      { $pull: { address: { _id: req.params.addressId } } },
+      { new: true, runValidators: true },
+    );
+    if (!updatedUser) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User or address not found!" });
+    }
+    return res.status(200).json({
+      success: true,
+      message: "Deleted address successfully!",
+    });
   } catch (error) {
     next(error);
   }
 });
 
-//delete user
-userRouter.delete("/:userId", async (req, res, next) => {
+//delete user (admin only)
+userRouter.delete("/:userId", protect, authorize(["admin"]), async (req, res, next) => {
   try {
     const deletedUser = await User.findByIdAndDelete(req.params.userId);
 
@@ -211,7 +258,17 @@ userRouter.get("/me", protect, async (req, res, next) => {
 
 userRouter.get("/:userId", protect, async (req, res, next) => {
   try {
-    const user = await User.findById(req.user.user._id);
+    const currentUser = req.user.user;
+    const isAdmin = currentUser.role === "admin";
+    const isSelf = currentUser._id.toString() === req.params.userId;
+
+    if (!isSelf && !isAdmin) {
+      return res.status(403).json({
+        message: "Forbidden: you can only view your own account.",
+      });
+    }
+
+    const user = await User.findById(req.params.userId).select("-password");
     if (!user) {
       return res.status(404).json({
         message: "User not found.",
@@ -238,7 +295,6 @@ userRouter.post("/login", async (req, res, next) => {
     }
 
     const user = await User.findOne({ email }).select("+password");
-    console.log("this is", user);
 
     if (!user) {
       return res

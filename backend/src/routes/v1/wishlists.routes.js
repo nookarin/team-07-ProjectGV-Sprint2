@@ -1,9 +1,12 @@
 import { Router } from "express";
 import { Wishlist } from "../../models/wishlist.model.js";
+import { protect } from "../../middlewares/protect.js";
+import { authorize } from "../../middlewares/authorize.js";
 
 export const wishlistRouter = Router();
 
-wishlistRouter.get("/", async (req, res, next) => {
+// GET / - Fetch all wishlists (admin only)
+wishlistRouter.get("/", protect, authorize(["admin"]), async (req, res, next) => {
   try {
     const wishlist = await Wishlist.find({}).populate("user products");
     return res.status(200).json({ success: true, wishlist });
@@ -12,18 +15,17 @@ wishlistRouter.get("/", async (req, res, next) => {
   }
 });
 
-wishlistRouter.post("/", async (req, res, next) => {
+// POST / - Add a product to the current user's wishlist
+wishlistRouter.post("/", protect, async (req, res, next) => {
   try {
-    const { user, product } = req.body;
-    if (!user || !product) {
+    const { product } = req.body;
+    const user = req.user.user._id;
+    if (!product) {
       return res
         .status(400)
-        .json({ success: false, message: "User and product are required!" });
+        .json({ success: false, message: "Product is required!" });
     }
 
-    // ค้นหา Wishlist ของ user คนนี้
-    // - ถ้ามีอยู่แล้ว: $addToSet จะเพิ่ม product เข้าไปใน array 'products' (และจะไม่เพิ่มซ้ำถ้ามีอยู่แล้ว)
-    // - ถ้ายังไม่มี: upsert: true จะสร้าง document ของ Wishlist ให้ใหม่
     const wishlist = await Wishlist.findOneAndUpdate(
       { user: user },
       { $addToSet: { products: product } },
@@ -33,7 +35,7 @@ wishlistRouter.post("/", async (req, res, next) => {
     if (!wishlist) {
       return res
         .status(400)
-        .json({ success: false, message: "User and product are required!" });
+        .json({ success: false, message: "Unable to save wishlist!" });
     }
 
     return res
@@ -44,15 +46,15 @@ wishlistRouter.post("/", async (req, res, next) => {
   }
 });
 
-wishlistRouter.delete("/:id", async (req, res, next) => {
+// DELETE /:id - Remove a product from the current user's wishlist
+wishlistRouter.delete("/:id", protect, async (req, res, next) => {
   try {
-    const { user } = req.body; // หรือดึง userId จาก req.user (ถ้ามี auth middleware)
+    const user = req.user.user._id;
 
-    // ค้นหา Wishlist ของ user แล้วใช้ $pull ดึง productId นั้นออกจาก array 'products'
     const updatedWishlist = await Wishlist.findOneAndUpdate(
       { user: user },
       { $pull: { products: req.params.id } },
-      { new: true } // คืนค่า wishlist อัปเดตล่าสุดกลับมา
+      { new: true },
     );
 
     if (!updatedWishlist) {

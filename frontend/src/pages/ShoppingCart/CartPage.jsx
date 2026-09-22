@@ -39,9 +39,11 @@ import {
 
 //ฟังก์ชัน sync กับ backend (MongoDB) — tie เข้ากับ user_id
 import { fetchCart, syncCart } from "#lib/cart-api";
+import { useAuth } from "@/contexts/Authentication/AuthContext";
 
 //เปิด browser
 export default function CartPage() {
+  const { user } = useAuth();
   const [items, setItems] = useState([]);  //Cart ที่กำลังแสดงอยู่บนหน้าจอ(เดี๋ยว useEffect จะไปโหลดของจริงมา)
   const [promoInput, setPromoInput] = useState(""); //สิ่งที่ผู้ใช้กำลังพิมพ์ในช่อง Promo
   const [appliedPromo, setAppliedPromo] = useState(null); // Promo ที่ ผ่านการ Apply แล้ว
@@ -54,7 +56,7 @@ export default function CartPage() {
   const scheduleSync = (nextItems) => {
     clearTimeout(syncTimer.current);
     syncTimer.current = setTimeout(() => {
-      syncCart(nextItems);
+      syncCart(nextItems, user?._id);
     }, 500);
   };
 
@@ -72,7 +74,7 @@ export default function CartPage() {
     }
 
     //ตอนโหลดหน้า: ดึง cart จาก MongoDB มา merge — ถ้า backend มีของให้ backend ชนะ
-    fetchCart()
+    fetchCart(user?._id)
       .then((remoteItems) => {
         if (remoteItems && remoteItems.length > 0) {
           setItems(remoteItems);
@@ -85,7 +87,7 @@ export default function CartPage() {
       .catch(() => {});
 
     return () => clearTimeout(syncTimer.current);
-  }, []);
+  }, [user]);
 
   //ฟังก์ชันที่ทำงานเมื่อกด +, - (id = สินค้าตัวไหน, delta = จะเปลี่ยนจำนวนเท่าไหร่)
   const handleQuantityChange = (id, delta) => {

@@ -178,6 +178,7 @@ export default function ProductForm({
     files.forEach((item) => formData.append("images", item.file));
     const res = await fetch(`${url}/products/${productId}/images`, {
       method: "POST",
+      credentials: "include",
       body: formData,
     });
     const result = await readJson(res);
@@ -231,6 +232,7 @@ export default function ProductForm({
         isEdit ? `${url}/products/${editingProduct.id}` : `${url}/products`,
         {
           method: isEdit ? "PUT" : "POST",
+          credentials: "include",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(toPayload(values, category._id, subcategoryIds)),
         },

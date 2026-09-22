@@ -1,5 +1,5 @@
-const CART_API = "/api/v1/shoppingcart";
-const USER_ID_KEY = "gearverseUserId";
+const API_BASE = import.meta.env.VITE_API_URL || "/api/v1";
+const CART_API = `${API_BASE}/shoppingcart`;
 
 //แปลงจากเอกสาร MongoDB (snake_case) เป็น shape ที่ React แสดงผล (camelCase)
 function toFrontendItem(item) {
@@ -27,29 +27,18 @@ function toBackendItem(item) {
   };
 }
 
-async function resolveUserId() {
-  const saved = localStorage.getItem(USER_ID_KEY);
-  if (saved) return saved;
-
-  try {
-    const res = await fetch("/api/v1/users");
-    const result = await res.json();
-    const firstUser = (result.data ?? [])[0];
-    if (!firstUser) return null;
-
-    localStorage.setItem(USER_ID_KEY, firstUser._id);
-    return firstUser._id;
-  } catch {
-    return null;
-  }
+// เพิ่ม/แก้/ลบ cart ต้องเป็น user ที่ login จริงเท่านั้น
+// (ไม่อนุญาตให้ขโมย cart ของ user อื่น หรือใช้ id ที่ไม่ใช่ของตัวเอง)
+function resolveUserId(userId) {
+  return userId || null;
 }
 
-export async function fetchCart() {
-  const userId = await resolveUserId();
-  if (!userId) return null;
+export async function fetchCart(userId) {
+  const id = resolveUserId(userId);
+  if (!id) return null;
 
   try {
-    const res = await fetch(`${CART_API}/${userId}`);
+    const res = await fetch(`${CART_API}/${id}`, { credentials: "include" });
     const result = await res.json();
     const cart = result.data ?? null;
     if (!cart) return null;
@@ -59,13 +48,14 @@ export async function fetchCart() {
   }
 }
 
-export async function syncCart(items) {
-  const userId = await resolveUserId();
-  if (!userId) return null;
+export async function syncCart(items, userId) {
+  const id = resolveUserId(userId);
+  if (!id) return null;
 
   try {
-    const res = await fetch(`${CART_API}/${userId}`, {
+    const res = await fetch(`${CART_API}/${id}`, {
       method: "PUT",
+      credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ items: items.map(toBackendItem) }),
     });

@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import { User } from "../models/user.model.js";
 
 export const protect = async (req, res, next) => {
   const token = req.cookies.accessToken;
@@ -9,12 +10,19 @@ export const protect = async (req, res, next) => {
   }
   try {
     const decodedToken = jwt.verify(token, process.env.SECRET_KEY);
-    console.log(decodedToken);
+    const user = await User.findById(decodedToken.userId);
+    if (!user) {
+      return res.status(401).json({
+        message: "User no longer exists.",
+      });
+    }
     req.user = {
-      user: { _id: decodedToken.userId },
+      user: { _id: user._id, role: user.role },
     };
     next();
   } catch (error) {
-    next(error);
+    return res.status(401).json({
+      message: "Invalid or expired token.",
+    });
   }
 };
