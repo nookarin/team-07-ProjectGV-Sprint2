@@ -43,11 +43,9 @@ import { fetchCart, syncCart } from "#lib/cart-api";
 //เปิด browser
 export default function CartPage() {
   const [items, setItems] = useState([]);  //Cart ที่กำลังแสดงอยู่บนหน้าจอ(เดี๋ยว useEffect จะไปโหลดของจริงมา)
-  
   const [promoInput, setPromoInput] = useState(""); //สิ่งที่ผู้ใช้กำลังพิมพ์ในช่อง Promo
   const [appliedPromo, setAppliedPromo] = useState(null); // Promo ที่ ผ่านการ Apply แล้ว
   const [promoError, setPromoError] = useState(""); //ข้อความ error
-  
   const [checkoutSuccess, setCheckoutSuccess] = useState(false);
 
   const syncTimer = useRef(null);
