@@ -10,6 +10,7 @@ import { Badge } from "#components/ui/badge";
 import video_banner1 from "../../assets/video-banner/banner3.mov";
 import video_banner2 from "../../assets/video-banner/banner2.mov";
 import video_banner3 from "../../assets/video-banner/banner1.mp4";
+import { Link } from "react-router-dom";
 
 const bannerData = [
   {
@@ -29,7 +30,7 @@ const bannerData = [
             "rounded-lg mt-20 px-8 py-5 shadow-lg shadow-gpurple-2 text-gpurple-2 inset-shadow-sm inset-shadow-gpurple-1"
           }
         >
-          SHOP NOW {"⮞"}
+          <Link to="/products">SHOP NOW {"⮞"}</Link>
         </Button>
       </div>
     ),

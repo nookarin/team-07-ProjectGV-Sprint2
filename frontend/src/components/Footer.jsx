@@ -107,7 +107,7 @@ const Footer = () => {
               <Button
                 type="submit"
                 className={
-                  "rounded-lg bg-gpink-2 shadow-md shadow-gpink-2 text-white"
+                  "rounded-lg bg-gpink-2 text-white"
                 }
               >
                 SUBMIT
