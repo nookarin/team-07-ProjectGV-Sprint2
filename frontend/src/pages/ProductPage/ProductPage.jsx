@@ -179,6 +179,11 @@ const ProductPage = () => {
     });
   };
 
+  // ตัวเลือก switch มีความหมายเฉพาะสินค้าประเภท keyboard เท่านั้น
+  // สินค้าประเภทอื่น (mouse, headset, ...) จะไม่แสดงส่วนนี้
+  const isKeyboard =
+    data?.category_id?.category_name?.toLowerCase() === "keyboard";
+
   const handleAddToCart = () => {
     addToCart({
       id: `lol-gearverse-${activeSwitch.id}-${activeColor.id}`,
@@ -307,65 +312,67 @@ const ProductPage = () => {
               </div>
             </div>
 
-            {/* Switch Selector */}
-            <div className="flex flex-col gap-3 mt-1">
-              <div className="flex justify-between items-center text-[10px] font-bold tracking-[1.5px] uppercase text-[#8A8A93]">
-                <span>SELECT SWITCH TYPE</span>
-                <span className="text-[#00FFFF] lowercase">
-                  {activeSwitch.name}
-                </span>
-              </div>
-              <div className="grid grid-cols-3 gap-3">
-                {SWITCH_OPTIONS.map((option) => {
-                  const isActive = activeSwitch.id === option.id;
-                  const isPlaying = playingSwitch === option.id;
+            {/* Switch Selector — เฉพาะสินค้าประเภท keyboard */}
+            {isKeyboard && (
+              <div className="flex flex-col gap-3 mt-1">
+                <div className="flex justify-between items-center text-[10px] font-bold tracking-[1.5px] uppercase text-[#8A8A93]">
+                  <span>SELECT SWITCH TYPE</span>
+                  <span className="text-[#00FFFF] lowercase">
+                    {activeSwitch.name}
+                  </span>
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  {SWITCH_OPTIONS.map((option) => {
+                    const isActive = activeSwitch.id === option.id;
+                    const isPlaying = playingSwitch === option.id;
 
-                  return (
-                    <div
-                      key={option.id}
-                      className={`relative rounded-[12px] border overflow-hidden transition-all h-[85px] ${isActive ? "border-[#00FFFF] bg-[#181423] shadow-[0_0_8px_rgba(0,255,255,0.15)]" : "border-[#2a2a35] bg-[#0C0C12] hover:bg-[#120F1A]"}`}
-                    >
-                      {/* เลือกชนิด switch (คลิกที่การ์ด) */}
-                      <button
-                        onClick={() => handleSwitchSelect(option)}
-                        aria-pressed={isActive}
-                        className="absolute inset-0 p-3 text-left cursor-pointer flex flex-col justify-between"
+                    return (
+                      <div
+                        key={option.id}
+                        className={`relative rounded-[12px] border overflow-hidden transition-all h-[85px] ${isActive ? "border-[#00FFFF] bg-[#181423] shadow-[0_0_8px_rgba(0,255,255,0.15)]" : "border-[#2a2a35] bg-[#0C0C12] hover:bg-[#120F1A]"}`}
                       >
-                        <div
-                          className="w-2.5 h-2.5 rounded-full"
-                          style={{ backgroundColor: option.dot }}
-                        ></div>
-                        <div className="mt-auto">
+                        {/* เลือกชนิด switch (คลิกที่การ์ด) */}
+                        <button
+                          onClick={() => handleSwitchSelect(option)}
+                          aria-pressed={isActive}
+                          className="absolute inset-0 p-3 text-left cursor-pointer flex flex-col justify-between"
+                        >
                           <div
-                            className={`text-[12px] font-semibold capitalize ${isActive ? "text-white" : "text-white/80"}`}
-                          >
-                            {option.label}
+                            className="w-2.5 h-2.5 rounded-full"
+                            style={{ backgroundColor: option.dot }}
+                          ></div>
+                          <div className="mt-auto">
+                            <div
+                              className={`text-[12px] font-semibold capitalize ${isActive ? "text-white" : "text-white/80"}`}
+                            >
+                              {option.label}
+                            </div>
+                            <div className="text-[10px] text-[#8A8A93] font-mono mt-0.5">
+                              {option.weight}
+                            </div>
                           </div>
-                          <div className="text-[10px] text-[#8A8A93] font-mono mt-0.5">
-                            {option.weight}
-                          </div>
-                        </div>
-                      </button>
+                        </button>
 
-                      {/* ฟังเสียง กดซ้ำที่ปุ่มเดิมเพื่อหยุด */}
-                      <button
-                        onClick={() => togglePreview(option.id)}
-                        aria-pressed={isPlaying}
-                        aria-label={`${isPlaying ? "Stop" : "Play"} ${option.label} switch sound`}
-                        title={isPlaying ? "Stop sound" : "Play sound"}
-                        className={`absolute top-2 right-2 z-10 p-1 rounded-[6px] cursor-pointer transition-colors ${isPlaying ? "text-[#00FFFF] bg-[#00FFFF]/10" : "text-[#8A8A93] hover:text-white hover:bg-white/10"}`}
-                      >
-                        {isPlaying ? (
-                          <VolumeX className="w-3.5 h-3.5" />
-                        ) : (
-                          <Volume2 className="w-3.5 h-3.5" />
-                        )}
-                      </button>
-                    </div>
-                  );
-                })}
+                        {/* ฟังเสียง กดซ้ำที่ปุ่มเดิมเพื่อหยุด */}
+                        <button
+                          onClick={() => togglePreview(option.id)}
+                          aria-pressed={isPlaying}
+                          aria-label={`${isPlaying ? "Stop" : "Play"} ${option.label} switch sound`}
+                          title={isPlaying ? "Stop sound" : "Play sound"}
+                          className={`absolute top-2 right-2 z-10 p-1 rounded-[6px] cursor-pointer transition-colors ${isPlaying ? "text-[#00FFFF] bg-[#00FFFF]/10" : "text-[#8A8A93] hover:text-white hover:bg-white/10"}`}
+                        >
+                          {isPlaying ? (
+                            <VolumeX className="w-3.5 h-3.5" />
+                          ) : (
+                            <Volume2 className="w-3.5 h-3.5" />
+                          )}
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Colors */}
             <div className="flex flex-col gap-4 mt-1">

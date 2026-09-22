@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import nookAvatar from "../../../assets/nook.jpg";
+import userAvatar from "../../../assets/user.png";
 import AccountSidebar from "../AccountSidebar";
 import axios from "axios";
 import { useAuth } from "@/contexts/Authentication/AuthContext";
@@ -20,7 +20,7 @@ const PASSWORD_MASK = "••••••••••••••••••";
 
 export default function PersonalInfo() {
   const { url, user } = useAuth();
-  const [avatar, setAvatar] = useState(nookAvatar);
+  const [avatar, setAvatar] = useState(userAvatar);
   const [data, setData] = useState({});
   const [loading, setLoading] = useState(null);
   const [editing, setEditing] = useState(null);
@@ -28,8 +28,8 @@ export default function PersonalInfo() {
   const [saving, setSaving] = useState(false);
   const fileInput = useRef(null);
   const profileRows = [
-    { label: "username", value: data?.username },
-    { label: "email", value: data?.email },
+    { label: "username", value: data?.username, editable: true },
+    { label: "email", value: data?.email, editable: true },
     { label: "password", value: PASSWORD_MASK, editable: true, secret: true },
     { label: "firstname", value: data?.firstname, editable: true },
     { label: "lastname", value: data?.lastname, editable: true },

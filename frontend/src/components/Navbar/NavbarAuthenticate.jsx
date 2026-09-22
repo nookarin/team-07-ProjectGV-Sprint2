@@ -10,6 +10,7 @@ import {
 import {
   CircleUser,
   CircleX,
+  Heart,
   LogOut,
   Search,
   ShoppingBag,
@@ -27,7 +28,7 @@ const NavbarAuthenticate = ({ setClick, click }) => {
     navigate('/')
   }
   return (
-    <div className="w-1/5 flex justify-end">
+    <div className="flex justify-end shrink-0">
       <NavigationMenu>
         <NavigationMenuList className={"flex gap-2"}>
           {/* <NavigationMenuItem>
@@ -72,6 +73,14 @@ const NavbarAuthenticate = ({ setClick, click }) => {
               >
                 <CircleX color="#6B6B8D" />
                 My Returns
+              </NavigationMenuLink>
+              {/* Wishlist link - routes to the user's wishlist page */}
+              <NavigationMenuLink
+                render={<Link to={"/wishlists"} />}
+                className={"text-white gap-4 hover:bg-gbase-3"}
+              >
+                <Heart color="#6B6B8D" />
+                My Wishlist
               </NavigationMenuLink>
               <hr className="w-full my-2 border-[#ffffff1f]" />
               {/* // add logout link under here */}

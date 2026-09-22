@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { ShoppingCart } from "../../models/cart.model.js";
+import { Product } from "../../models/product.model.js";
 
 export const shoppingCartRouter = Router();
 
@@ -9,69 +10,191 @@ shoppingCartRouter.get("/:userId", async (req, res, next) => {
     const cart = await ShoppingCart.findOne({
       user_id: req.params.userId,
       status: "active",
-    });
-    if (!cart) {
-      return res.json({ success: true, data: null });
+    }).populate("user_id items.product_id");
+
+    if (!cart || cart.items.length === 0) {
+      return res.json({
+        success: true,
+        message: "No items have been added to the cart yet.",
+        cart: cart ?? null,
+      });
     }
-    return res.json({ success: true, data: cart });
+
+    return res.json({ success: true, cart });
   } catch (error) {
     next(error);
   }
 });
 
-// PUT /api/v1/shoppingcart/:userId - Upsert entire cart (sync from frontend)
-shoppingCartRouter.put("/:userId", async (req, res, next) => {
+// PATCH /api/v1/shoppingcart/:userId/items/:itemId
+shoppingCartRouter.patch("/:userId/items/:itemId", async (req, res, next) => {
   try {
-    const { items } = req.body;
-    if (!Array.isArray(items)) {
-      return res.status(400).json({ success: false, message: "items array is required!" });
-    }
+    const { quantity } = req.body;
 
-    const cart = await ShoppingCart.findOneAndUpdate(
-      { user_id: req.params.userId, status: "active" },
-      { user_id: req.params.userId, items },
-      { new: true, upsert: true, runValidators: true },
-    );
-
-    return res.json({ success: true, data: cart });
-  } catch (error) {
-    next(error);
-  }
-});
-
-// POST /api/v1/shoppingcart/:userId/items - Add an item to cart
-shoppingCartRouter.post("/:userId/items", async (req, res, next) => {
-  try {
-    const { product_id, product_name, tag, unit_price, quantity, delivery, image } = req.body;
-    if (!product_name || unit_price == null || quantity == null) {
+    if (!Number.isInteger(quantity) || quantity < 1) {
       return res.status(400).json({
         success: false,
-        message: "product_name, unit_price and quantity are required!",
+        message: "Quantity must be a positive integer!",
       });
     }
 
-    let cart = await ShoppingCart.findOne({ user_id: req.params.userId, status: "active" });
+    const cart = await ShoppingCart.findOne({
+      user_id: req.params.userId,
+      status: "active",
+    });
 
     if (!cart) {
+      return res.status(404).json({
+        success: false,
+        message: "Cart not found!",
+      });
+    }
+
+    const item = cart.items.find(
+      (item) => item._id.toString() === req.params.itemId
+    );
+
+    if (!item) {
+      return res.status(404).json({
+        success: false,
+        message: "Cart item not found!",
+      });
+    }
+
+    // หา product จริงจาก product_id ใน cart item
+    const product = await Product.findById(item.product_id);
+
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found!",
+      });
+    }
+
+    // เช็กว่า quantity ที่ต้องการแก้เกิน stock หรือไม่
+    if (quantity > product.stock) {
+      return res.status(400).json({
+        success: false,
+        message: "Quantity exceeds available stock!",
+      });
+    }
+
+    item.quantity = quantity;
+
+    await cart.save();
+
+    await cart.populate("items.product_id");
+
+    return res.status(200).json({
+      success: true,
+      cart,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// POST /api/v1/shoppingcart/:userId/items
+shoppingCartRouter.post("/:userId/items", async (req, res, next) => {
+  try {
+    const { product_id, quantity } = req.body;
+
+    if (!product_id) {
+      return res.status(400).json({
+        success: false,
+        message: "Product id is required!",
+      });
+    }
+
+    if (
+      quantity !== undefined &&
+      (!Number.isInteger(quantity) || quantity < 1)
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Quantity must be a positive integer!",
+      });
+    }
+
+    // เช็กว่าสินค้ามีอยู่จริง
+    const product = await Product.findById(product_id);
+
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found!",
+      });
+    }
+
+    const quantityToAdd = quantity ?? 1;
+
+    // หา active cart
+    let cart = await ShoppingCart.findOne({
+      user_id: req.params.userId,
+      status: "active",
+    });
+
+    // ถ้ายังไม่มี cart
+    if (!cart) {
+      if (quantityToAdd > product.stock) {
+        return res.status(400).json({
+          success: false,
+          message: "Quantity exceeds available stock!",
+        });
+      }
+
       cart = await ShoppingCart.create({
         user_id: req.params.userId,
-        items: [{ product_id, product_name, tag, unit_price, quantity, delivery, image }],
+        items: [
+          {
+            product_id,
+            quantity: quantityToAdd,
+          },
+        ],
       });
     } else {
+      // เช็กว่าสินค้านี้มีอยู่ใน cart หรือยัง
       const existingIndex = cart.items.findIndex(
-        (item) => item.product_id?.toString() === product_id
+        (item) => item.product_id.toString() === product_id
       );
 
       if (existingIndex >= 0) {
-        cart.items[existingIndex].quantity += quantity;
+        // จำนวนเดิม + จำนวนที่กำลังจะเพิ่ม
+        const newQuantity =
+          cart.items[existingIndex].quantity + quantityToAdd;
+
+        if (newQuantity > product.stock) {
+          return res.status(400).json({
+            success: false,
+            message: "Quantity exceeds available stock!",
+          });
+        }
+
+        cart.items[existingIndex].quantity = newQuantity;
       } else {
-        cart.items.push({ product_id, product_name, tag, unit_price, quantity, delivery, image });
+        // ยังไม่มีสินค้านี้ใน cart
+        if (quantityToAdd > product.stock) {
+          return res.status(400).json({
+            success: false,
+            message: "Quantity exceeds available stock!",
+          });
+        }
+
+        cart.items.push({
+          product_id,
+          quantity: quantityToAdd,
+        });
       }
 
       await cart.save();
+
+      await cart.populate("items.product_id");
     }
 
-    return res.json({ success: true, data: cart });
+    return res.status(200).json({
+      success: true,
+      cart,
+    });
   } catch (error) {
     next(error);
   }
@@ -86,32 +209,68 @@ shoppingCartRouter.delete("/:userId/items/:itemId", async (req, res, next) => {
     });
 
     if (!cart) {
-      return res.status(404).json({ success: false, message: "cart not found!" });
+      return res.status(404).json({
+        success: false,
+        message: "Cart not found!",
+      });
     }
 
-    cart.items = cart.items.filter((item) => item._id.toString() !== req.params.itemId);
+    // เช็กว่า items ที่จะลบมีอยู่จริงไหม
+    // .some() ใช้เช็กว่า ใน array มีอย่างน้อย 1 ตัวที่ตรงกับเงื่อนไขหรือไม่ จะคืนค่าเป็น true หรือ false
+    const itemExists = cart.items.some(
+      (item) => item._id.toString() === req.params.itemId,
+    );
+
+    if (!itemExists) {
+      return res.status(404).json({
+        success: false,
+        message: "Cart item not found!",
+      });
+    }
+
+    // เก็บทุก item ที่ _id ไม่ตรงกับ itemId ที่ต้องการลบ ดังนั้น item ที่ตรงกันจะถูกตัดออกจาก array
+    cart.items = cart.items.filter(
+      (item) => item._id.toString() !== req.params.itemId,
+    );
+
     await cart.save();
 
-    return res.json({ success: true, data: cart });
+    await cart.populate("items.product_id");
+
+    return res.status(200).json({
+      success: true,
+      cart,
+    });
   } catch (error) {
     next(error);
   }
 });
 
-// DELETE /api/v1/shoppingcart/:userId - Clear entire cart
+// DELETE /api/v1/shoppingcart/:userId
 shoppingCartRouter.delete("/:userId", async (req, res, next) => {
   try {
-    const cart = await ShoppingCart.findOneAndUpdate(
-      { user_id: req.params.userId, status: "active" },
-      { items: [] },
-      { new: true },
-    );
+    const cart = await ShoppingCart.findOne({
+      user_id: req.params.userId,
+      status: "active",
+    });
 
     if (!cart) {
-      return res.status(404).json({ success: false, message: "cart not found!" });
+      return res.status(404).json({
+        success: false,
+        message: "Cart not found!",
+      });
     }
 
-    return res.json({ success: true, data: cart });
+    // ล้างสินค้าทั้งหมดในตะกร้า
+    cart.items = [];
+
+    await cart.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Cart cleared successfully!",
+      cart,
+    });
   } catch (error) {
     next(error);
   }
