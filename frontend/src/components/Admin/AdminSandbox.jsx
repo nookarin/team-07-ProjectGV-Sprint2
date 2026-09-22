@@ -56,7 +56,9 @@ export default function AdminSandbox() {
         params.set("sort", userQuery.sort);
         params.set("order", userQuery.order);
 
-        const res = await fetch(`${USERS_API_URL}/users?${params.toString()}`);
+        const res = await fetch(`${USERS_API_URL}/users?${params.toString()}`, {
+          credentials: "include",
+        });
         const result = await readJson(res);
         if (!res.ok) throw new Error(result.message || "Failed to load users");
         if (!cancelled) setUsers((result.data ?? []).map((doc) => ({ ...doc, id: doc._id })));

@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { Review } from "../../models/review.model.js";
+import { protect } from "../../middlewares/protect.js";
 
 export const reviewRouter = Router();
 
@@ -36,10 +37,11 @@ reviewRouter.get("/:id", async (req, res, next) => {
   }
 });
 
-reviewRouter.post("/", async (req, res, next) => {
+reviewRouter.post("/", protect, async (req, res, next) => {
   try {
-    const { user_id, product_id, orderitem_id, rating, comment } = req.body;
-    if (!user_id || !product_id || rating == null) {
+    const { product_id, orderitem_id, rating, comment } = req.body;
+    const user_id = req.user.user._id;
+    if (!product_id || rating == null) {
       return res.status(400).json({
         success: false,
         message: "user_id, product_id and rating are required!",
@@ -58,33 +60,53 @@ reviewRouter.post("/", async (req, res, next) => {
   }
 });
 
-reviewRouter.put("/:id", async (req, res, next) => {
+reviewRouter.put("/:id", protect, async (req, res, next) => {
   try {
     const { rating, comment } = req.body;
-    const review = await Review.findByIdAndUpdate(
-      req.params.id,
-      { rating, comment },
-      { new: true, runValidators: true },
-    );
+    const review = await Review.findById(req.params.id);
     if (!review) {
       return res
         .status(404)
         .json({ success: false, message: "review not found!" });
     }
-    return res.json({ success: true, data: review });
+
+    const currentUser = req.user.user;
+    if (
+      currentUser.role !== "admin" &&
+      review.user_id.toString() !== currentUser._id.toString()
+    ) {
+      return res.status(403).json({ success: false, message: "Forbidden" });
+    }
+
+    const updatedReview = await Review.findByIdAndUpdate(
+      req.params.id,
+      { rating, comment },
+      { new: true, runValidators: true },
+    );
+    return res.json({ success: true, data: updatedReview });
   } catch (error) {
     next(error);
   }
 });
 
-reviewRouter.delete("/:id", async (req, res, next) => {
+reviewRouter.delete("/:id", protect, async (req, res, next) => {
   try {
-    const review = await Review.findByIdAndDelete(req.params.id);
+    const review = await Review.findById(req.params.id);
     if (!review) {
       return res
         .status(404)
         .json({ success: false, message: "review not found!" });
     }
+
+    const currentUser = req.user.user;
+    if (
+      currentUser.role !== "admin" &&
+      review.user_id.toString() !== currentUser._id.toString()
+    ) {
+      return res.status(403).json({ success: false, message: "Forbidden" });
+    }
+
+    await Review.findByIdAndDelete(req.params.id);
     return res.json({ success: true, message: "deleted review successfully!" });
   } catch (error) {
     next(error);

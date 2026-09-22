@@ -280,7 +280,9 @@ export default function UserManager() {
         params.set("sort", sort);
         params.set("order", order);
 
-        const res = await fetch(`${API_URL}/users?${params.toString()}`);
+        const res = await fetch(`${API_URL}/users?${params.toString()}`, {
+          credentials: "include",
+        });
         const result = await res.json();
         if (!res.ok) throw new Error(result.message || "Failed to load users");
         if (!cancelled) setUsers((result.data ?? []).map((doc) => ({ ...doc, id: doc._id })));
@@ -367,6 +369,7 @@ export default function UserManager() {
       const url = isEdit ? `${API_URL}/users/${editingUser.id}` : `${API_URL}/users/register`;
       const res = await fetch(url, {
         method: isEdit ? "PUT" : "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(toPayload(form)),
       });
@@ -389,7 +392,7 @@ export default function UserManager() {
     if (!deletingUser) return;
     setDeleting(true);
     try {
-      const res = await fetch(`${API_URL}/users/${deletingUser.id}`, { method: "DELETE" });
+      const res = await fetch(`${API_URL}/users/${deletingUser.id}`, { method: "DELETE", credentials: "include" });
       const result = await res.json();
       if (!res.ok) throw new Error(result.message || "Failed to delete user");
 
@@ -413,8 +416,8 @@ export default function UserManager() {
     let errorMsg = "";
     try {
       const [reviewRes, cartRes] = await Promise.all([
-        fetch(`/api/v1/reviews?userId=${user.id}`),
-        fetch(`/api/v1/shoppingcart/${user.id}`),
+        fetch(`/api/v1/reviews?userId=${user.id}`, { credentials: "include" }),
+        fetch(`/api/v1/shoppingcart/${user.id}`, { credentials: "include" }),
       ]);
 
       const reviewResult = await reviewRes.json().catch(() => ({}));

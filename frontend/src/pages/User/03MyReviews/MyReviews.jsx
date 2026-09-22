@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { Star, Trash2, PencilLine } from "lucide-react";
 import AccountSidebar from "../AccountSidebar";
+import { useAuth } from "@/contexts/Authentication/AuthContext";
 
 const API_URL = import.meta.env.VITE_API_URL;
 const PRODUCTS_URL = import.meta.env.VITE_API_URL;
-const USER_ID_KEY = "gearverseUserId";
 
 function formatDate(value) {
   if (!value) return "";
@@ -24,19 +24,6 @@ function fromDoc(doc) {
     date: formatDate(doc.createdAt),
     comment: doc.comment ?? "",
   };
-}
-
-async function resolveUserId() {
-  const saved = localStorage.getItem(USER_ID_KEY);
-  if (saved) return saved;
-
-  const res = await fetch("/api/v1/users");
-  const result = await res.json();
-  const firstUser = (result.data ?? [])[0];
-  if (!firstUser) return null;
-
-  localStorage.setItem(USER_ID_KEY, firstUser._id);
-  return firstUser._id;
 }
 
 function Stars({ value, onChange, readonly }) {
@@ -60,9 +47,9 @@ function Stars({ value, onChange, readonly }) {
 }
 
 export default function MyReviews() {
+  const { user } = useAuth();
   const [reviews, setReviews] = useState([]);
   const [products, setProducts] = useState([]);
-  const [userId, setUserId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -90,11 +77,10 @@ export default function MyReviews() {
 
     async function init() {
       try {
-        const id = await resolveUserId();
+        const id = user?._id || null;
         if (cancelled) return;
-        setUserId(id);
         if (!id) {
-          setError("No user found. Create a user first, then reload.");
+          setError("No user found. Please log in, then reload.");
           return;
         }
 
@@ -117,7 +103,7 @@ export default function MyReviews() {
     return () => {
       cancelled = true;
     };
-  }, [loadReviews]);
+  }, [loadReviews, user]);
 
   function startEdit(review) {
     setEditingId(review.id);
@@ -130,6 +116,7 @@ export default function MyReviews() {
     try {
       const res = await fetch(`${API_URL}/reviews/${reviewId}`, {
         method: "PUT",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ rating: editRating, comment: editComment }),
       });
@@ -152,7 +139,7 @@ export default function MyReviews() {
   async function deleteReview(reviewId) {
     setSaving(true);
     try {
-      const res = await fetch(`${API_URL}/reviews/${reviewId}`, { method: "DELETE" });
+      const res = await fetch(`${API_URL}/reviews/${reviewId}`, { method: "DELETE", credentials: "include" });
       const result = await res.json();
       if (!res.ok) throw new Error(result.message || "Failed to delete review");
       setReviews((current) => current.filter((r) => r.id !== reviewId));
@@ -173,9 +160,9 @@ export default function MyReviews() {
     try {
       const res = await fetch(`${API_URL}/reviews`, {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          user_id: userId,
           product_id: form.productId,
           rating: form.rating,
           comment: form.comment,

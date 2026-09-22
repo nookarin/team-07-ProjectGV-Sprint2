@@ -76,10 +76,10 @@ export default function Addresses() {
       setLoading(true);
       setLoadError("");
       try {
-        const res = await fetch(`${API_URL}/users`, { credentials: "include" });
+        const res = await fetch(`${API_URL}/users/${userId}`, { credentials: "include" });
         const result = await res.json();
         if (!res.ok) throw new Error(result.message || "Failed to load addresses");
-        const current = (result.data ?? []).find((u) => String(u._id) === String(userId));
+        const current = result.data;
         const raw = current?.address ?? [];
         const rows = Array.isArray(raw) ? raw.filter((addr) => addr && formatAddress(addr) !== "") : [];
         if (!cancelled) setAddresses(rows.map((addr) => ({ ...addr, zipCode: addr.zipCode != null ? String(addr.zipCode) : "" })));
@@ -147,10 +147,10 @@ export default function Addresses() {
       closeEditor();
       setConfirmingDelete(null);
       setLoading(true);
-      const refreshRes = await fetch(`${API_URL}/users`, { credentials: "include" });
+      const refreshRes = await fetch(`${API_URL}/users/${userId}`, { credentials: "include" });
       const refreshResult = await refreshRes.json();
       if (refreshRes.ok) {
-        const current = (refreshResult.data ?? []).find((u) => String(u._id) === String(userId));
+        const current = refreshResult.data;
         const raw = current?.address ?? [];
         const rows = Array.isArray(raw) ? raw.filter((addr) => addr && formatAddress(addr) !== "") : [];
         setAddresses(rows.map((addr) => ({ ...addr, zipCode: addr.zipCode != null ? String(addr.zipCode) : "" })));

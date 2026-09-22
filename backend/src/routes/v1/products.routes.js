@@ -4,6 +4,8 @@ import { Product } from "../../models/product.model.js";
 import { Subcategory } from "../../models/subcategory.model.js";
 import { Category } from "../../models/category.model.js";
 import { cloudinary } from "../../config/cloudinary.js";
+import { protect } from "../../middlewares/protect.js";
+import { authorize } from "../../middlewares/authorize.js";
 
 export const productRouter = Router();
 
@@ -118,8 +120,8 @@ productRouter.get('/:category/:product', async (req, res, next) => {
   }
 })
 
-// POST product
-productRouter.post("/", async (req, res, next) => {
+// POST product (admin only)
+productRouter.post("/", protect, authorize(["admin"]), async (req, res, next) => {
   try {
     const {
       product_name,
@@ -191,8 +193,8 @@ productRouter.post("/", async (req, res, next) => {
 });
 
 // POST /:id/images - Upload product images to Cloudinary and link them to the product.
-// The first uploaded image becomes the main product picture.
-productRouter.post("/:id/images", uploadImages, async (req, res, next) => {
+// The first uploaded image becomes the main product picture. (admin only)
+productRouter.post("/:id/images", protect, authorize(["admin"]), uploadImages, async (req, res, next) => {
   try {
     // uploadImages กับ req.files คืออันเดียวกัน
     // ตรวจสอบว่ามีรูปภาพจาก req ถูกส่งเข้ามาหรือไม่
@@ -261,8 +263,8 @@ productRouter.post("/:id/images", uploadImages, async (req, res, next) => {
   }
 });
 
-// PUT /:id - Update product within system (Admin)
-productRouter.put("/:id", async (req, res, next) => {
+// PUT /:id - Update product within system (admin only)
+productRouter.put("/:id", protect, authorize(["admin"]), async (req, res, next) => {
   try {
     const { subcategory_ids } = req.body;
 
@@ -303,8 +305,8 @@ productRouter.put("/:id", async (req, res, next) => {
   }
 });
 
-// DELETE /:id - Remove product from system (Admin)
-productRouter.delete("/:id", async (req, res, next) => {
+// DELETE /:id - Remove product from system (admin only)
+productRouter.delete("/:id", protect, authorize(["admin"]), async (req, res, next) => {
   try {
     const product = await Product.findByIdAndDelete(req.params.id);
     if (!product) {
