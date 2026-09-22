@@ -242,7 +242,7 @@ const ProductPage = () => {
             </div>
 
             {/* Thumbnails Gallery */}
-            <div className="w-full grid grid-cols-4 gap-4">
+            <div className="w-full grid grid-cols-2 sm:grid-cols-4 gap-4">
               {!loading ? (
                 data.images?.map((img, idx) => (
                   <div
@@ -321,7 +321,7 @@ const ProductPage = () => {
                     {activeSwitch.name}
                   </span>
                 </div>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {SWITCH_OPTIONS.map((option) => {
                     const isActive = activeSwitch.id === option.id;
                     const isPlaying = playingSwitch === option.id;

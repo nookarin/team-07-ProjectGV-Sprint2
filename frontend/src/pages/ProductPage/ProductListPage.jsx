@@ -6,6 +6,7 @@ import { DollarSign } from "lucide-react";
 import axios from "axios";
 import { useAuth } from "@/contexts/Authentication/AuthContext";
 import { Ring } from "#components/ring";
+import { useDebounce } from "use-debounce";
 
 const ProductListPage = () => {
   const param = useParams();
@@ -13,24 +14,25 @@ const ProductListPage = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(null);
   const [filter, setFilter] = useState("");
+  const [debouncedValue] = useDebounce(filter, 500);
   const [tags, setTags] = useState([]);
-  const [err, setErr] = useState('')
+  const [err, setErr] = useState("");
   const [price, setPrice] = useState({
     min: 0,
     max: 20000,
   });
-  const [filterTag, setFilterTag] = useState('')
+  const [filterTag, setFilterTag] = useState("");
   const fetchData = async () => {
     setLoading(true);
-    setErr('')
+    setErr("");
     try {
       const response = await axios.get(
         `${url}/products/${param.id}?name=${filter}&tag=${filterTag}`,
       );
       console.log(response.data);
-      if(response.data.message) {
-        setProducts([])
-        setErr(response.data.message)
+      if (response.data.message) {
+        setProducts([]);
+        setErr(response.data.message);
       }
       setProducts(response.data.products);
       setLoading(false);
@@ -44,9 +46,15 @@ const ProductListPage = () => {
     setTags(response.data.subcategories);
   };
   useEffect(() => {
+    if (debouncedValue || filterTag) {
+      fetchData();
+    }
+  }, [debouncedValue, filterTag]);
+
+  useEffect(() => {
     fetchData();
     fetchTags();
-  }, [filter, param.id]);
+  }, [param.id]);
 
   const min = price.min === "" || price.min == null ? 0 : Number(price.min);
   const max =
@@ -120,7 +128,8 @@ const ProductListPage = () => {
                   return (
                     <button
                       key={index}
-                      className="border border-gpurple-2/40 px-2 py-1 rounded-xl bg-gpink-3/30"
+                      className="border border-gpurple-2/40 px-2 py-1 rounded-xl bg-gpink-3/30 hover:bg-gpink-2"
+                      // onClick={(e) => setFilterTag(tag.subcategory_name)}
                     >
                       {tag.subcategory_name}
                     </button>
@@ -134,7 +143,7 @@ const ProductListPage = () => {
         </div>
       </aside>
       <div className="w-9/12 py-14 mx-auto">
-        <div className="grid grid-cols-3 xl:gap-10 max-xl:gap-20">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:gap-10 max-xl:gap-20">
           {!loading ? (
             filteredProducts?.map((product, index) => {
               return (
