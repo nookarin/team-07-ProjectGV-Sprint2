@@ -14,15 +14,29 @@ const ProductListPage = () => {
   const [loading, setLoading] = useState(null);
   const [filter, setFilter] = useState("");
   const [tags, setTags] = useState([]);
+  const [err, setErr] = useState('')
   const [price, setPrice] = useState({
     min: 0,
     max: 20000,
   });
+  const [filterTag, setFilterTag] = useState('')
   const fetchData = async () => {
     setLoading(true);
-    const response = await axios.get(`${url}/products/${param.id}?name=${filter}`);
-    setProducts(response.data.products);
-    setLoading(false);
+    setErr('')
+    try {
+      const response = await axios.get(
+        `${url}/products/${param.id}?name=${filter}&tag=${filterTag}`,
+      );
+      console.log(response.data);
+      if(response.data.message) {
+        setProducts([])
+        setErr(response.data.message)
+      }
+      setProducts(response.data.products);
+      setLoading(false);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const fetchTags = async () => {
@@ -35,8 +49,9 @@ const ProductListPage = () => {
   }, [filter, param.id]);
 
   const min = price.min === "" || price.min == null ? 0 : Number(price.min);
-  const max = price.max === "" || price.max == null ? Infinity : Number(price.max);
-  const filteredProducts = products.filter(
+  const max =
+    price.max === "" || price.max == null ? Infinity : Number(price.max);
+  const filteredProducts = products?.filter(
     (product) => product.price >= min && product.price <= max,
   );
   return (
@@ -56,6 +71,7 @@ const ProductListPage = () => {
           <input
             type="text"
             id="name"
+            placeholder="GearVerse Nova III"
             onChange={(e) => setFilter(e.target.value)}
             className="border border-gbase-2 bg-gbase-3/30 rounded-lg mt-2 py-1 px-2"
           />
@@ -130,6 +146,7 @@ const ProductListPage = () => {
           ) : (
             <Ring className={"size-20"} />
           )}
+          {err && <p className="text-gray-500">{err}</p>}
         </div>
       </div>
     </div>
