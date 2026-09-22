@@ -1,31 +1,6 @@
 import React, { useEffect, useState } from "react";
 import LogoImg from "../../assets/Artboard1.png";
 import LogoText from "../../assets/Untitled-2.png";
-import {
-  Menubar,
-  MenubarCheckboxItem,
-  MenubarContent,
-  MenubarGroup,
-  MenubarItem,
-  MenubarMenu,
-  MenubarRadioGroup,
-  MenubarRadioItem,
-  MenubarSeparator,
-  MenubarShortcut,
-  MenubarSub,
-  MenubarSubContent,
-  MenubarSubTrigger,
-  MenubarTrigger,
-} from "#components/ui/menubar";
-import {
-  CircleUser,
-  CircleX,
-  LogOut,
-  Search,
-  ShoppingBag,
-  Star,
-  User,
-} from "lucide-react";
 import { Link } from "react-router-dom";
 import {
   NavigationMenu,
@@ -38,12 +13,25 @@ import {
 import NavbarAuthenticate from "./NavbarAuthenticate";
 import NavbarUnauthen from "./NavbarUnauthen";
 import { useAuth } from "@/contexts/Authentication/AuthContext";
+import axios from "axios";
 
-const category = ["keyboard", "mouse", "headset", "accessory"];
+// const category = ["keyboard", "mouse", "headset", "accessory"];
 
 const Navbar = () => {
   const [click, setClick] = useState(false);
-  const { user } = useAuth();
+  const { user, url } = useAuth();
+  const [loading, setLoading] = useState(null);
+  const [category, setCategory] = useState([]);
+  const fetchData = async () => {
+    setLoading(true);
+    const response = await axios.get(`${url}/categories/`);
+    setCategory(response.data.categories);
+    setLoading(false);
+    console.log(response.data.categories);
+  };
+  useEffect(() => {
+    fetchData();
+  }, []);
   return (
     <nav className="bg-gbg-2 w-full h-16 flex items-center justify-between px-10 text-white relative z-20 shadow-xl shadow-gpurple-4/80">
       <Link to={"/"} className="flex items-center gap-4 w-1/3">
@@ -64,19 +52,23 @@ const Navbar = () => {
           <NavigationMenuItem>
             <NavigationMenuTrigger>COLLECTIONS</NavigationMenuTrigger>
             <NavigationMenuContent className={"text-white w-56"}>
-              {category.map((item, index) => {
-                return (
-                  <NavigationMenuLink
-                    key={index}
-                    render={
-                      <Link className="capitalize" to={`products/${item}`} />
-                    }
-                    className={"hover:bg-gbase-2"}
-                  >
-                    {item}
-                  </NavigationMenuLink>
-                );
-              })}
+              {!loading &&
+                category?.map((item, index) => {
+                  return (
+                    <NavigationMenuLink
+                      key={index}
+                      render={
+                        <Link
+                          className="capitalize"
+                          to={`products/${item.category_name}`}
+                        />
+                      }
+                      className={"hover:bg-gbase-2"}
+                    >
+                      {item.category_name}
+                    </NavigationMenuLink>
+                  );
+                })}
             </NavigationMenuContent>
           </NavigationMenuItem>
           <NavigationMenuItem>
