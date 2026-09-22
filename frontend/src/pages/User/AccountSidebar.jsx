@@ -1,6 +1,7 @@
 import {
   CircleUserRound,
   ClipboardList,
+  Heart,
   ShieldX,
   Star,
 } from "lucide-react";
@@ -15,6 +16,8 @@ const navigation = [
     icon: ShieldX,
     to: "/my-cancellations",
   },
+  // Wishlist link - routes to the user's wishlist page
+  { label: "My Wishlist", icon: Heart, to: "/wishlists" },
 ];
 
 export default function AccountSidebar({ active }) {
