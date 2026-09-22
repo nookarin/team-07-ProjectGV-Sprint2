@@ -14,7 +14,7 @@ import { Input } from "@base-ui/react";
 const NavbarUnauthen = () => {
   const [click, setClick] = useState(false);
   return (
-    <div className="w-1/5 flex justify-end ">
+    <div className="flex justify-end shrink-0">
       <NavigationMenu>
         <NavigationMenuList className={"flex gap-2"}>
           {/* <NavigationMenuItem>

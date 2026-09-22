@@ -1,13 +1,23 @@
 // Web Audio API synthesizer for realistic mechanical keyboard switch sound tests
 
+// clicky ไม่มีค่าตรงนี้ชั่วคราว: public/clicky_sound.mp3 จริง ๆ เป็นไฟล์วิดีโอ (MP4/H.264)
+// ที่ถูกตั้งชื่อ .mp3 ไว้ผิด ไม่ใช่ไฟล์เสียงคลิกสวิตช์ เล่นผ่าน <audio> ไม่ได้
+// เลยปล่อยให้ตกไปใช้ playSynthetic() แทนจนกว่าจะได้ไฟล์เสียงคลิกจริงมาแทนที่
 const SWITCH_SOUNDS = {
     linear: '/linear_sound.mp3',
     tactile: '/tactile_sound.mp3',
-    clicky: '/clicky_sound.mp3'
 };
 
 // เสียงสังเคราะห์สั้นมาก (~0.1s) ใช้ตัวเลขนี้นับว่าเล่นจบเพื่อรีเซ็ตปุ่ม
 const SYNTHETIC_DURATION_MS = 150;
+
+// ไฟล์เสียงจริง (mp3) บางไฟล์ยาวเกินไป (8-12s) ตัดจบให้ไม่เกินเวลานี้ (ต่อ type)
+const MAX_PLAYBACK_MS = {
+    linear: 1000,
+    tactile: 1000,
+    clicky: 2000,
+};
+const DEFAULT_MAX_PLAYBACK_MS = 1000;
 
 class SoundEngine {
     constructor() {
@@ -15,6 +25,7 @@ class SoundEngine {
         this.currentAudio = null;
         this.currentType = null;
         this.syntheticTimer = null;
+        this.maxDurationTimer = null;
     }
 
     initCtx() {
@@ -42,6 +53,10 @@ class SoundEngine {
             clearTimeout(this.syntheticTimer);
             this.syntheticTimer = null;
         }
+        if (this.maxDurationTimer) {
+            clearTimeout(this.maxDurationTimer);
+            this.maxDurationTimer = null;
+        }
         this.currentType = null;
     }
 
@@ -58,6 +73,10 @@ class SoundEngine {
 
         const finish = () => {
             if (this.currentType !== type) return; // โดนหยุดหรือเปลี่ยนเสียงไปแล้ว
+            if (this.maxDurationTimer) {
+                clearTimeout(this.maxDurationTimer);
+                this.maxDurationTimer = null;
+            }
             this.currentAudio = null;
             this.currentType = null;
             if (onEnded) onEnded(type);
@@ -86,7 +105,22 @@ class SoundEngine {
                 const playPromise = audio.play();
 
                 if (playPromise !== undefined) {
-                    playPromise.catch(triggerFallback);
+                    playPromise
+                        .then(() => {
+                            if (this.currentType !== type) return; // โดนหยุด/เปลี่ยนเสียงไปแล้วระหว่างรอ play()
+                            // ตัดจบเสียงตามเวลาสูงสุดของแต่ละ type แม้ไฟล์ต้นฉบับจะยาวกว่านั้น
+                            this.maxDurationTimer = setTimeout(() => {
+                                this.maxDurationTimer = null;
+                                if (this.currentAudio === audio) {
+                                    audio.onended = null;
+                                    audio.onerror = null;
+                                    audio.pause();
+                                    audio.currentTime = 0;
+                                }
+                                finish();
+                            }, MAX_PLAYBACK_MS[type] ?? DEFAULT_MAX_PLAYBACK_MS);
+                        })
+                        .catch(triggerFallback);
                 }
             } else {
                 this.playSynthetic(type, finish);
