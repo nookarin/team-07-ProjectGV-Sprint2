@@ -28,7 +28,7 @@ const NavbarAuthenticate = ({ setClick, click }) => {
     navigate('/')
   }
   return (
-    <div className="w-1/5 flex justify-end">
+    <div className="flex justify-end shrink-0">
       <NavigationMenu>
         <NavigationMenuList className={"flex gap-2"}>
           {/* <NavigationMenuItem>
