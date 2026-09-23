@@ -18,7 +18,6 @@ export function AuthProvider({ children }) {
       const response = await axios.post(`${url}/users/login`, data, {
         withCredentials: true,
       });
-      console.log(response.data.message);
       setUser(response.data.user);
       setLoading(false);
       return true
