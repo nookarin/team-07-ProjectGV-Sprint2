@@ -24,7 +24,7 @@ const uploadImages = multer({
 productRouter.get("/", async (req, res, next) => {
   try {
     const products = await Product.find().populate(
-      "category_id subcategory_ids",
+      "category_id subcategory_ids subcategory_ids.subcategory_name",
     );
 
     console.log(products)

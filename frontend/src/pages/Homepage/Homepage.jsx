@@ -52,7 +52,6 @@ const Homepage = () => {
   const getProducts = async () => {
     setLoading(true);
     const response = await axios.get(`${url}/products`);
-    console.log(response.data);
     setProducts(response.data.products);
     setLoading(false);
   };
@@ -76,14 +75,9 @@ const Homepage = () => {
           {!loading &&
             products?.slice(0, 3).map((item, index) => {
               return (
-                <ProductSecondaryCard
-                  img={item.image_url}
-                  name={item.product_name}
-                  price={item.price}
-                  description={item.description}
-                  key={index}
-                  product={item}
-                />
+                <div key={index}>
+                  <ProductSecondaryCard product={item} />
+                </div>
               );
             })}
         </div>
