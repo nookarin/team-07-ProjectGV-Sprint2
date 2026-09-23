@@ -27,12 +27,14 @@ export default function Login() {
       toast.success("Login successful.", {
         richColors: true,
         duration: 5000,
+        position: 'top-center'
       });
       navigate('/')
     } else {
       toast.error("Login failed", {
         richColors: true,
         duration: 5000,
+        position: 'top-center'
       });
     }
   };

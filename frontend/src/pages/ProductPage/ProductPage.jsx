@@ -167,7 +167,7 @@ const ProductPage = () => {
     setIsWishlisted(next);
     toast[next ? "success" : "info"](
       next ? "Added to your wishlist" : "Removed from your wishlist",
-      { richColors: true },
+      { richColors: true, position: "top-center" },
     );
   };
 
@@ -203,7 +203,11 @@ const ProductPage = () => {
     });
 
     toast.success(`Added ${quantity} × ${PRODUCT_NAME} to your cart`, {
-      action: { label: "View cart", onClick: () => navigate("/cart") },
+      action: {
+        label: "View cart",
+        onClick: () => navigate("/cart"),
+        position: "top-center",
+      },
     });
   };
 
