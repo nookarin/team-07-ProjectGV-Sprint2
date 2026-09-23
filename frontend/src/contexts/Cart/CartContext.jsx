@@ -4,7 +4,7 @@ import { useAuth } from "../Authentication/AuthContext";
 import axios from "axios";
 
 export function CartProvider({ children }) {
-  const { url } = useAuth();
+  const { url, user } = useAuth();
   const [cart, setCart] = useState([]);
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(null);

@@ -40,15 +40,17 @@ import {
 //ฟังก์ชัน sync กับ backend (MongoDB) — tie เข้ากับ user_id
 import { fetchCart, syncCart } from "#lib/cart-api";
 import { useAuth } from "@/contexts/Authentication/AuthContext";
+import { useCart } from "@/contexts/Cart/CartProvider";
 
 //เปิด browser
 export default function CartPage() {
   const { user } = useAuth();
-  const [items, setItems] = useState([]);  //Cart ที่กำลังแสดงอยู่บนหน้าจอ(เดี๋ยว useEffect จะไปโหลดของจริงมา)
+  const [items, setItems] = useState([]); //Cart ที่กำลังแสดงอยู่บนหน้าจอ(เดี๋ยว useEffect จะไปโหลดของจริงมา)
   const [promoInput, setPromoInput] = useState(""); //สิ่งที่ผู้ใช้กำลังพิมพ์ในช่อง Promo
   const [appliedPromo, setAppliedPromo] = useState(null); // Promo ที่ ผ่านการ Apply แล้ว
   const [promoError, setPromoError] = useState(""); //ข้อความ error
   const [checkoutSuccess, setCheckoutSuccess] = useState(false);
+  const { data, loading } = useCart();
 
   const syncTimer = useRef(null);
 
@@ -65,9 +67,11 @@ export default function CartPage() {
     setItems(loadedItems); //แสดงไอเทมใน cart
 
     const savedPromoCode = getSavedPromo(); //เรียก .js ดูว่ามีโค้ดมั้ย
-    if (savedPromoCode) { //ถ้ามีเช็คกับ function ใน.js ว่าถูกไหม
+    if (savedPromoCode) {
+      //ถ้ามีเช็คกับ function ใน.js ว่าถูกไหม
       const res = validatePromoCode(savedPromoCode);
-      if (res.valid) { //ถ้าถูก
+      if (res.valid) {
+        //ถ้าถูก
         setAppliedPromo(res); // apply ได้
         setPromoInput(savedPromoCode); //แสดงในช่อง input
       }
@@ -91,9 +95,11 @@ export default function CartPage() {
 
   //ฟังก์ชันที่ทำงานเมื่อกด +, - (id = สินค้าตัวไหน, delta = จะเปลี่ยนจำนวนเท่าไหร่)
   const handleQuantityChange = (id, delta) => {
-    setItems((prevItems) => { //Cart ก่อนเปลี่ยน(INITIAL_CART_ITEMS, saved)
+    setItems((prevItems) => {
+      //Cart ก่อนเปลี่ยน(INITIAL_CART_ITEMS, saved)
       const updated = prevItems //สร้าง updated
-        .map((item) => { //กำลังวนดูสินค้าทุกตัว
+        .map((item) => {
+          //กำลังวนดูสินค้าทุกตัว
           if (item.id === id) {
             const newQty = item.quantity + delta;
             return newQty > 0 ? { ...item, quantity: newQty } : null;
@@ -159,14 +165,14 @@ export default function CartPage() {
   // คำนวณราคา
   const subtotal = items.reduce(
     (sum, item) => sum + item.unitPrice * item.quantity,
-    0
+    0,
   );
 
   const totalItemCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
   const discount = appliedPromo ? appliedPromo.discount : 0; //ถ้ามี Promo → ใช้ส่วนลดของ Promo, ถ้าไม่มี → ลด $0
   const shipping = items.length > 0 ? DEFAULT_SHIPPING : 0; //ถ้ามีสินค้า → มีค่าส่ง, ถ้า Cart ว่าง → ค่าส่ง $0
-  const grandTotal = Math.max(0, subtotal - discount + shipping);  //Math.max(0, ...) ป้องกันไม่ให้ยอดติดลบ
+  const grandTotal = Math.max(0, subtotal - discount + shipping); //Math.max(0, ...) ป้องกันไม่ให้ยอดติดลบ
 
   const handleProceedToCheckout = () => {
     setCheckoutSuccess(true);
@@ -210,7 +216,7 @@ export default function CartPage() {
             </div>
 
             {/* Cart Items List */}
-            {items.length === 0 ? (
+            {data?.length === 0 ? (
               <Card className="bg-[#121022] border-[#25203f] rounded-2xl p-12 text-center flex flex-col items-center justify-center space-y-4">
                 <div className="w-16 h-16 rounded-full bg-[#1c1833] flex items-center justify-center text-slate-500">
                   <ShoppingBag className="w-8 h-8" />
@@ -219,7 +225,8 @@ export default function CartPage() {
                   Your cart is currently empty
                 </h3>
                 <p className="text-slate-400 text-sm max-w-md">
-                  Looks like you haven't added any GearVerse gaming equipment to your cart yet.
+                  Looks like you haven't added any GearVerse gaming equipment to
+                  your cart yet.
                 </p>
                 <Button
                   onClick={handleResetDemo}
@@ -230,19 +237,19 @@ export default function CartPage() {
               </Card>
             ) : (
               <div className="space-y-4">
-                {items.map((item) => {
-                  const itemTotal = item.unitPrice * item.quantity;
+                {data?.map((item) => {
+                  const itemTotal = item.product_id.price * item.quantity;
                   return (
                     <Card
-                      key={item.id}
+                      key={item._id}
                       className="bg-[#121022] border-0 shadow-none border-purple-600/20 hover:border-purple-400/50 rounded-2xl transition-all group"
                     >
                       <CardContent className="p-4 sm:p-5 flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
                         {/* Product Thumbnail */}
                         <div className="w-20 h-20 sm:w-28 sm:h-28 rounded-xl overflow-hidden flex-shrink-0 border border-[#2e264f] relative flex items-center justify-center">
                           <img
-                            src={item.image}
-                            alt={item.name}
+                            src={item.product_id.image_url}
+                            alt={item.product_id.product_name}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           />
                         </div>
@@ -250,7 +257,7 @@ export default function CartPage() {
                         {/* Info & Metadata */}
                         <div className="flex-1 min-w-0 space-y-2 text-center sm:text-left">
                           <h3 className="text-base sm:text-lg font-bold text-white tracking-wide truncate">
-                            {item.name}
+                            {item.product_id.product_name}
                           </h3>
 
                           {/* Specs Badge */}
@@ -275,7 +282,7 @@ export default function CartPage() {
                               Unit Price
                             </span>
                             <span className="text-white font-bold text-sm">
-                              ${item.unitPrice.toFixed(2)}
+                              ${item.product_id.price.toFixed(2)}
                             </span>
                           </div>
 
@@ -284,7 +291,7 @@ export default function CartPage() {
                             <Button
                               variant="ghost"
                               size="icon-xs"
-                              onClick={() => handleQuantityChange(item.id, -1)}
+                              onClick={() => handleQuantityChange(item._id, -1)}
                               className="text-slate-300 hover:text-white hover:bg-[#282147] rounded cursor-pointer"
                               aria-label="Decrease quantity"
                             >
@@ -296,7 +303,7 @@ export default function CartPage() {
                             <Button
                               variant="ghost"
                               size="icon-xs"
-                              onClick={() => handleQuantityChange(item.id, 1)}
+                              onClick={() => handleQuantityChange(item._id, 1)}
                               className="text-slate-300 hover:text-white hover:bg-[#282147] rounded cursor-pointer"
                               aria-label="Increase quantity"
                             >
@@ -341,8 +348,12 @@ export default function CartPage() {
                     <ShieldCheck className="w-5 h-5" />
                   </div>
                   <div>
-                    <h4 className="text-sm font-bold text-white">Secure Payment</h4>
-                    <p className="text-slate-400 text-xs">SSL Encrypted checkouts</p>
+                    <h4 className="text-sm font-bold text-white">
+                      Secure Payment
+                    </h4>
+                    <p className="text-slate-400 text-xs">
+                      SSL Encrypted checkouts
+                    </p>
                   </div>
                 </CardContent>
               </Card>
@@ -354,8 +365,12 @@ export default function CartPage() {
                     <Truck className="w-5 h-5" />
                   </div>
                   <div>
-                    <h4 className="text-sm font-bold text-white">Fast Delivery</h4>
-                    <p className="text-slate-400 text-xs">Same-day dispatch priority</p>
+                    <h4 className="text-sm font-bold text-white">
+                      Fast Delivery
+                    </h4>
+                    <p className="text-slate-400 text-xs">
+                      Same-day dispatch priority
+                    </p>
                   </div>
                 </CardContent>
               </Card>
@@ -367,8 +382,12 @@ export default function CartPage() {
                     <Headphones className="w-5 h-5" />
                   </div>
                   <div>
-                    <h4 className="text-sm font-bold text-white">24/7 Support</h4>
-                    <p className="text-slate-400 text-xs">Elite crew on standby</p>
+                    <h4 className="text-sm font-bold text-white">
+                      24/7 Support
+                    </h4>
+                    <p className="text-slate-400 text-xs">
+                      Elite crew on standby
+                    </p>
                   </div>
                 </CardContent>
               </Card>
@@ -388,7 +407,10 @@ export default function CartPage() {
                   Promo Code / Gift Card
                 </label>
 
-                <form onSubmit={handleApplyPromo} className="flex flex-col sm:flex-row gap-2">
+                <form
+                  onSubmit={handleApplyPromo}
+                  className="flex flex-col sm:flex-row gap-2"
+                >
                   <Input
                     type="text"
                     value={promoInput}

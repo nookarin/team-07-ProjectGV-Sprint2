@@ -25,7 +25,7 @@ import axios from "axios";
 const NavbarAuthenticate = ({ setClick, click }) => {
   const navigate = useNavigate();
   const { url, logout, user } = useAuth();
-  const { cart, setCart, addToCart, getCart, loading, data } = useCart();
+  const { loading, data } = useCart();
   const handleLogout = () => {
     logout();
     navigate("/");
@@ -104,14 +104,14 @@ const NavbarAuthenticate = ({ setClick, click }) => {
             >
               <ShoppingBag size={20} color="#22D3EE" />
             </NavigationMenuTrigger>
-            <NavigationMenuContent className={"text-white"}>
+            <NavigationMenuContent className={"text-white flex flex-col gap-4"}>
               <div className="flex flex-col gap-4">
                 {!loading &&
                   data?.map((item) => {
                     return (
                       <div
                         key={item.product_id._id}
-                        className="flex gap-2 items-center"
+                        className="flex gap-2 items-center border-b border-gbase-1 pb-2"
                       >
                         <img
                           src={item.product_id.image_url}
@@ -126,8 +126,13 @@ const NavbarAuthenticate = ({ setClick, click }) => {
                     );
                   })}
               </div>
-              <NavigationMenuLink className={"cursor-pointer"}>
-                See More
+              <NavigationMenuLink
+                render={<Link to={"/cart"} />}
+                className={
+                  "cursor-pointer font-bold tracking-wide bg-gpink-2 text-center flex items-center justify-center"
+                }
+              >
+                My Cart
               </NavigationMenuLink>
             </NavigationMenuContent>
           </NavigationMenuItem>
