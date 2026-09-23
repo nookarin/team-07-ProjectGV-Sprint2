@@ -29,12 +29,13 @@ shoppingCartRouter.get("/:userId", async (req, res, next) => {
 // PATCH /api/v1/shoppingcart/:userId/items/:itemId
 shoppingCartRouter.patch("/:userId/items/:itemId", async (req, res, next) => {
   try {
+    console.log(req.body)
     const { quantity } = req.body;
 
-    if (!Number.isInteger(quantity) || quantity < 1) {
+    if (!Number.isInteger(quantity)) {
       return res.status(400).json({
         success: false,
-        message: "Quantity must be a positive integer!",
+        message: "Quantity must be a number!",
       });
     }
 

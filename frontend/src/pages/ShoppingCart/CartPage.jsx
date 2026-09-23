@@ -41,141 +41,49 @@ import {
 import { fetchCart, syncCart } from "#lib/cart-api";
 import { useAuth } from "@/contexts/Authentication/AuthContext";
 import { useCart } from "@/contexts/Cart/CartProvider";
+import { useDebouncedCallback } from "use-debounce";
+import axios from "axios";
+import { toast } from "sonner";
 
 //เปิด browser
 export default function CartPage() {
-  const { user } = useAuth();
-  const [items, setItems] = useState([]); //Cart ที่กำลังแสดงอยู่บนหน้าจอ(เดี๋ยว useEffect จะไปโหลดของจริงมา)
-  const [promoInput, setPromoInput] = useState(""); //สิ่งที่ผู้ใช้กำลังพิมพ์ในช่อง Promo
-  const [appliedPromo, setAppliedPromo] = useState(null); // Promo ที่ ผ่านการ Apply แล้ว
-  const [promoError, setPromoError] = useState(""); //ข้อความ error
-  const [checkoutSuccess, setCheckoutSuccess] = useState(false);
-  const { data, loading } = useCart();
+  const { user, url } = useAuth();
+  const { data, loading, updateQuantity, cart, setCart } = useCart();
 
-  const syncTimer = useRef(null);
+  const handleQuantity = async (itemId, currentQuantity, type) => {
+    let newQuantity = currentQuantity;
 
-  //sync กับ MongoDB แบบ debounce (lag 500ms เพื่อไม่ให้ยิง API เยอะเกินไป)
-  const scheduleSync = (nextItems) => {
-    clearTimeout(syncTimer.current);
-    syncTimer.current = setTimeout(() => {
-      syncCart(nextItems, user?._id);
-    }, 500);
-  };
+    if (type === "increase") {
+      newQuantity = currentQuantity + 1;
+    }
 
-  useEffect(() => {
-    const loadedItems = getInitialCart(); //เรียก .js ดูว่ามีสินค้ามั้ย
-    setItems(loadedItems); //แสดงไอเทมใน cart
+    if (type === "decrease") {
+      newQuantity = currentQuantity - 1;
+    }
 
-    const savedPromoCode = getSavedPromo(); //เรียก .js ดูว่ามีโค้ดมั้ย
-    if (savedPromoCode) {
-      //ถ้ามีเช็คกับ function ใน.js ว่าถูกไหม
-      const res = validatePromoCode(savedPromoCode);
-      if (res.valid) {
-        //ถ้าถูก
-        setAppliedPromo(res); // apply ได้
-        setPromoInput(savedPromoCode); //แสดงในช่อง input
+    // ป้องกันไม่ให้ต่ำกว่า 1
+    if (newQuantity < 1) {
+      return;
+    }
+
+    try {
+      const response = await axios.patch(
+        `${url}/shoppingcart/${user._id}/items/${itemId}`,
+        {
+          quantity: newQuantity,
+        },
+      );
+
+      if (response.data.success) {
+        setCart(response.data.cart);
       }
+    } catch (error) {
+      console.log(error);
+
+      toast.error(error.response?.data?.message || "Something went wrong!", {
+        richColors: true
+      });
     }
-
-    //ตอนโหลดหน้า: ดึง cart จาก MongoDB มา merge — ถ้า backend มีของให้ backend ชนะ
-    fetchCart(user?._id)
-      .then((remoteItems) => {
-        if (remoteItems && remoteItems.length > 0) {
-          setItems(remoteItems);
-          saveCart(remoteItems);
-          scheduleSync(remoteItems);
-        } else {
-          scheduleSync(loadedItems);
-        }
-      })
-      .catch(() => {});
-
-    return () => clearTimeout(syncTimer.current);
-  }, [user]);
-
-  //ฟังก์ชันที่ทำงานเมื่อกด +, - (id = สินค้าตัวไหน, delta = จะเปลี่ยนจำนวนเท่าไหร่)
-  const handleQuantityChange = (id, delta) => {
-    setItems((prevItems) => {
-      //Cart ก่อนเปลี่ยน(INITIAL_CART_ITEMS, saved)
-      const updated = prevItems //สร้าง updated
-        .map((item) => {
-          //กำลังวนดูสินค้าทุกตัว
-          if (item.id === id) {
-            const newQty = item.quantity + delta;
-            return newQty > 0 ? { ...item, quantity: newQty } : null;
-          }
-          return item;
-        })
-        .filter(Boolean);
-
-      saveCart(updated); //localStorage อัปเดต
-      scheduleSync(updated); //sync กับ MongoDB
-      return updated; //React แสดงจำนวนใหม่
-    });
-  };
-
-  //ลบสินค้า
-  const handleRemoveItem = (id) => {
-    setItems((prevItems) => {
-      const updated = prevItems.filter((item) => item.id !== id); //เอาทุกตัวที่ไม่ใช่ ID ที่กดลบไว้
-      saveCart(updated);
-      scheduleSync(updated); //sync กับ MongoDB
-      return updated;
-    });
-  };
-
-  const handleClearAll = () => {
-    setItems([]);
-    saveCart([]);
-    scheduleSync([]); //sync กับ MongoDB
-  };
-
-  const handleResetDemo = () => {
-    const { items: resetItems, promoCode } = resetToDefaultCart();
-    setItems(resetItems); //เอา INITIAL_CART_ITEMS, GEAR30 กลับไปแสดง
-    scheduleSync(resetItems); //sync กับ MongoDB
-    const res = validatePromoCode(promoCode);
-    setAppliedPromo(res);
-    setPromoInput(promoCode);
-    setPromoError("");
-    setCheckoutSuccess(false);
-  };
-
-  const handleApplyPromo = (e) => {
-    e.preventDefault();
-    if (!promoInput.trim()) return; //ถ้าเกิด event กด apply แล้วห้ามกลับไปเป็น default/refresh
-
-    const res = validatePromoCode(promoInput);
-    if (res.valid) {
-      setAppliedPromo(res);
-      savePromo(res.code);
-      setPromoError("");
-    } else {
-      setPromoError(res.error);
-    }
-  };
-
-  const handleRemovePromo = () => {
-    setAppliedPromo(null);
-    setPromoInput("");
-    savePromo(null);
-    setPromoError("");
-  };
-
-  // คำนวณราคา
-  const subtotal = items.reduce(
-    (sum, item) => sum + item.unitPrice * item.quantity,
-    0,
-  );
-
-  const totalItemCount = items.reduce((sum, item) => sum + item.quantity, 0);
-
-  const discount = appliedPromo ? appliedPromo.discount : 0; //ถ้ามี Promo → ใช้ส่วนลดของ Promo, ถ้าไม่มี → ลด $0
-  const shipping = items.length > 0 ? DEFAULT_SHIPPING : 0; //ถ้ามีสินค้า → มีค่าส่ง, ถ้า Cart ว่าง → ค่าส่ง $0
-  const grandTotal = Math.max(0, subtotal - discount + shipping); //Math.max(0, ...) ป้องกันไม่ให้ยอดติดลบ
-
-  const handleProceedToCheckout = () => {
-    setCheckoutSuccess(true);
   };
 
   return (
@@ -192,11 +100,11 @@ export default function CartPage() {
                   Shopping Cart
                 </h1>
                 <Badge className="bg-[#1e1a33] text-slate-300 hover:bg-[#282345] font-semibold text-xs px-3 py-1 rounded-md border border-[#2f294d]/60">
-                  {totalItemCount} {totalItemCount === 1 ? "item" : "items"}
+                  {/* {totalItemCount} {totalItemCount === 1 ? "item" : "items"} */}
                 </Badge>
               </div>
 
-              {items.length > 0 ? (
+              {/* {items.length > 0 ? (
                 <Button
                   variant="link"
                   onClick={handleClearAll}
@@ -212,7 +120,7 @@ export default function CartPage() {
                 >
                   <RotateCcw className="w-4 h-4" /> Reset Demo Items
                 </Button>
-              )}
+              )} */}
             </div>
 
             {/* Cart Items List */}
@@ -229,7 +137,7 @@ export default function CartPage() {
                   your cart yet.
                 </p>
                 <Button
-                  onClick={handleResetDemo}
+                  // onClick={handleResetDemo}
                   className="mt-2 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-semibold px-6 py-2.5 rounded-xl shadow-lg shadow-purple-500/20"
                 >
                   Load Demo Items
@@ -291,7 +199,13 @@ export default function CartPage() {
                             <Button
                               variant="ghost"
                               size="icon-xs"
-                              onClick={() => handleQuantityChange(item._id, -1)}
+                              onClick={() =>
+                                handleQuantity(
+                                  item._id,
+                                  item.quantity,
+                                  "decrease",
+                                )
+                              }
                               className="text-slate-300 hover:text-white hover:bg-[#282147] rounded cursor-pointer"
                               aria-label="Decrease quantity"
                             >
@@ -303,7 +217,13 @@ export default function CartPage() {
                             <Button
                               variant="ghost"
                               size="icon-xs"
-                              onClick={() => handleQuantityChange(item._id, 1)}
+                              onClick={() =>
+                                handleQuantity(
+                                  item._id,
+                                  item.quantity,
+                                  "increase",
+                                )
+                              }
                               className="text-slate-300 hover:text-white hover:bg-[#282147] rounded cursor-pointer"
                               aria-label="Increase quantity"
                             >
@@ -325,7 +245,7 @@ export default function CartPage() {
                           <Button
                             variant="destructive"
                             size="icon-sm"
-                            onClick={() => handleRemoveItem(item.id)}
+                            // onClick={() => handleRemoveItem(item.id)}
                             className="bg-[#27152b] hover:bg-[#3d183f] text-[#f43f5e] hover:text-rose-300 rounded-lg border border-[#4a1b3f]/60 cursor-pointer"
                             title="Remove item"
                           >
@@ -407,7 +327,7 @@ export default function CartPage() {
                   Promo Code / Gift Card
                 </label>
 
-                <form
+                {/* <form
                   onSubmit={handleApplyPromo}
                   className="flex flex-col sm:flex-row gap-2"
                 >
@@ -434,22 +354,22 @@ export default function CartPage() {
                       Apply
                     </Button>
                   )}
-                </form>
+                </form> */}
 
                 {/* Applied Success banner */}
-                {appliedPromo && (
+                {/* {appliedPromo && (
                   <div className="flex items-center gap-1.5 text-[#10b981] text-xs font-semibold pt-1">
                     <Check className="w-4 h-4" />
                     <span>{appliedPromo.description}</span>
                   </div>
-                )}
+                )} */}
 
                 {/* Error message banner */}
-                {promoError && (
+                {/* {promoError && (
                   <p className="text-rose-400 text-xs font-medium pt-1">
                     {promoError}
                   </p>
-                )}
+                )} */}
               </CardContent>
             </Card>
 
@@ -460,21 +380,21 @@ export default function CartPage() {
                   <div className="flex justify-between items-center text-slate-300">
                     <span>Cart Subtotal</span>
                     <span className="font-bold text-white text-base">
-                      ${subtotal.toFixed(2)}
+                      {/* ${subtotal.toFixed(2)} */}
                     </span>
                   </div>
 
                   <div className="flex justify-between items-center text-slate-300">
                     <span>Discount Applied</span>
                     <span className="font-bold text-[#10b981] text-base">
-                      {discount > 0 ? `-$${discount.toFixed(2)}` : "$0.00"}
+                      {/* {discount > 0 ? `-$${discount.toFixed(2)}` : "$0.00"} */}
                     </span>
                   </div>
 
                   <div className="flex justify-between items-center text-slate-300">
                     <span>Estimated Shipping</span>
                     <span className="font-bold text-white text-base">
-                      ${shipping.toFixed(2)}
+                      {/* ${shipping.toFixed(2)} */}
                     </span>
                   </div>
                 </div>
@@ -487,12 +407,12 @@ export default function CartPage() {
                     Grand Total
                   </span>
                   <span className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-                    ${grandTotal.toFixed(2)}
+                    {/* ${grandTotal.toFixed(2)} */}
                   </span>
                 </div>
 
                 {/* Proceed to Checkout Button */}
-                <Button
+                {/* <Button
                   onClick={handleProceedToCheckout}
                   disabled={items.length === 0}
                   className={`w-full py-4 h-auto rounded-xl font-black text-sm tracking-wider uppercase flex items-center justify-center gap-2 transition-all duration-300 shadow-xl ${
@@ -503,7 +423,7 @@ export default function CartPage() {
                 >
                   <span>PROCEED TO CHECKOUT</span>
                   <ArrowRight className="w-4 h-4 stroke-[3]" />
-                </Button>
+                </Button> */}
 
                 {/* Security badge footer */}
                 <div className="flex items-center justify-center gap-1.5 text-slate-400 text-xs pt-1">
@@ -516,7 +436,7 @@ export default function CartPage() {
         </div>
 
         {/* Modal Dialog using shadcn UI Dialog */}
-        <Dialog open={checkoutSuccess} onOpenChange={setCheckoutSuccess}>
+        {/* <Dialog open={checkoutSuccess} onOpenChange={setCheckoutSuccess}>
           <DialogContent className="bg-[#151229] border-purple-500/30 text-slate-100 rounded-3xl p-5 sm:p-8 w-[calc(100%-2rem)] max-w-md">
             <DialogHeader className="text-center flex flex-col items-center space-y-4">
               <div className="w-16 h-16 bg-gradient-to-tr from-emerald-500 to-cyan-400 rounded-full flex items-center justify-center text-slate-950 mx-auto shadow-lg shadow-emerald-500/30">
@@ -548,7 +468,7 @@ export default function CartPage() {
               Close & Continue Browsing
             </Button>
           </DialogContent>
-        </Dialog>
+        </Dialog> */}
       </div>
     </div>
   );
