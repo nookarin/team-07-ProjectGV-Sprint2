@@ -141,12 +141,6 @@ export default function CartPage() {
                   Looks like you haven't added any GearVerse gaming equipment to
                   your cart yet.
                 </p>
-                <Button
-                  // onClick={handleResetDemo}
-                  className="mt-2 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-semibold px-6 py-2.5 rounded-xl shadow-lg shadow-purple-500/20"
-                >
-                  Load Demo Items
-                </Button>
               </Card>
             ) : (
               <div className="space-y-4">
