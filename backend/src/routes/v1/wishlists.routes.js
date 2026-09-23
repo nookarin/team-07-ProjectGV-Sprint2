@@ -40,7 +40,7 @@ wishlistRouter.post("/", protect, async (req, res, next) => {
 
     return res
       .status(201)
-      .json({ success: true, message: "Created wishlist successfully" });
+      .json({ success: true, message: "Product added to your wishlist" });
   } catch (error) {
     next(error);
   }
