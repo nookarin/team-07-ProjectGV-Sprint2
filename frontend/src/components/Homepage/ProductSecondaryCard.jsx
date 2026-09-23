@@ -2,7 +2,7 @@ import { useCart } from "@/contexts/Cart/CartProvider";
 import { Heart, ShoppingCart } from "lucide-react";
 import React from "react";
 
-const ProductSecondaryCard = ({product}) => {
+const ProductSecondaryCard = ({ product, discount }) => {
   const { addToCart } = useCart();
   return (
     <div className="border border-gpurple-2 bg-gbg-1/95 text-center rounded-2xl shadow-lg shadow-purple-900/50">
@@ -19,7 +19,16 @@ const ProductSecondaryCard = ({product}) => {
       </div>
       <div className="flex justify-between m-4 mt-10">
         <div className="flex w-40 justify-between items-center border-2 rounded-xl border-gpurple-2">
-          <p className="text-gpurple-2 w-full font-bold textxl p-2">${product.price}</p>
+          <div className="flex items-center w-full h-10">
+            <p
+              className={`text-gpurple-2 ${discount ? "line-through ml-2 font-normal text-sm" : "w-full p-2 font-bold text-2xl"}`}
+            >
+              ${product.price}
+            </p>
+            <p className={`text-red-500 ml-1 font-bold text-2xl ${!discount && "hidden"}`}>
+              {Math.floor(product.price * discount)}
+            </p>
+          </div>
           <button
             onClick={() => addToCart(product)}
             className="bg-gpurple-2 p-2 rounded-e-lg hover:bg-gpurple-4"
