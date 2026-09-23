@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -19,14 +19,18 @@ import {
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/Authentication/AuthContext";
+import { useCart } from "@/contexts/Cart/CartProvider";
+import axios from "axios";
 
 const NavbarAuthenticate = ({ setClick, click }) => {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { url, logout, user } = useAuth();
+  const { loading, data } = useCart();
   const handleLogout = () => {
-    logout()
-    navigate('/')
-  }
+    logout();
+    navigate("/");
+  };
+
   return (
     <div className="flex justify-end shrink-0">
       <NavigationMenu>
@@ -100,15 +104,42 @@ const NavbarAuthenticate = ({ setClick, click }) => {
             >
               <ShoppingBag size={20} color="#22D3EE" />
             </NavigationMenuTrigger>
-            <NavigationMenuContent className={'text-white'}>
-              <div>
-                <p>asdsadas</p>
+            <NavigationMenuContent className={"text-white flex flex-col gap-4"}>
+              <div className="flex flex-col gap-4">
+                {!loading &&
+                  data?.map((item) => {
+                    return (
+                      <div
+                        key={item.product_id._id}
+                        className="flex gap-2 items-center border-b border-gbase-1 pb-2"
+                      >
+                        <img
+                          src={item.product_id.image_url}
+                          alt=""
+                          className="w-10 h-10 object-cover rounded-lg"
+                        />
+                        <div>
+                          <p>{item.product_id.product_name}</p>
+                          <p>Price: {item.product_id.price}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
               </div>
-              <NavigationMenuLink className={'cursor-pointer'}>See More</NavigationMenuLink>
+              <NavigationMenuLink
+                render={<Link to={"/cart"} />}
+                className={
+                  "cursor-pointer font-bold tracking-wide bg-gpink-2 text-center flex items-center justify-center"
+                }
+              >
+                My Cart
+              </NavigationMenuLink>
             </NavigationMenuContent>
           </NavigationMenuItem>
           <NavigationMenuItem>
-            <NavigationMenuLink className={'cursor-pointer'}>USD/THB</NavigationMenuLink>
+            <NavigationMenuLink className={"cursor-pointer"}>
+              USD/THB
+            </NavigationMenuLink>
           </NavigationMenuItem>
         </NavigationMenuList>
       </NavigationMenu>

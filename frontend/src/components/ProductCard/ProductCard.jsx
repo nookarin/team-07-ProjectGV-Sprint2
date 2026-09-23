@@ -2,10 +2,16 @@ import { Badge } from "#components/ui/badge";
 import { Button } from "@base-ui/react";
 import { Heart, ShoppingCart, Star } from "lucide-react";
 import React from "react";
-import { Link } from "react-router-dom";
+import { data, Link } from "react-router-dom";
 import img_default from "/images/headset.jpg";
+import { useCart } from "@/contexts/Cart/CartProvider";
+import axios from "axios";
+import { useAuth } from "@/contexts/Authentication/AuthContext";
 
 const ProductCard = ({ img, product }) => {
+  const { url, user } = useAuth();
+  const { cart, setCart } = useCart();
+  
   return (
     <div className="relative border bg-gbg-1/60 backdrop-blur-2xl border-gpurple-2 text-center rounded-2xl shadow-lg shadow-purple-900/50 text-white">
       <Badge
@@ -15,11 +21,19 @@ const ProductCard = ({ img, product }) => {
         {product.category_id.category_name}
       </Badge>
       <Link to={`/product/${product._id}`}>
-        <img className="rounded-t-2xl w-full h-100 object-cover border-b border-gbase-1" src={img ? img : img_default} alt="" />
+        <img
+          className="rounded-t-2xl w-full h-100 object-cover border-b border-gbase-1"
+          src={img ? img : img_default}
+          alt=""
+        />
       </Link>
       <div className="w-[80%] h-30 mx-auto my-4 text-white">
         <h3 className="font-bold text-xl">{product.product_name}</h3>
-        <p className="text-sm font-light mt-4">{product.description.length >= 150 ? product.description.slice(0,150) : product.description}</p>
+        <p className="text-sm font-light mt-4">
+          {product.description.length >= 150
+            ? product.description.slice(0, 150)
+            : product.description}
+        </p>
       </div>
       <div className="text-start gap-0.5 mx-4 mt-10 flex items-center">
         <Star size={16} className="fill-amber-500 stroke-amber-500" />
@@ -40,7 +54,10 @@ const ProductCard = ({ img, product }) => {
               className="hover:fill-gpurple-2 active:fill-red-600 active:stroke-red-600 "
             />
           </Button>
-          <Button className="border border-gbase-1 bg-gbase-3 rounded-lg p-2">
+          <Button
+            onClick={() => addToCart(product)}
+            className="border border-gbase-1 bg-gbase-3 rounded-lg p-2"
+          >
             <ShoppingCart />
           </Button>
         </div>

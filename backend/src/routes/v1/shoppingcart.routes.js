@@ -29,12 +29,13 @@ shoppingCartRouter.get("/:userId", async (req, res, next) => {
 // PATCH /api/v1/shoppingcart/:userId/items/:itemId
 shoppingCartRouter.patch("/:userId/items/:itemId", async (req, res, next) => {
   try {
+    console.log(req.body)
     const { quantity } = req.body;
 
-    if (!Number.isInteger(quantity) || quantity < 1) {
+    if (!Number.isInteger(quantity)) {
       return res.status(400).json({
         success: false,
-        message: "Quantity must be a positive integer!",
+        message: "Quantity must be a number!",
       });
     }
 
@@ -97,6 +98,7 @@ shoppingCartRouter.patch("/:userId/items/:itemId", async (req, res, next) => {
 // POST /api/v1/shoppingcart/:userId/items
 shoppingCartRouter.post("/:userId/items", async (req, res, next) => {
   try {
+    console.log(req.body)
     const { product_id, quantity } = req.body;
 
     if (!product_id) {
@@ -196,6 +198,7 @@ shoppingCartRouter.post("/:userId/items", async (req, res, next) => {
       cart,
     });
   } catch (error) {
+    console.log(error)
     next(error);
   }
 });
