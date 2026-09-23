@@ -49,28 +49,13 @@ import { toast } from "sonner";
 export default function CartPage() {
   const { user, url } = useAuth();
   const { data, loading, updateQuantity, cart, setCart } = useCart();
-
+  const [quantities, setQuantities] = useState({});
   const handleRemoveItem = async (itemId) =>{
     const response = await axios.delete(`${url}/shoppingcart/${user._id}/items/${itemId}`)
     setCart(response.data.items)
   }
 
-  const handleQuantity = async (itemId, currentQuantity, type) => {
-    let newQuantity = currentQuantity;
-
-    if (type === "increase") {
-      newQuantity = currentQuantity + 1;
-    }
-
-    if (type === "decrease") {
-      newQuantity = currentQuantity - 1;
-    }
-
-    // ป้องกันไม่ให้ต่ำกว่า 1
-    if (newQuantity < 1) {
-      return;
-    }
-
+  const syncQuantity = useDebouncedCallback(async (itemId, newQuantity) => {
     try {
       const response = await axios.patch(
         `${url}/shoppingcart/${user._id}/items/${itemId}`,
@@ -88,7 +73,38 @@ export default function CartPage() {
       toast.error(error.response?.data?.message || "Something went wrong!", {
         richColors: true
       });
+
+      setQuantities((prev) => {
+        const next = { ...prev };
+        delete next[itemId];
+        return next;
+      });
     }
+  }, 500);
+
+  const handleQuantity = (itemId, type) => {
+    const currentQuantity =
+      quantities[itemId] ??
+      data.find((item) => item._id === itemId)?.quantity ??
+      1;
+
+    let newQuantity = currentQuantity;
+
+    if (type === "increase") {
+      newQuantity = currentQuantity + 1;
+    }
+
+    if (type === "decrease") {
+      newQuantity = currentQuantity - 1;
+    }
+
+    // ป้องกันไม่ให้ต่ำกว่า 1
+    if (newQuantity < 1) {
+      return;
+    }
+
+    setQuantities((prev) => ({ ...prev, [itemId]: newQuantity }));
+    syncQuantity(itemId, newQuantity);
   };
 
   return (
@@ -104,8 +120,8 @@ export default function CartPage() {
                 <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
                   Shopping Cart
                 </h1>
-                <Badge className="bg-[#1e1a33] text-slate-300 hover:bg-[#282345] font-semibold text-xs px-3 py-1 rounded-md border border-[#2f294d]/60">
-                  {/* {totalItemCount} {totalItemCount === 1 ? "item" : "items"} */}
+                <Badge className="bg-[#1e1a33] mt-2 text-slate-300 hover:bg-[#282345] font-semibold text-xs px-3 py-1 rounded-md border border-[#2f294d]/60">
+                  {data.length} {data.length === 1 ? "item" : "items"}
                 </Badge>
               </div>
 
@@ -145,7 +161,8 @@ export default function CartPage() {
             ) : (
               <div className="space-y-4">
                 {data?.map((item) => {
-                  const itemTotal = item.product_id.price * item.quantity;
+                  const displayQuantity = quantities[item._id] ?? item.quantity;
+                  const itemTotal = item.product_id.price * displayQuantity;
                   return (
                     <Card
                       key={item._id}
@@ -169,15 +186,15 @@ export default function CartPage() {
 
                           {/* Specs Badge */}
                           <div>
-                            <Badge className="bg-[#1f1938] text-[#c084fc] hover:bg-[#2b214f] text-xs px-3 py-1 rounded-md font-medium border border-[#3b2a63]/50">
-                              {item.tag}
+                            <Badge className={`${item.product_id.subcategory_ids.length === 0 && 'hidden'} bg-[#1f1938] text-[#c084fc] hover:bg-[#2b214f] text-xs px-3 py-1 rounded-md font-medium border border-[#3b2a63]/50`}>
+                              {item.product_id.subcategory_ids.length !== 0 ?item.product_id.subcategory_ids[0]?.subcategory_name: ''}
                             </Badge>
                           </div>
 
                           {/* Delivery Info */}
                           <div className="flex items-center justify-center sm:justify-start gap-1.5 text-[#10b981] text-xs font-semibold pt-1">
                             <Truck className="w-3.5 h-3.5" />
-                            <span>{item.delivery}</span>
+                            <span>Free Delivery</span>
                           </div>
                         </div>
 
@@ -201,7 +218,6 @@ export default function CartPage() {
                               onClick={() =>
                                 handleQuantity(
                                   item._id,
-                                  item.quantity,
                                   "decrease",
                                 )
                               }
@@ -211,7 +227,7 @@ export default function CartPage() {
                               <Minus className="w-3.5 h-3.5" />
                             </Button>
                             <span className="w-8 text-center font-extrabold text-white text-sm">
-                              {item.quantity}
+                              {displayQuantity}
                             </span>
                             <Button
                               variant="ghost"
@@ -219,7 +235,6 @@ export default function CartPage() {
                               onClick={() =>
                                 handleQuantity(
                                   item._id,
-                                  item.quantity,
                                   "increase",
                                 )
                               }
