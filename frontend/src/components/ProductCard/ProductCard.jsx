@@ -10,7 +10,7 @@ import { useAuth } from "@/contexts/Authentication/AuthContext";
 
 const ProductCard = ({ img, product }) => {
   const { url, user } = useAuth();
-  const { cart, setCart } = useCart();
+  const { cart, setCart, addToCart,err } = useCart();
 
   return (
     <div className="relative border bg-gbg-1/60 backdrop-blur-2xl border-gpurple-2 text-center rounded-2xl shadow-lg shadow-purple-900/50 text-white">
@@ -58,7 +58,7 @@ const ProductCard = ({ img, product }) => {
           </Button>
           <Button
             onClick={() => addToCart(product)}
-            className="border border-gbase-1 bg-gbase-3 rounded-lg p-2"
+            className="border border-gbase-1 bg-gbase-3 rounded-lg p-2 hover:bg-gpurple-4"
           >
             <ShoppingCart />
           </Button>

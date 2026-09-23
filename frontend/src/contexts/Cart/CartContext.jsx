@@ -3,13 +3,14 @@ import { CartContext } from "./CartProvider";
 import { useAuth } from "../Authentication/AuthContext";
 import axios from "axios";
 import { useDebounce } from "use-debounce";
+import { toast } from "sonner";
 
 export function CartProvider({ children }) {
   const { url, user } = useAuth();
   const [cart, setCart] = useState([]);
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(null);
-  const [debouncedValue] = useDebounce(cart, 500);
+  const [err, setErr] = useState('Please login first')
   const getCart = async () => {
     setLoading(true);
     const response = await axios.get(`${url}/shoppingcart/${user._id}`);
@@ -17,6 +18,13 @@ export function CartProvider({ children }) {
     setLoading(false);
   };
   const addToCart = async (product) => {
+    if(!user) {
+      setErr('Please login first.')
+      toast.error(err, {
+        richColors: true,
+        position: 'bottom-center'
+      })
+    }
     setCart([...cart, product]);
     try {
       const response = await axios.post(
@@ -55,6 +63,7 @@ export function CartProvider({ children }) {
         loading,
         data,
         updateQuantity,
+        err
       }}
     >
       {children}
