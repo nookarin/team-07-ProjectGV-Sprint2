@@ -97,6 +97,7 @@ shoppingCartRouter.patch("/:userId/items/:itemId", async (req, res, next) => {
 // POST /api/v1/shoppingcart/:userId/items
 shoppingCartRouter.post("/:userId/items", async (req, res, next) => {
   try {
+    console.log(req.body)
     const { product_id, quantity } = req.body;
 
     if (!product_id) {
@@ -196,6 +197,7 @@ shoppingCartRouter.post("/:userId/items", async (req, res, next) => {
       cart,
     });
   } catch (error) {
+    console.log(error)
     next(error);
   }
 });
