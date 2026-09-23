@@ -49,7 +49,7 @@ import { toast } from "sonner";
 export default function CartPage() {
   const { user, url } = useAuth();
   const { data, loading, updateQuantity, cart, setCart } = useCart();
-
+  console.log(data)
   const handleRemoveItem = async (itemId) =>{
     const response = await axios.delete(`${url}/shoppingcart/${user._id}/items/${itemId}`)
     setCart(response.data.items)
@@ -175,15 +175,15 @@ export default function CartPage() {
 
                           {/* Specs Badge */}
                           <div>
-                            <Badge className="bg-[#1f1938] text-[#c084fc] hover:bg-[#2b214f] text-xs px-3 py-1 rounded-md font-medium border border-[#3b2a63]/50">
-                              {item.tag}
+                            <Badge className={`${item.product_id.subcategory_ids.length === 0 && 'hidden'} bg-[#1f1938] text-[#c084fc] hover:bg-[#2b214f] text-xs px-3 py-1 rounded-md font-medium border border-[#3b2a63]/50`}>
+                              {item.product_id.subcategory_ids.length !== 0 ?item.product_id.subcategory_ids[0]?.subcategory_name: ''}
                             </Badge>
                           </div>
 
                           {/* Delivery Info */}
                           <div className="flex items-center justify-center sm:justify-start gap-1.5 text-[#10b981] text-xs font-semibold pt-1">
                             <Truck className="w-3.5 h-3.5" />
-                            <span>{item.delivery}</span>
+                            <span>Free Delivery</span>
                           </div>
                         </div>
 

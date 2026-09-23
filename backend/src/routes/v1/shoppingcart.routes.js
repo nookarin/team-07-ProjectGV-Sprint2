@@ -10,7 +10,19 @@ shoppingCartRouter.get("/:userId", async (req, res, next) => {
     const cart = await ShoppingCart.findOne({
       user_id: req.params.userId,
       status: "active",
-    }).populate("user_id items.product_id");
+    })
+      .populate("user_id")
+      .populate({
+        path: "items.product_id",
+        populate: [
+          {
+            path: "category_id",
+          },
+          {
+            path: "subcategory_ids",
+          },
+        ],
+      });
 
     if (!cart || cart.items.length === 0) {
       return res.json({
@@ -29,7 +41,7 @@ shoppingCartRouter.get("/:userId", async (req, res, next) => {
 // PATCH /api/v1/shoppingcart/:userId/items/:itemId
 shoppingCartRouter.patch("/:userId/items/:itemId", async (req, res, next) => {
   try {
-    console.log(req.body)
+    console.log(req.body);
     const { quantity } = req.body;
 
     if (!Number.isInteger(quantity)) {
@@ -52,7 +64,7 @@ shoppingCartRouter.patch("/:userId/items/:itemId", async (req, res, next) => {
     }
 
     const item = cart.items.find(
-      (item) => item._id.toString() === req.params.itemId
+      (item) => item._id.toString() === req.params.itemId,
     );
 
     if (!item) {
@@ -98,7 +110,7 @@ shoppingCartRouter.patch("/:userId/items/:itemId", async (req, res, next) => {
 // POST /api/v1/shoppingcart/:userId/items
 shoppingCartRouter.post("/:userId/items", async (req, res, next) => {
   try {
-    console.log(req.body)
+    console.log(req.body);
     const { product_id, quantity } = req.body;
 
     if (!product_id) {
@@ -157,13 +169,12 @@ shoppingCartRouter.post("/:userId/items", async (req, res, next) => {
     } else {
       // เช็กว่าสินค้านี้มีอยู่ใน cart หรือยัง
       const existingIndex = cart.items.findIndex(
-        (item) => item.product_id.toString() === product_id
+        (item) => item.product_id.toString() === product_id,
       );
 
       if (existingIndex >= 0) {
         // จำนวนเดิม + จำนวนที่กำลังจะเพิ่ม
-        const newQuantity =
-          cart.items[existingIndex].quantity + quantityToAdd;
+        const newQuantity = cart.items[existingIndex].quantity + quantityToAdd;
 
         if (newQuantity > product.stock) {
           return res.status(400).json({
@@ -198,7 +209,7 @@ shoppingCartRouter.post("/:userId/items", async (req, res, next) => {
       cart,
     });
   } catch (error) {
-    console.log(error)
+    console.log(error);
     next(error);
   }
 });
@@ -206,7 +217,6 @@ shoppingCartRouter.post("/:userId/items", async (req, res, next) => {
 // DELETE /api/v1/shoppingcart/:userId/items/:itemId - Remove an item from cart
 shoppingCartRouter.delete("/:userId/items/:itemId", async (req, res, next) => {
   try {
-    console.log(req.params)
     const cart = await ShoppingCart.findOne({
       user_id: req.params.userId,
       status: "active",
