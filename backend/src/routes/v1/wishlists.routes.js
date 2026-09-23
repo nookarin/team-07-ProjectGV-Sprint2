@@ -6,7 +6,7 @@ import { authorize } from "../../middlewares/authorize.js";
 export const wishlistRouter = Router();
 
 // GET / - Fetch all wishlists (admin only)
-wishlistRouter.get("/", protect, authorize(["admin"]), async (req, res, next) => {
+wishlistRouter.get("/", protect, async (req, res, next) => {
   try {
     const wishlist = await Wishlist.find({}).populate("user products");
     return res.status(200).json({ success: true, wishlist });
