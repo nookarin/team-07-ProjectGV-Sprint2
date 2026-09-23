@@ -49,28 +49,13 @@ import { toast } from "sonner";
 export default function CartPage() {
   const { user, url } = useAuth();
   const { data, loading, updateQuantity, cart, setCart } = useCart();
-  console.log(data)
+  const [quantities, setQuantities] = useState({});
   const handleRemoveItem = async (itemId) =>{
     const response = await axios.delete(`${url}/shoppingcart/${user._id}/items/${itemId}`)
     setCart(response.data.items)
   }
 
-  const handleQuantity = async (itemId, currentQuantity, type) => {
-    let newQuantity = currentQuantity;
-
-    if (type === "increase") {
-      newQuantity = currentQuantity + 1;
-    }
-
-    if (type === "decrease") {
-      newQuantity = currentQuantity - 1;
-    }
-
-    // ป้องกันไม่ให้ต่ำกว่า 1
-    if (newQuantity < 1) {
-      return;
-    }
-
+  const syncQuantity = useDebouncedCallback(async (itemId, newQuantity) => {
     try {
       const response = await axios.patch(
         `${url}/shoppingcart/${user._id}/items/${itemId}`,
@@ -88,7 +73,38 @@ export default function CartPage() {
       toast.error(error.response?.data?.message || "Something went wrong!", {
         richColors: true
       });
+
+      setQuantities((prev) => {
+        const next = { ...prev };
+        delete next[itemId];
+        return next;
+      });
     }
+  }, 500);
+
+  const handleQuantity = (itemId, type) => {
+    const currentQuantity =
+      quantities[itemId] ??
+      data.find((item) => item._id === itemId)?.quantity ??
+      1;
+
+    let newQuantity = currentQuantity;
+
+    if (type === "increase") {
+      newQuantity = currentQuantity + 1;
+    }
+
+    if (type === "decrease") {
+      newQuantity = currentQuantity - 1;
+    }
+
+    // ป้องกันไม่ให้ต่ำกว่า 1
+    if (newQuantity < 1) {
+      return;
+    }
+
+    setQuantities((prev) => ({ ...prev, [itemId]: newQuantity }));
+    syncQuantity(itemId, newQuantity);
   };
 
   return (
@@ -145,7 +161,8 @@ export default function CartPage() {
             ) : (
               <div className="space-y-4">
                 {data?.map((item) => {
-                  const itemTotal = item.product_id.price * item.quantity;
+                  const displayQuantity = quantities[item._id] ?? item.quantity;
+                  const itemTotal = item.product_id.price * displayQuantity;
                   return (
                     <Card
                       key={item._id}
@@ -201,7 +218,6 @@ export default function CartPage() {
                               onClick={() =>
                                 handleQuantity(
                                   item._id,
-                                  item.quantity,
                                   "decrease",
                                 )
                               }
@@ -211,7 +227,7 @@ export default function CartPage() {
                               <Minus className="w-3.5 h-3.5" />
                             </Button>
                             <span className="w-8 text-center font-extrabold text-white text-sm">
-                              {item.quantity}
+                              {displayQuantity}
                             </span>
                             <Button
                               variant="ghost"
@@ -219,7 +235,6 @@ export default function CartPage() {
                               onClick={() =>
                                 handleQuantity(
                                   item._id,
-                                  item.quantity,
                                   "increase",
                                 )
                               }
