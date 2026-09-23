@@ -12,8 +12,13 @@ import { useWishlist } from "@/contexts/Wishlist/WishlistProvider";
 const ProductCard = ({ img, product }) => {
   const { url, user } = useAuth();
   const { cart, setCart, addToCart,err } = useCart();
-  // Pull the addToWishlist function from the wishlist context so the heart works.
-  const { addToWishlist } = useWishlist();
+  // Pull the wishlist functions/state from context so the heart can add and remove.
+  const { products, addToWishlist, removeFromWishlist } = useWishlist();
+  // check active.
+  const isWishlisted = products.some((p) => p._id === product._id);
+  // Toggle adds if absent, removes if already saved.
+  const handleWishlistClick = () =>
+    isWishlisted ? removeFromWishlist(product._id) : addToWishlist(product);
 
   return (
     <div className="relative border bg-gbg-1/60 backdrop-blur-2xl border-gpurple-2 text-center rounded-2xl shadow-lg shadow-purple-900/50 text-white">
@@ -54,11 +59,11 @@ const ProductCard = ({ img, product }) => {
         </div>
         <div className="flex gap-2">
           <Button 
-            onClick={() => addToWishlist(product)}
+            onClick={handleWishlistClick}
             className="border border-gbase-1 bg-gbase-3 rounded-lg p-2 hover:bg-gpurple-4">
             <Heart
               color="#ffffff"
-              className="active:fill-red-600 active:stroke-red-600"
+              className={isWishlisted ? "fill-red-600 stroke-red-600" : ""}
             />
           </Button>
           <Button

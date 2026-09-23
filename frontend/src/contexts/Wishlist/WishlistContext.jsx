@@ -61,6 +61,35 @@ export function WishlistProvider({ children }) {
     }
   };
 
+  // Toggle inverse of addToWishlist: guard on login, DELETE the product from the user's wishlist (user id travels in the body), then refresh the saved list.
+  const removeFromWishlist = async (productId) => {
+    if (!user) {
+      setErr("Please login first.");
+      toast.error(err, {
+        richColors: true,
+        position: "bottom-center",
+      });
+      return;
+    }
+    try {
+      const response = await axios.delete(`${url}/wishlists/${productId}`, {
+        data: { user: user._id },
+        withCredentials: true,
+      });
+      toast.success(response.data.message || "Removed from wishlist.", {
+        richColors: true,
+        position: "bottom-center",
+      });
+      await getWishlist();
+    } catch (error) {
+      console.log("TEST", error);
+      toast.error(error.response?.data?.message || "Failed to remove product.", {
+        richColors: true,
+        position: "bottom-center",
+      });
+    }
+  };
+
   // refresh the wishlist whenever a different user logs in.
   useEffect(() => {
     getWishlist();
@@ -72,6 +101,7 @@ export function WishlistProvider({ children }) {
         products,
         setProducts,
         addToWishlist,
+        removeFromWishlist,
         getWishlist,
         loading,
         err,
