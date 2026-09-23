@@ -11,7 +11,7 @@ import { useAuth } from "@/contexts/Authentication/AuthContext";
 const ProductCard = ({ img, product }) => {
   const { url, user } = useAuth();
   const { cart, setCart } = useCart();
-  
+
   return (
     <div className="relative border bg-gbg-1/60 backdrop-blur-2xl border-gpurple-2 text-center rounded-2xl shadow-lg shadow-purple-900/50 text-white">
       <Badge
@@ -28,11 +28,13 @@ const ProductCard = ({ img, product }) => {
         />
       </Link>
       <div className="w-[80%] h-30 mx-auto my-4 text-white">
-        <h3 className="font-bold text-xl">{product.product_name}</h3>
-        <p className="text-sm font-light mt-4">
-          {product.description.length >= 150
-            ? product.description.slice(0, 150)
-            : product.description}
+        <h3 className="font-bold text-xs sm:text-base xl:text-xl">
+          {product.product_name}
+        </h3>
+        <p
+          className={`text-sm font-light mt-4 overflow-auto scrollbar-thumb-gbase-1 ${product.product_name.length > 20 ? "h-[70%]" : "h-[90%]"}`}
+        >
+          {product.description}
         </p>
       </div>
       <div className="text-start gap-0.5 mx-4 mt-10 flex items-center">

@@ -84,7 +84,7 @@ const ProductListPage = () => {
             className="border border-gbase-2 bg-gbase-3/30 rounded-lg mt-2 py-1 px-2"
           />
         </div>
-        <div className="flex gap-5">
+        <div className="flex gap-5 w-full">
           <div className="flex flex-col gap-2">
             <label>Price:</label>
             <div className="flex items-center">
@@ -93,7 +93,7 @@ const ProductListPage = () => {
                 <input
                   type="number"
                   name="min"
-                  className="outline-0"
+                  className="outline-0 w-24 sm:w-40"
                   placeholder="min price"
                   value={price.min === 0 ? "" : price.min}
                   onChange={(e) =>
@@ -107,7 +107,7 @@ const ProductListPage = () => {
                 <input
                   type="number"
                   name="max"
-                  className="outline-0"
+                  className="outline-0 w-24 sm:w-40"
                   placeholder="max price"
                   value={price.max === 20000 ? "" : price.max}
                   onChange={(e) =>
@@ -117,12 +117,9 @@ const ProductListPage = () => {
               </div>
             </div>
           </div>
-          {/* <div>
-            <p>Sort</p>
-          </div> */}
-          <div className="flex flex-col gap-2">
+          <div className="hidden md:flex flex-col gap-2 w-full">
             <label htmlFor="">Tags:</label>
-            <div className="flex gap-2">
+            <div className="flex gap-2 h-10 w-full overflow-y-scroll flex-wrap scrollbar-thumb-gbase-1 scrollbar-track-gbase-3/50 scrollbar-thin">
               {!loading ? (
                 tags?.map((tag, index) => {
                   return (
@@ -136,14 +133,16 @@ const ProductListPage = () => {
                   );
                 })
               ) : (
-                <p>Loading..</p>
+                <p>Loading...</p>
               )}
             </div>
           </div>
         </div>
       </aside>
       <div className="w-9/12 py-14 mx-auto">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:gap-10 max-xl:gap-20">
+        <div
+          className={`${loading ? "flex justify-center" : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:gap-10 max-xl:gap-20"}`}
+        >
           {!loading ? (
             filteredProducts?.map((product, index) => {
               return (
@@ -153,7 +152,7 @@ const ProductListPage = () => {
               );
             })
           ) : (
-            <Ring className={"size-20"} />
+            <Ring className={"size-20 text-white"} />
           )}
           {err && <p className="text-gray-500">{err}</p>}
         </div>

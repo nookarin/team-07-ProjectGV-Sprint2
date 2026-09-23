@@ -36,17 +36,17 @@ const Navbar = () => {
   }, []);
   return (
     <nav className="bg-gbg-2 w-full h-16 flex items-center justify-between gap-4 px-4 sm:px-10 text-white relative z-20 shadow-xl shadow-gpurple-4/80">
-      <Link to={"/"} className="flex items-center gap-2 sm:gap-4 shrink-0">
+      <Link to={"/"} className="flex items-center gap-2 sm:gap-4 shrink-0 w-1/3 md:w-1/4">
         <img className="w-10 h-10 shrink-0" src={LogoImg} alt="logo" />
         <img
-          className="w-40 hidden sm:block"
+          className="w-40 hidden lg:block"
           src={LogoText}
           alt="logo text"
         />
       </Link>
 
       {/* SECTION 2 — ซ่อนเมนูแนวนอนตอนจอแคบ ใช้ hamburger แทนกันตัวหนังสือทับกัน */}
-      <NavigationMenu className={"hidden md:flex flex-1 justify-center"}>
+      <NavigationMenu className={"hidden md:flex flex-1 justify-center w-1/3"}>
         <NavigationMenuList>
           <NavigationMenuItem>
             <NavigationMenuLink
@@ -95,7 +95,7 @@ const Navbar = () => {
       </NavigationMenu>
 
       {/* SEC3 */}
-      <div className="flex items-center gap-2 shrink-0">
+      <div className="flex items-center gap-2 shrink-0 w-1/3 md:w-1/4 justify-end">
         {user ? (
           <NavbarAuthenticate setClick={setClick} click={click} />
         ) : (
