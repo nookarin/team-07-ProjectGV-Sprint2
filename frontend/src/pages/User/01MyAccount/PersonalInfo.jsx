@@ -66,12 +66,14 @@ export default function PersonalInfo() {
     if (!editing || draft.trim() === "") {
       toast.error("Required data.", {
         richColors: true,
+        position: 'top-center'
       });
       return;
     }
     if (editing === "password" && draft === PASSWORD_MASK) {
       toast.error("Please enter a new password.", {
         richColors: true,
+        position: 'top-center'
       });
       return;
     }
@@ -84,6 +86,7 @@ export default function PersonalInfo() {
       );
       toast.success(`${editing} updated successfully.`, {
         richColors: true,
+        position: 'top-center'
       });
       await fetchData();
       setEditing(null);
@@ -91,6 +94,7 @@ export default function PersonalInfo() {
       console.log(error);
       toast.error(error.response?.data?.message || "Failed to update.", {
         richColors: true,
+        position: 'top-center'
       });
     } finally {
       setSaving(false);

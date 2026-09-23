@@ -42,7 +42,7 @@ export default function MyWishlist() {
         if (!cancelled) {
           toast.error(
             error.response?.data?.message || "Failed to load your wishlist.",
-            { richColors: true },
+            { richColors: true, position: "top-center" },
           );
         }
       } finally {
@@ -72,11 +72,15 @@ export default function MyWishlist() {
       );
       setSearchResults(results);
       if (results.length === 0) {
-        toast.info("No matching products found.", { richColors: true });
+        toast.info("No matching products found.", {
+          richColors: true,
+          position: "top-center",
+        });
       }
     } catch (error) {
       toast.error(error.response?.data?.message || "Search failed.", {
         richColors: true,
+        position: "top-center",
       });
     } finally {
       setSearching(false);
@@ -95,14 +99,14 @@ export default function MyWishlist() {
       );
       toast.success(response.data.message || "Added to wishlist.", {
         richColors: true,
+        position: "top-center",
       });
-      setSearchResults((current) =>
-        current.filter((p) => p._id !== productId),
-      );
+      setSearchResults((current) => current.filter((p) => p._id !== productId));
       setProducts(await fetchWishlistData(url, user._id));
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to add product.", {
         richColors: true,
+        position: "top-center",
       });
     } finally {
       setPendingId(null);
@@ -120,12 +124,13 @@ export default function MyWishlist() {
       });
       toast.success(response.data.message || "Removed from wishlist.", {
         richColors: true,
+        position: "top-center",
       });
       setProducts((current) => current.filter((p) => p._id !== productId));
     } catch (error) {
       toast.error(
         error.response?.data?.message || "Failed to remove product.",
-        { richColors: true },
+        { richColors: true, position: "top-center" },
       );
     } finally {
       setPendingId(null);
