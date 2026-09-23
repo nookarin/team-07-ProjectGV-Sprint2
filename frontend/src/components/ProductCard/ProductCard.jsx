@@ -7,10 +7,13 @@ import img_default from "/images/headset.jpg";
 import { useCart } from "@/contexts/Cart/CartProvider";
 import axios from "axios";
 import { useAuth } from "@/contexts/Authentication/AuthContext";
+import { useWishlist } from "@/contexts/Wishlist/WishlistProvider";
 
 const ProductCard = ({ img, product }) => {
   const { url, user } = useAuth();
   const { cart, setCart, addToCart,err } = useCart();
+  // Pull the addToWishlist function from the wishlist context so the heart works.
+  const { addToWishlist } = useWishlist();
 
   return (
     <div className="relative border bg-gbg-1/60 backdrop-blur-2xl border-gpurple-2 text-center rounded-2xl shadow-lg shadow-purple-900/50 text-white">
@@ -50,10 +53,12 @@ const ProductCard = ({ img, product }) => {
           <p className="text-3xl font-bold tracking-wide">฿{product.price}</p>
         </div>
         <div className="flex gap-2">
-          <Button className="border border-gbase-1 bg-gbase-3 rounded-lg p-2">
+          <Button 
+            onClick={() => addToWishlist(product)}
+            className="border border-gbase-1 bg-gbase-3 rounded-lg p-2 hover:bg-gpurple-4">
             <Heart
-              color="#A78BFA"
-              className="hover:fill-gpurple-2 active:fill-red-600 active:stroke-red-600 "
+              color="#ffffff"
+              className="active:fill-red-600 active:stroke-red-600"
             />
           </Button>
           <Button
