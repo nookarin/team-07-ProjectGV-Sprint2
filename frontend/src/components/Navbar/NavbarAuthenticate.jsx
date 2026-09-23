@@ -44,7 +44,7 @@ const NavbarAuthenticate = ({ setClick, click }) => {
           </NavigationMenuItem> */}
           <NavigationMenuItem>
             <NavigationMenuTrigger
-              className={"border border-gbase-1 rounded-lg h-10"}
+              className={"border border-gbase-1 rounded-lg h-10 hover:bg-gbase-2"}
             >
               <User size={20} color="#22D3EE" className="mr-2" />
               PROFILE
@@ -99,7 +99,7 @@ const NavbarAuthenticate = ({ setClick, click }) => {
           </NavigationMenuItem>
           <NavigationMenuItem>
             <NavigationMenuTrigger
-              className={"border border-gbase-1 rounded-lg h-10"}
+              className={"border border-gbase-1 rounded-lg h-10 hover:bg-gbase-2"}
               render={<Link to={"/cart"} />}
             >
               <ShoppingBag size={20} color="#22D3EE" />
