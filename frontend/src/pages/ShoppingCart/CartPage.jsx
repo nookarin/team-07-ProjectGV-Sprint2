@@ -104,8 +104,8 @@ export default function CartPage() {
                 <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
                   Shopping Cart
                 </h1>
-                <Badge className="bg-[#1e1a33] text-slate-300 hover:bg-[#282345] font-semibold text-xs px-3 py-1 rounded-md border border-[#2f294d]/60">
-                  {/* {totalItemCount} {totalItemCount === 1 ? "item" : "items"} */}
+                <Badge className="bg-[#1e1a33] mt-2 text-slate-300 hover:bg-[#282345] font-semibold text-xs px-3 py-1 rounded-md border border-[#2f294d]/60">
+                  {data.length} {data.length === 1 ? "item" : "items"}
                 </Badge>
               </div>
 
