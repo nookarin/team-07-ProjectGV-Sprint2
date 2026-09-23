@@ -206,6 +206,7 @@ shoppingCartRouter.post("/:userId/items", async (req, res, next) => {
 // DELETE /api/v1/shoppingcart/:userId/items/:itemId - Remove an item from cart
 shoppingCartRouter.delete("/:userId/items/:itemId", async (req, res, next) => {
   try {
+    console.log(req.params)
     const cart = await ShoppingCart.findOne({
       user_id: req.params.userId,
       status: "active",

@@ -50,6 +50,11 @@ export default function CartPage() {
   const { user, url } = useAuth();
   const { data, loading, updateQuantity, cart, setCart } = useCart();
 
+  const handleRemoveItem = async (itemId) =>{
+    const response = await axios.delete(`${url}/shoppingcart/${user._id}/items/${itemId}`)
+    setCart(response.data.items)
+  }
+
   const handleQuantity = async (itemId, currentQuantity, type) => {
     let newQuantity = currentQuantity;
 
@@ -245,7 +250,7 @@ export default function CartPage() {
                           <Button
                             variant="destructive"
                             size="icon-sm"
-                            // onClick={() => handleRemoveItem(item.id)}
+                            onClick={() => handleRemoveItem(item._id)}
                             className="bg-[#27152b] hover:bg-[#3d183f] text-[#f43f5e] hover:text-rose-300 rounded-lg border border-[#4a1b3f]/60 cursor-pointer"
                             title="Remove item"
                           >

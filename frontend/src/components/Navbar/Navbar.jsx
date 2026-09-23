@@ -29,7 +29,6 @@ const Navbar = () => {
     const response = await axios.get(`${url}/categories/`);
     setCategory(response.data.categories);
     setLoading(false);
-    console.log(response.data.categories);
   };
   useEffect(() => {
     fetchData();
