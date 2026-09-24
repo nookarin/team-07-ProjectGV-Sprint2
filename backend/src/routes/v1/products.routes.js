@@ -90,7 +90,7 @@ productRouter.get("/:category", async (req, res, next) => {
     const { category } = req.params;
     const { name } = req.query;
     const filter = {};
-    console.log(name);
+
     if (category) {
       const categoryData = await Category.findOne({
         category_name: category,
@@ -124,15 +124,6 @@ productRouter.get("/:category", async (req, res, next) => {
       products,
     });
   } catch (error) {
-    next(error);
-  }
-});
-
-productRouter.get("/:category/:product", async (req, res, next) => {
-  try {
-    const { category, product } = req.params;
-  } catch (error) {
-    console.log(error);
     next(error);
   }
 });
