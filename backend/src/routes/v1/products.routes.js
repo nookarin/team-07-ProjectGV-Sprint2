@@ -27,7 +27,6 @@ productRouter.get("/", async (req, res, next) => {
       "category_id subcategory_ids subcategory_ids.subcategory_name",
     );
 
-    console.log(products)
     if (products.length === 0) {
       return res.status(200).json({
         success: false,
@@ -72,7 +71,7 @@ productRouter.get("/:category", async (req, res, next) => {
     const { category } = req.params;
     const { name } = req.query;
     const filter = {};
-    console.log(name);
+
     if (category) {
       const categoryData = await Category.findOne({
         category_name: category,
@@ -109,16 +108,6 @@ productRouter.get("/:category", async (req, res, next) => {
     next(error);
   }
 });
-
-
-productRouter.get('/:category/:product', async (req, res, next) => {
-  try {
-    const { category, product } = req.params
-  } catch (error) {
-    console.log(error)
-    next(error)
-  }
-})
 
 // POST product (admin only)
 productRouter.post("/", protect, authorize(["admin"]), async (req, res, next) => {
