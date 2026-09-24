@@ -8,7 +8,7 @@ import {
   LuEyeClosed,
 } from "react-icons/lu";
 import { PiLockKeyBold } from "react-icons/pi";
-import { data, Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "@/contexts/Authentication/AuthContext";
 import { toast } from "sonner";
@@ -17,6 +17,7 @@ export default function Register() {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loading, setLoading] = useState(null);
   const { url } = useAuth();
   const [data, setData] = useState({
     firstname: "",
@@ -27,15 +28,27 @@ export default function Register() {
   });
 
   const register = async (data) => {
-    const response = await axios.post(`${url}/users/register`, data);
-    if (response.data.success) {
-      navigate("/login");
+    try {
+      setLoading(true);
+      const response = await axios.post(`${url}/users/register`, data);
+      setLoading(false);
+      if (response.data.success) {
+        navigate("/login");
+      }
+    } catch (error) {
+      setLoading(false);
+      if (error.response?.status === 500) {
+        toast.error(error.response?.data?.message, {
+          richColors: true,
+          position: "top-center",
+        });
+      }
+      console.log(error);
     }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(e);
     if (data.confirmpassword !== data.password) {
       toast.error("Passwords do not match!", {
         position: "top-center",
@@ -46,21 +59,21 @@ export default function Register() {
           borderRadius: "10px",
         },
       });
+      return;
     }
-
     const submitData = {
       firstname: data.firstname,
       lastname: data.lastname,
       email: data.email,
       password: data.password,
     };
-
     register(submitData);
   };
 
   const onChangeHandler = (e) => {
     setData({ ...data, [e.target.name]: e.target.value });
   };
+
   return (
     <div
       style={{
@@ -236,8 +249,9 @@ export default function Register() {
           <button
             className="px-4 py-2 text-white bg-gradient-to-r from-[#ec4899] via-[#a855f7] to-[#06b6d4] rounded-md cursor-pointer"
             type="submit"
+            disabled={loading}
           >
-            CREATE AN ACCOUNT
+            {loading ? "CREATING..." : "CREATE AN ACCOUNT"}
           </button>
         </form>
         <div className="border-t-2 border-gray-500 w-full pt-8 flex justify-center items-center">
