@@ -2,16 +2,16 @@
   "name": "backend",
   "version": "1.0.0",
   "description": "",
+  "keywords": [],
+  "license": "ISC",
+  "author": "",
+  "type": "module",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "node --env-file=.env --watch src/index.js",
     "start": "node src/index.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "module",
   "dependencies": {
     "@google/genai": "^2.23.0",
     "bcrypt": "^6.0.0",
@@ -22,7 +22,8 @@
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.9.5",
     "multer": "^2.4.0",
-    "nodemailer": "^10.0.10"
+    "nodemailer": "^10.0.10",
+    "stripe": "^22.6.2"
   },
   "allowScripts": {
     "bcrypt@6.0.0": true,
