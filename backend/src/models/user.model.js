@@ -25,7 +25,6 @@ const userSchema = new mongoose.Schema(
     },
     firstname: { type: String },
     lastname: { type: String },
-    phoneNumber: { type: Number },
     // Avatar image: stores the Cloudinary secure URL of the uploaded profile picture.
     avatar: { type: String, default: "" },
     // Stores the Cloudinary public_id of the avatar so it can be deleted later.
@@ -46,6 +45,7 @@ const userSchema = new mongoose.Schema(
           district: { type: String, trim: true },
           province: { type: String, trim: true },
           zipCode: { type: Number, trim: true },
+          phoneNumber: { type: Number, trim: true },
           isDefault: { type: Boolean, default: false },
         },
       ],
