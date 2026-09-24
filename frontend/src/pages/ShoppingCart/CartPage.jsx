@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from "react"; //เก็บสถานะที่ React กำลังใช้แสดงหน้าเว็บ, สั่งให้ React ทำอะไรบางอย่าง หลังจาก Component ถูกโหลด
+import { useState, useEffect, useRef, useMemo } from "react"; //เก็บสถานะที่ React กำลังใช้แสดงหน้าเว็บ, สั่งให้ React ทำอะไรบางอย่าง หลังจาก Component ถูกโหลด
+import { useNavigate } from "react-router-dom";
 import {
   Truck,
   X,
@@ -18,13 +19,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
 
 //ฟังก์ชันจากไฟล์ .js
 import {
@@ -48,9 +42,22 @@ import LoadingScreen from "@/components/LoadingScreen";
 
 //เปิด browser
 export default function CartPage() {
+  const navigate = useNavigate();
   const { user, url } = useAuth();
   const { data, loading, updateQuantity, cart, setCart } = useCart();
   const [quantities, setQuantities] = useState({});
+
+  const subtotal = useMemo(
+    () =>
+      (data ?? []).reduce((sum, item) => {
+        const quantity = quantities[item._id] ?? item.quantity;
+        return sum + item.product_id.price * quantity;
+      }, 0),
+    [data, quantities],
+  );
+  const shipping = (data ?? []).length > 0 ? DEFAULT_SHIPPING : 0;
+  const grandTotal = subtotal + shipping;
+
   const handleRemoveItem = async (itemId) =>{
     const response = await axios.delete(`${url}/shoppingcart/${user._id}/items/${itemId}`)
     setCart(response.data.items)
@@ -397,21 +404,14 @@ export default function CartPage() {
                   <div className="flex justify-between items-center text-slate-300">
                     <span>Cart Subtotal</span>
                     <span className="font-bold text-white text-base">
-                      {/* ${subtotal.toFixed(2)} */}
-                    </span>
-                  </div>
-
-                  <div className="flex justify-between items-center text-slate-300">
-                    <span>Discount Applied</span>
-                    <span className="font-bold text-[#10b981] text-base">
-                      {/* {discount > 0 ? `-$${discount.toFixed(2)}` : "$0.00"} */}
+                      ${subtotal.toFixed(2)}
                     </span>
                   </div>
 
                   <div className="flex justify-between items-center text-slate-300">
                     <span>Estimated Shipping</span>
                     <span className="font-bold text-white text-base">
-                      {/* ${shipping.toFixed(2)} */}
+                      ${shipping.toFixed(2)}
                     </span>
                   </div>
                 </div>
@@ -424,23 +424,23 @@ export default function CartPage() {
                     Grand Total
                   </span>
                   <span className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-                    {/* ${grandTotal.toFixed(2)} */}
+                    ${grandTotal.toFixed(2)}
                   </span>
                 </div>
 
                 {/* Proceed to Checkout Button */}
-                {/* <Button
-                  onClick={handleProceedToCheckout}
-                  disabled={items.length === 0}
+                <Button
+                  onClick={() => navigate("/checkout")}
+                  disabled={(data ?? []).length === 0}
                   className={`w-full py-4 h-auto rounded-xl font-black text-sm tracking-wider uppercase flex items-center justify-center gap-2 transition-all duration-300 shadow-xl ${
-                    items.length === 0
+                    (data ?? []).length === 0
                       ? "bg-slate-800 text-slate-500 cursor-not-allowed"
                       : "bg-gradient-to-r from-[#ec4899] via-[#a855f7] to-[#06b6d4] text-slate-950 hover:brightness-110 hover:shadow-cyan-500/25 active:scale-[0.99] cursor-pointer"
                   }`}
                 >
                   <span>PROCEED TO CHECKOUT</span>
                   <ArrowRight className="w-4 h-4 stroke-[3]" />
-                </Button> */}
+                </Button>
 
                 {/* Security badge footer */}
                 <div className="flex items-center justify-center gap-1.5 text-slate-400 text-xs pt-1">
@@ -451,41 +451,6 @@ export default function CartPage() {
             </Card>
           </div>
         </div>
-
-        {/* Modal Dialog using shadcn UI Dialog */}
-        {/* <Dialog open={checkoutSuccess} onOpenChange={setCheckoutSuccess}>
-          <DialogContent className="bg-[#151229] border-purple-500/30 text-slate-100 rounded-3xl p-5 sm:p-8 w-[calc(100%-2rem)] max-w-md">
-            <DialogHeader className="text-center flex flex-col items-center space-y-4">
-              <div className="w-16 h-16 bg-gradient-to-tr from-emerald-500 to-cyan-400 rounded-full flex items-center justify-center text-slate-950 mx-auto shadow-lg shadow-emerald-500/30">
-                <Check className="w-8 h-8 stroke-[3]" />
-              </div>
-              <DialogTitle className="text-2xl font-extrabold text-white text-center">
-                Order Demo Ready!
-              </DialogTitle>
-              <DialogDescription className="text-slate-300 text-sm text-center">
-                Proceeding to checkout with grand total of{" "}
-                <strong className="text-white font-bold">
-                  ${grandTotal.toFixed(2)}
-                </strong>
-                .
-              </DialogDescription>
-            </DialogHeader>
-
-            <div className="bg-[#1d1938] border border-[#332b59] rounded-xl p-4 text-xs text-slate-400 space-y-1 font-mono my-2">
-              <p>Status: Cart Synced to MongoDB</p>
-              <p>Items: {totalItemCount} unit(s)</p>
-              <p>Promo: {appliedPromo ? appliedPromo.code : "None"}</p>
-              <p>Cart tied to user ID and ready for order checkout.</p>
-            </div>
-
-            <Button
-              onClick={() => setCheckoutSuccess(false)}
-              className="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-bold py-3 rounded-xl shadow-lg h-auto"
-            >
-              Close & Continue Browsing
-            </Button>
-          </DialogContent>
-        </Dialog> */}
       </div>
     </div>
   );

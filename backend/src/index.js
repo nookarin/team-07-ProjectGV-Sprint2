@@ -5,10 +5,18 @@ import { router as apiRoutes } from "./routes/index.js";
 import cookieParser from "cookie-parser";
 
 const corsOptions = {
-  origin: [
-    "http://localhost:5173",
-    "https://team-07-project-gv-sprint2.vercel.app",
-  ],
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps, curl) or localhost, or any vercel.app deployment
+    if (
+      !origin ||
+      origin.includes("localhost") ||
+      origin.endsWith(".vercel.app") ||
+      origin.includes("onrender.com")
+    ) {
+      return callback(null, true);
+    }
+    return callback(null, true);
+  },
   credentials: true,
 };
 

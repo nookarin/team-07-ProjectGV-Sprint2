@@ -19,6 +19,8 @@ import UserManager from "#components/Admin/UserManager";
 import Login from "./pages/Login/Login";
 import ForgotPassword from "./pages/ForgotPassword/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword/ResetPassword";
+import Checkout from "./pages/Checkout/Checkout";
+import OrderConfirmation from "./pages/OrderConfirmation/OrderConfirmation";
 import SalePage from "./pages/ProductPage/SalePage";
 import { TruckElectric } from "lucide-react";
 import PromotionPage from "./pages/Admin/PromotionPage";
@@ -65,6 +67,8 @@ const routerAuthen = createBrowserRouter([
       { path: "my-cancellations", element: <MyCancellations /> },
       { path: "wishlists", element: <MyWishlist /> },
       { path: "cart", element: <CartPage /> },
+      { path: "checkout", element: <Checkout /> },
+      { path: "order-confirmation/:orderId", element: <OrderConfirmation /> },
       { path: "product/:product_id", element: <ProductPage /> },
       { path: "products", element: <AllProductPage /> },
       { path: "products/:id", element: <ProductListPage /> },

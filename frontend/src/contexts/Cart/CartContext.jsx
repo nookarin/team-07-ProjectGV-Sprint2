@@ -12,10 +12,21 @@ export function CartProvider({ children }) {
   const [loading, setLoading] = useState(null);
   const [err, setErr] = useState('Please login first')
   const getCart = async () => {
+    if (!user) {
+      setData([]);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
-    const response = await axios.get(`${url}/shoppingcart/${user._id}`);
-    setData(response.data.cart.items);
-    setLoading(false);
+    try {
+      const response = await axios.get(`${url}/shoppingcart/${user._id}`);
+      setData(response.data.cart?.items ?? []);
+    } catch (error) {
+      console.log("TEST", error);
+      setData([]);
+    } finally {
+      setLoading(false);
+    }
   };
   const addToCart = async (product) => {
     if(!user) {
@@ -52,7 +63,7 @@ export function CartProvider({ children }) {
 
   useEffect(() => {
     getCart();
-  }, [cart]);
+  }, [user]);
   return (
     <CartContext.Provider
       value={{

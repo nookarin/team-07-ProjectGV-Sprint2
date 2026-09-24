@@ -22,7 +22,11 @@
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.9.5",
     "multer": "^2.4.0",
-    "nodemailer": "^10.0.10"
+    "nodemailer": "^10.0.10",
+    "omise": "^1.1.0",
+    "promptpay-qr": "^0.5.0",
+    "qrcode": "^1.5.4",
+    "stripe": "^22.6.2"
   },
   "allowScripts": {
     "bcrypt@6.0.0": true,
