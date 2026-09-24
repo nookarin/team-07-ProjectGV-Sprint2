@@ -11,7 +11,7 @@ const NewArrivalPage = () => {
 
   const fetchData = async () => {
     setLoading(true);
-    const response = await axios.get(`${url}/products?sort=createAt`);
+    const response = await axios.get(`${url}/products?createdAt=1`);
     setProducts(response.data.products);
     setLoading(false);
     console.log(response);

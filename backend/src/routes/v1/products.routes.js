@@ -23,13 +23,13 @@ const uploadImages = multer({
 
 productRouter.get("/", async (req, res, next) => {
   try {
-    console.log(req.query)
-    if (req.query.sort) {
+    const { createdAt } = req.query
+    if (createdAt) {
       const products = await Product.find()
         .populate(
           "category_id subcategory_ids subcategory_ids.subcategory_name",
         )
-        .sort(req.query.sort);
+        .sort({ createdAt: -1});
       if (products.length === 0) {
         return res.status(200).json({
           success: false,

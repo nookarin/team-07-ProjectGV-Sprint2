@@ -29,7 +29,6 @@ export function CartProvider({ children }) {
         richColors: true,
         position: "bottom-center",
       });
-      console.log(result);
       getCart();
     } catch (error) {
       console.log("ERROR:", error, error?.response);
