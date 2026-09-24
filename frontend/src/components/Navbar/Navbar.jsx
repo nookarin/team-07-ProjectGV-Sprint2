@@ -35,28 +35,31 @@ const Navbar = () => {
   }, []);
   return (
     <nav className="bg-gbg-2 w-full h-16 flex items-center justify-between gap-4 px-4 sm:px-10 text-white relative z-20 shadow-xl shadow-gpurple-4/80">
-      <Link to={"/"} className="flex items-center gap-2 sm:gap-4 shrink-0 w-1/3 md:w-1/4">
+      <Link
+        to={"/"}
+        className="flex items-center gap-2 sm:gap-4 shrink-0 w-1/3 md:w-1/4"
+      >
         <img className="w-10 h-10 shrink-0" src={LogoImg} alt="logo" />
-        <img
-          className="w-40 hidden lg:block"
-          src={LogoText}
-          alt="logo text"
-        />
+        <img className="w-40 hidden lg:block" src={LogoText} alt="logo text" />
       </Link>
 
       {/* SECTION 2 — ซ่อนเมนูแนวนอนตอนจอแคบ ใช้ hamburger แทนกันตัวหนังสือทับกัน */}
-      <NavigationMenu className={"hidden md:flex flex-1 justify-center w-1/3"}>
+      <NavigationMenu className={"hidden lg:flex flex-1 justify-center w-1/3"}>
         <NavigationMenuList>
           <NavigationMenuItem>
             <NavigationMenuLink
               render={<Link to={"/products"} />}
-              className={`active:text-gcyan-light`}
+              className={`active:text-gcyan-light hover:bg-gbase-1 hover:rounded-2xl`}
             >
               SHOP
             </NavigationMenuLink>
           </NavigationMenuItem>
           <NavigationMenuItem>
-            <NavigationMenuTrigger>COLLECTIONS</NavigationMenuTrigger>
+            <NavigationMenuTrigger
+              className={"hover:bg-gbase-1 hover:rounded-2xl"}
+            >
+              COLLECTIONS
+            </NavigationMenuTrigger>
             <NavigationMenuContent className={"text-white w-56"}>
               {!loading &&
                 category?.map((item, index) => {
@@ -78,12 +81,17 @@ const Navbar = () => {
             </NavigationMenuContent>
           </NavigationMenuItem>
           <NavigationMenuItem>
-            <NavigationMenuLink>NEW ARRIVALS</NavigationMenuLink>
+            <NavigationMenuLink
+              className={"hover:bg-gbase-1 hover:rounded-2xl"}
+              render={<Link to={"/new-arrival"} />}
+            >
+              NEW ARRIVALS
+            </NavigationMenuLink>
           </NavigationMenuItem>
           <NavigationMenuItem>
             <NavigationMenuLink
               className={
-                "border border-pink-300 text-pink-300 h-8 ml-4 rounded-lg"
+                "border border-pink-300 text-pink-300 h-8 ml-4 rounded-lg hover:bg-gpink-2 hover:text-white"
               }
               render={<Link to={"/sale"} />}
             >
@@ -101,13 +109,13 @@ const Navbar = () => {
           <NavbarUnauthen />
         )}
 
-        {/* Hamburger — โผล่เฉพาะจอแคบกว่า md */}
+        {/* Hamburger — โผล่เฉพาะจอแคบกว่า lg */}
         <button
           type="button"
           aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
           aria-expanded={mobileMenuOpen}
           onClick={() => setMobileMenuOpen((prev) => !prev)}
-          className="md:hidden h-10 w-10 flex items-center justify-center rounded-lg hover:bg-gbase-2 cursor-pointer"
+          className="lg:hidden h-10 w-10 flex items-center justify-center rounded-lg hover:bg-gbase-2 cursor-pointer"
         >
           {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
         </button>
@@ -138,9 +146,9 @@ const Navbar = () => {
               </Link>
             ))}
           <Link
-            to={"/"}
+            to={"/new-arrival"}
             onClick={() => setMobileMenuOpen(false)}
-            className="px-3 py-2.5 rounded-lg hover:bg-gbase-2"
+            className="px-3 py-2.5 rounded-lg hover:bg-gbase-2 cursor-pointer"
           >
             NEW ARRIVALS
           </Link>

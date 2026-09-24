@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { AuthContext } from "./AuthContext";
 import axios from "axios";
 import LoadingScreen from "@/components/LoadingScreen";
+import { toast } from "sonner";
 
 // Full-screen loader rendered while a page is only rendered after auth check/login completes.
 
@@ -20,12 +21,17 @@ export function AuthProvider({ children }) {
       });
       setUser(response.data.user);
       setLoading(false);
-      return true
+      return true;
     } catch (error) {
       console.log(error);
+      console.log(error.response);
       setErr(error.response?.data?.message || error.message);
       setLoading(false);
-      return false
+      toast.error(error.response.data.message, {
+        richColors: true,
+        position: "top-center",
+      });
+      return false;
     }
   };
 
@@ -33,7 +39,7 @@ export function AuthProvider({ children }) {
     try {
       await axios.post(`${url}/users/logout`, {}, { withCredentials: true });
     } catch (error) {
-      console.log("Logout error:",error);
+      console.log("Logout error:", error);
     } finally {
       setUser(null);
     }
@@ -46,13 +52,13 @@ export function AuthProvider({ children }) {
         const response = await fetch(`${url}/users/me`, {
           credentials: "include",
         });
-        console.log(response)
+        console.log(response);
         if (response.ok) {
           const res = await response.json();
           setUser(res.user);
         }
       } catch (error) {
-        console.log("CHECK USER:",error);
+        console.log("CHECK USER:", error);
       } finally {
         setLoading(false);
       }

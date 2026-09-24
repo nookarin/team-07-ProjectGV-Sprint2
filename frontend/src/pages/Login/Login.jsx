@@ -31,11 +31,11 @@ export default function Login() {
       });
       navigate('/')
     } else {
-      toast.error("Login failed", {
-        richColors: true,
-        duration: 5000,
-        position: 'top-center'
-      });
+      // toast.error("Login failed", {
+      //   richColors: true,
+      //   duration: 5000,
+      //   position: 'top-center'
+      // });
     }
   };
   return (
@@ -85,7 +85,13 @@ export default function Login() {
                 className="text-purple-400 text-xs cursor-pointer"
                 for="password"
               >
-                <button className="cursor-pointer">Forgot Password?</button>
+                <button
+                  type="button"
+                  className="cursor-pointer"
+                  onClick={() => navigate("/forgot-password")}
+                >
+                  Forgot Password?
+                </button>
               </label>
             </div>
             <div className="relative w-full">

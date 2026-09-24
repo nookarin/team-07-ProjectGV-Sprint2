@@ -10,7 +10,7 @@ export function CartProvider({ children }) {
   const [cart, setCart] = useState([]);
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(null);
-  const [err, setErr] = useState('Please login first')
+  const [err, setErr] = useState("Please login first");
   const getCart = async () => {
     setLoading(true);
     const response = await axios.get(`${url}/shoppingcart/${user._id}`);
@@ -18,13 +18,6 @@ export function CartProvider({ children }) {
     setLoading(false);
   };
   const addToCart = async (product) => {
-    if(!user) {
-      setErr('Please login first.')
-      toast.error(err, {
-        richColors: true,
-        position: 'bottom-center'
-      })
-    }
     setCart([...cart, product]);
     try {
       const response = await axios.post(
@@ -32,8 +25,24 @@ export function CartProvider({ children }) {
         { product_id: product._id, quantity: 1 },
       );
       const result = await axios.get(`${url}/shoppingcart/${user._id}`);
+      toast.success("Added Product to Cart", {
+        richColors: true,
+        position: "bottom-center",
+      });
+      getCart();
     } catch (error) {
-      console.log("TEST",error);
+      console.log("ERROR:", error, error?.response);
+      if (!user) {
+        toast.error("Please login first.", {
+          richColors: true,
+          position: "bottom-center",
+        });
+      } else {
+        toast.error(error?.response?.data?.message, {
+          richColors: true,
+          position: "bottom-center",
+        });
+      }
     }
   };
 
@@ -44,8 +53,9 @@ export function CartProvider({ children }) {
         { quantity },
       );
       setCart(response.data.cart.items);
+      getCart();
     } catch (error) {
-      console.log("TEST",error);
+      console.log("TEST", error);
       getCart();
     }
   };
@@ -63,7 +73,7 @@ export function CartProvider({ children }) {
         loading,
         data,
         updateQuantity,
-        err
+        err,
       }}
     >
       {children}

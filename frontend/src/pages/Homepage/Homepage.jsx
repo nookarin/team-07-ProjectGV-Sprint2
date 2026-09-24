@@ -16,7 +16,7 @@ import { useAuth } from "@/contexts/Authentication/AuthContext";
 import LoadingScreen from "@/components/LoadingScreen";
 
 const category = [
-  { name: "headphone", img: img_cate1 },
+  { name: "headset", img: img_cate1 },
   { name: "keyboard", img: img_cate2 },
   { name: "accessory", img: img_cate3 },
   { name: "mouse", img: img_cate4 },

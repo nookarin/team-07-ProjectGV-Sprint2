@@ -7,7 +7,20 @@ export const promoRouter = Router();
 promoRouter.get("/", async (req, res, next) => {
   try {
     console.log(req.query);
-    const { name } = req.query;
+    const { name, code } = req.query;
+    if (code) {
+      const response = await Promo.find({ name: code.toLowerCase() });
+      console.log(response)
+      if (response.length === 0) {
+        return res.json({
+          success: false,
+          message: "This Promotion doesn't exists.",
+        });
+      }
+      return res.json({
+        data: response,
+      });
+    }
     if (name) {
       const response = await Promo.find({
         name: { $regex: name, $options: "i" },
@@ -28,7 +41,6 @@ promoRouter.get("/", async (req, res, next) => {
 
 promoRouter.post("/", async (req, res, next) => {
   try {
-    
     const {
       name,
       discount_amount,
@@ -62,7 +74,7 @@ promoRouter.post("/", async (req, res, next) => {
       expire_at,
       description,
       created_at: new Date(),
-      is_active: true
+      is_active: true,
     });
     return res.json({
       message: "Created new promotion successfully.",
@@ -70,7 +82,7 @@ promoRouter.post("/", async (req, res, next) => {
       success: true,
     });
   } catch (error) {
-    console.log(error)
+    console.log(error);
     next(error);
   }
 });
@@ -86,7 +98,7 @@ promoRouter.put("/:id", async (req, res, next) => {
       promo_start,
       expire_at,
       description,
-      updated_at: new Date()
+      updated_at: new Date(),
     });
     return res.json({
       message: "Updated successfully.",

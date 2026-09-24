@@ -31,6 +31,8 @@ const NavbarAuthenticate = ({ setClick, click }) => {
     navigate("/");
   };
 
+  useEffect(() => {
+  }, [data])
   return (
     <div className="flex justify-end shrink-0">
       <NavigationMenu>
@@ -137,7 +139,7 @@ const NavbarAuthenticate = ({ setClick, click }) => {
             </NavigationMenuContent>
           </NavigationMenuItem>
           <NavigationMenuItem>
-            <NavigationMenuLink className={"cursor-pointer"}>
+            <NavigationMenuLink className={"cursor-pointer hidden xl:block"}>
               USD/THB
             </NavigationMenuLink>
           </NavigationMenuItem>
