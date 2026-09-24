@@ -51,6 +51,8 @@ const userSchema = new mongoose.Schema(
       ],
       default: [{}], // <--- ใส่ [{}] เพื่อสั่งให้สร้าง Object เปล่า 1 ตัวลง Array ( Mongoose จะดึง Default แต่ละ Field มาเติมให้เอง )
     },
+    resetPasswordToken: { type: String, select: false },
+    resetPasswordExpires: { type: Date, select: false },
   },
   {
     timestamps: true,

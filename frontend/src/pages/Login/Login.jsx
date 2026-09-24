@@ -85,7 +85,13 @@ export default function Login() {
                 className="text-purple-400 text-xs cursor-pointer"
                 for="password"
               >
-                <button className="cursor-pointer">Forgot Password?</button>
+                <button
+                  type="button"
+                  className="cursor-pointer"
+                  onClick={() => navigate("/forgot-password")}
+                >
+                  Forgot Password?
+                </button>
               </label>
             </div>
             <div className="relative w-full">
