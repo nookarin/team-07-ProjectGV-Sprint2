@@ -1,8 +1,13 @@
 import express from "express";
 import cors from "cors";
+import cookieParser from "cookie-parser";
+
 import { connectDB } from "./config/db.js";
 import { router as apiRoutes } from "./routes/index.js";
-import cookieParser from "cookie-parser";
+
+// ✅ เพิ่มอันนี้
+import { stripeWebhookRouter } from "./routes/stripeWebhook.route.js";
+
 
 const corsOptions = {
   origin: [
@@ -12,15 +17,44 @@ const corsOptions = {
   credentials: true,
 };
 
+
 const app = express();
+
 const port = process.env.PORT || 3000;
 
+
+// =======================================
+// Stripe Webhook
+// สำคัญ: ต้องอยู่ก่อน express.json()
+// =======================================
+
+app.use(
+  "/api/v1/stripe",
+  stripeWebhookRouter
+);
+
+
+// =======================================
+// Middleware ปกติ
+// =======================================
+
 app.use(express.json());
+
 app.use(cookieParser());
+
 app.use(cors(corsOptions));
+
+
+// =======================================
+// API Routes ปกติ
+// =======================================
 
 app.use("/api", apiRoutes);
 
+
+// =======================================
+// Error Handler
+// =======================================
 
 app.use((err, req, res, next) => {
   return res.status(500).json({
@@ -28,6 +62,11 @@ app.use((err, req, res, next) => {
     message: err.message,
   });
 });
+
+
+// =======================================
+// Start Server
+// =======================================
 
 async function start() {
   try {
@@ -37,7 +76,11 @@ async function start() {
       console.log(`Server running on port: ${port} 🏃‍♀️`);
     });
   } catch (err) {
-    console.error("Failed to connect to MongoDB:", err.message);
+    console.error(
+      "Failed to connect to MongoDB:",
+      err.message
+    );
+
     process.exit(1);
   }
 }

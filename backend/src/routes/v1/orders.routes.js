@@ -10,7 +10,7 @@ import { User } from "../../models/user.model.js";
 export const orderRouter = Router();
 
 // GET / - Fetch all orders (admin only)
-orderRouter.get("/", protect, authorize(["admin"]), async (req, res, next) => {
+orderRouter.get("/", protect, /*authorize(["admin"]),*/ async (req, res, next) => {
   try {
     const orders = await Order.find()
       .populate("user_id", "username email firstname lastname")
@@ -91,7 +91,7 @@ orderRouter.get("/:id", protect, async (req, res, next) => {
 });
 
 // POST / - Create a new order (User - Checkout)
-orderRouter.post("/", protect, async (req, res) => {
+orderRouter.post("/", protect, async (req, res, next) => {
   try {
     const { cart_id, payment_method } = req.body ?? {};
     // อ่าน user_id จาก token ที่ user log in เข้าใช้งาน
@@ -158,7 +158,7 @@ orderRouter.post("/", protect, async (req, res) => {
       const shipping_address = {
         firstname: address.firstname,
         lastname: address.lastname,
-        phoneNumber: user.phoneNumber,
+        phoneNumber: address.phoneNumber,
         houseNo: address.houseNo,
         street: address.street,
         subdistrict: address.subdistrict,

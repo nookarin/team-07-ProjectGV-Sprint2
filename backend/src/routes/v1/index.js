@@ -13,6 +13,7 @@ import { subcategoryRouter } from "./subcategories.routes.js";
 import { chatbotRouter } from "./chatbot.routes.js";
 import { promoRouter } from "./promo.routes.js";
 import { passwordRouter } from "./password.routes.js";
+import { paymentRouter } from "./payments.routes.js";
 
 export const router = Router();
 
@@ -30,3 +31,4 @@ router.use("/keycaps", keycapRouter);
 router.use("/wishlists", wishlistRouter);
 router.use("/chatbot", chatbotRouter);
 router.use("/promo", promoRouter);
+router.use("/payments", paymentRouter);
