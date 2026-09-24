@@ -3,6 +3,7 @@ import userAvatar from "../../../assets/user.png";
 import AccountSidebar from "../AccountSidebar";
 import axios from "axios";
 import { useAuth } from "@/contexts/Authentication/AuthContext";
+import LoadingScreen from "@/components/LoadingScreen";
 import {
   Dialog,
   DialogClose,
@@ -15,6 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "#components/ui/button";
 import { toast } from "sonner";
+import { Trash2, Loader2 } from "lucide-react";
 
 const PASSWORD_MASK = "••••••••••••••••••";
 
@@ -27,6 +29,9 @@ export default function PersonalInfo() {
   const [draft, setDraft] = useState("");
   const [saving, setSaving] = useState(false);
   const fileInput = useRef(null);
+  // เก็บสถานะการอัปโหลด / ลบรูปโปรไฟล์ เพื่อแสดง loading บนปุ่ม
+  const [avatarUpdating, setAvatarUpdating] = useState(false);
+  const [avatarDeleting, setAvatarDeleting] = useState(false);
   const profileRows = [
     { label: "username", value: data?.username, editable: true },
     { label: "email", value: data?.email, editable: true },
@@ -34,9 +39,66 @@ export default function PersonalInfo() {
     { label: "firstname", value: data?.firstname, editable: true },
     { label: "lastname", value: data?.lastname, editable: true },
   ];
-  function selectAvatar(event) {
+  // อัปโหลดรูปโปรไฟล์ที่ผู้ใช้เลือกไปยัง backend แล้วให้ backend อัปโหลดต่อขึ้น Cloudinary
+  async function selectAvatar(event) {
     const file = event.target.files?.[0];
-    if (file) setAvatar(URL.createObjectURL(file));
+    if (!file) return;
+
+    // สร้าง FormData เพื่อส่งไฟล์รูปให้ backend
+    const formData = new FormData();
+    formData.append("avatar", file);
+
+    setAvatarUpdating(true);
+    try {
+      // POST ไปยัง endpoint อัปโหลดรูปโปรไฟล์ backend จะจัดการ Cloudinary ให้
+      const response = await axios.post(
+        `${url}/users/${user._id}/avatar`,
+        formData,
+        { withCredentials: true },
+      );
+      // อัปเดตรูปโปรไฟล์ให้แสดงรูปใหม่จาก Cloudinary ทันที
+      setAvatar(response.data.avatar);
+      setData((current) => ({ ...current, avatar: response.data.avatar }));
+      toast.success("Profile picture updated successfully.", {
+        richColors: true,
+        position: "top-center",
+      });
+    } catch (error) {
+      console.log(error);
+      toast.error(error.response?.data?.message || "Failed to update profile picture.", {
+        richColors: true,
+        position: "top-center",
+      });
+    } finally {
+      setAvatarUpdating(false);
+      // reset input เพื่อให้เลือกไฟล์เดิมซ้ำได้อีกครั้ง
+      if (fileInput.current) fileInput.current.value = "";
+    }
+  }
+
+  // ลบรูปโปรไฟล์ออกจาก Cloudinary และรีเซ็ตกลับไปเป็นรูปเริ่มต้น
+  async function deleteAvatar() {
+    setAvatarDeleting(true);
+    try {
+      await axios.delete(`${url}/users/${user._id}/avatar`, {
+        withCredentials: true,
+      });
+      // กลับไปแสดงรูปเริ่มต้น (default avatar) หลังลบสำเร็จ
+      setAvatar(userAvatar);
+      setData((current) => ({ ...current, avatar: null }));
+      toast.success("Profile picture deleted.", {
+        richColors: true,
+        position: "top-center",
+      });
+    } catch (error) {
+      console.log(error);
+      toast.error(error.response?.data?.message || "Failed to delete profile picture.", {
+        richColors: true,
+        position: "top-center",
+      });
+    } finally {
+      setAvatarDeleting(false);
+    }
   }
 
   async function fetchData() {
@@ -46,6 +108,12 @@ export default function PersonalInfo() {
         withCredentials: true,
       });
       setData(response.data.data);
+      // ใช้รูปโปรไฟล์จาก Cloudinary ถ้าผู้ใช้เคยอัปโหลดไว้ ไม่เช่นนั้นใช้รูปเริ่มต้น
+      if (response.data.data?.avatar) {
+        setAvatar(response.data.data.avatar);
+      } else {
+        setAvatar(userAvatar);
+      }
     } catch (error) {
       console.log(error);
     } finally {
@@ -102,6 +170,8 @@ export default function PersonalInfo() {
   }
   return (
     <main className="min-h-screen bg-[#090813] px-4 py-12 font-sans text-[#DDD6FE] sm:px-8 lg:px-14 lg:py-[72px]">
+      {/* Show full-screen LoadingScreen while the user data API request is being fetched */}
+      {loading && <LoadingScreen />}
       <div className="mx-auto grid max-w-[920px] gap-12 lg:grid-cols-[220px_minmax(360px,1fr)_170px] lg:gap-[60px]">
         <AccountSidebar active="/edit-profile" />
 
@@ -195,13 +265,32 @@ export default function PersonalInfo() {
             onChange={selectAvatar}
             className="hidden"
           />
+          {/* ปุ่มเลือกไฟล์รูปโปรไฟล์ - ระหว่างอัปโหลดจะแสดงสถานะ Uploading... */}
           <button
             type="button"
             onClick={() => fileInput.current?.click()}
-            className="mt-1.5 w-[105px] rounded-lg border border-[#2A2A45] bg-[#1A1A2E] py-2 text-[8px] text-[#A5F3FC] transition-colors hover:bg-[#22223A]"
+            disabled={avatarUpdating || avatarDeleting}
+            className="mt-1.5 flex w-[150px] items-center justify-center gap-1.5 rounded-lg border border-[#2A2A45] bg-[#1A1A2E] py-2 text-[8px] text-[#A5F3FC] transition-colors hover:bg-[#22223A] disabled:cursor-not-allowed disabled:opacity-50"
           >
-            Select Image
+            {avatarUpdating && <Loader2 className="size-3 animate-spin" />}
+            {avatarUpdating ? "Uploading..." : "Select Image"}
           </button>
+          {/* ปุ่มลบรูปโปรไฟล์ - แสดงเฉพาะเมื่อมีรูปที่อัปโหลดไว้แล้ว */}
+          {data?.avatar && (
+            <button
+              type="button"
+              onClick={deleteAvatar}
+              disabled={avatarDeleting || avatarUpdating}
+              className="mt-1.5 flex w-[150px] items-center justify-center gap-1.5 rounded-lg border border-rose-500/40 bg-[#2A0F18] py-2 text-[8px] text-rose-300 transition-colors hover:bg-[#3D183F] disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {avatarDeleting ? (
+                <Loader2 className="size-3 animate-spin" />
+              ) : (
+                <Trash2 className="size-3" />
+              )}
+              {avatarDeleting ? "Removing..." : "Delete Picture"}
+            </button>
+          )}
         </section>
       </div>
     </main>

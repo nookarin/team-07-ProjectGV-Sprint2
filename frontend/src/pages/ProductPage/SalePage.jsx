@@ -2,6 +2,7 @@ import ProductSecondaryCard from "#components/Homepage/ProductSecondaryCard";
 import { useAuth } from "@/contexts/Authentication/AuthContext";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
+import LoadingScreen from "@/components/LoadingScreen";
 
 const SalePage = () => {
   const [loading, setLoading] = useState(null);
@@ -18,6 +19,8 @@ const SalePage = () => {
   }, []);
   return (
     <div className="min-h-screen w-full flex flex-col text-white">
+      {/* Show full-screen LoadingScreen while the products API request is being fetched */}
+      {loading && <LoadingScreen />}
       <div className="h-60 border flex flex-col justify-center items-center border-gbase-1 bg-linear-to-br from-gbg-1 0% via-50% via-gbase-3 to-gpurple-5/40">
         <div className="text-white text-center">
           <h3 className="font-bold tracking-widest">SALE</h3>

@@ -26,6 +26,10 @@ const userSchema = new mongoose.Schema(
     firstname: { type: String },
     lastname: { type: String },
     phoneNumber: { type: Number },
+    // Avatar image: stores the Cloudinary secure URL of the uploaded profile picture.
+    avatar: { type: String, default: "" },
+    // Stores the Cloudinary public_id of the avatar so it can be deleted later.
+    avatar_public_id: { type: String, default: "" },
     role: {
       type: String,
       enum: ["user", "admin"],
