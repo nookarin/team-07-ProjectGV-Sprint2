@@ -1,0 +1,195 @@
+%% ============================================================
+%% ER Diagram (new) — อ้างอิงจากโครงสร้าง Mongoose Model จริงทั้ง 12 collection
+%% ใน backend/src/models/*.model.js
+%% (ตัวเก่า 04_ER_Diagram.mmd เป็นเวอร์ชันดีไซน์ มี entity ที่ยังไม่มีในโค้ดจริง
+%% เช่น ProductVariant, Bundle, Manufacturer, Distributor)
+%% ============================================================
+erDiagram
+    %% ---------- ความสัมพันธ์หลัก ----------
+    User ||--o{ ShoppingCart : owns
+    User ||--o| Wishlist : owns
+    User ||--o{ Order : places
+    User ||--o{ Review : writes
+
+    Order }o--|| ShoppingCart : checked_out_from
+    ShoppingCart ||--|{ CartItem : contains
+    Order ||--|{ OrderItem : contains
+
+    Product }o--|| Category : belongs_to
+    Product }o--o{ Subcategory : has_many
+    Subcategory }o--o{ Category : associates_with
+    Product ||--o{ Review : receives
+
+    %% Embedded ภายใน Product document (ref แบบซ้ำ-หลายตัวเลือก ใช้ product_id เดิมยังไม่ใช้)
+    Product ||--o{ Tag : tagged_as
+    Product ||--o{ Keycap : keycap_options
+    Product ||--o{ kbSwitch : switch_options
+    Product ||--o{ Color : color_options
+
+    %% ---------- User ----------
+    User{
+        ObjectId _id PK
+        string email UK
+        string username
+        string password "select: false"
+        string firstname
+        string lastname
+        string avatar "Cloudinary URL; default \"\""
+        string avatar_public_id "Cloudinary public_id; default \"\""
+        string role "enum: user | admin"
+        string resetPasswordToken "select: false"
+        date resetPasswordExpires
+        date createdAt
+        date updatedAt
+    }
+
+    %% Address เป็น embedded array ใน User (ใช้สำหรับที่อยู่จัดส่ง)
+    %% ฟิลด์ย่อย: firstname, lastname, phoneNumber, houseNo, street,
+    %%           subdistrict, district, province, zipCode(number), isDefault
+
+    %% ---------- สินค้า / หมวดหมู่ ----------
+    Product{
+        ObjectId _id PK
+        string product_name
+        string description
+        number price "min: 0; required"
+        number stock "default 0; min: 0"
+        ObjectId category_id FK "required"
+        ObjectId subcategory_ids FK "array → Subcategory"
+        number weight "default 0"
+        string image_url
+        string images "array of string"
+        date createdAt
+        date updatedAt
+    }
+
+    Category{
+        ObjectId _id PK
+        string category_name UK
+        date createdAt
+        date updatedAt
+    }
+
+    Subcategory{
+        ObjectId _id PK
+        string subcategory_name
+        ObjectId category_ids FK "array → Category; ต้องมี ≥1"
+        date createdAt
+        date updatedAt
+    }
+
+    %% ---------- ตัวเลือกสินค้า (แบบง่าย, อ้าง product_id) ----------
+    Tag{
+        ObjectId _id PK
+        string name UK
+        string description "default \"\""
+        ObjectId product_id FK "optional; default null"
+        date createdAt
+        date updatedAt
+    }
+
+    Keycap{
+        ObjectId _id PK
+        string name
+        string material "default \"\""
+        string profile "default \"\""
+        ObjectId product_id FK "optional; default null"
+        date createdAt
+        date updatedAt
+    }
+
+    kbSwitch{
+        ObjectId _id PK
+        string name
+        string switch_type "Linear | Tactile | Clicky | Silent | Magnetic | Optical"
+        ObjectId product_id FK "optional"
+        date createdAt
+        date updatedAt
+    }
+
+    Color{
+        ObjectId _id PK
+        string name
+        string hex_code
+        ObjectId product_id FK "optional"
+        date createdAt
+        date updatedAt
+    }
+
+    %% ---------- ตะกร้า ----------
+    ShoppingCart{
+        ObjectId _id PK
+        ObjectId user_id FK "required"
+        string status "enum: active | checked_out; default active"
+        date createdAt
+        date updatedAt
+    }
+
+    CartItem{
+        ObjectId _id PK "embedded subdoc ใน ShoppingCart.items"
+        ObjectId product_id FK "required"
+        number quantity "min: 1; default 1"
+    }
+
+    %% ---------- Wishlist ----------
+    Wishlist{
+        ObjectId _id PK
+        ObjectId user FK "unique: one wishlist per user"
+        ObjectId products FK "array → Product"
+        date createdAt
+        date updatedAt
+    }
+
+    %% ---------- รีวิว ----------
+    Review{
+        ObjectId _id PK
+        ObjectId user_id FK "required"
+        ObjectId product_id FK "required"
+        ObjectId orderitem_id FK "optional → OrderItem (embedded)"
+        number rating "min 1 - max 5; required"
+        string comment
+        date createdAt
+        date updatedAt
+    }
+
+    %% ---------- คำสั่งซื้อ ----------
+    Order{
+        ObjectId _id PK
+        ObjectId user_id FK "required"
+        ObjectId cart_id FK "unique: 1 คำสั่งซื้อต่อ cart"
+        string order_number "auto: ORD-<timestamp>-<rand>"
+        number total_price "default 0"
+        number total_quantity "default 0"
+        string status "enum: pending | paid | shipped | completed | cancelled"
+        string payment_method "bank_transfer | promptpay | cod | credit_card | debit_card"
+        date createdAt
+        date updatedAt
+    }
+
+    %% shipping_address เป็น embedded subdoc ใน Order (มี _id: false)
+    %% ฟิลด์: firstname, lastname, phoneNumber, houseNo, street,
+    %%        subdistrict, district, province, zipCode(string)
+
+    OrderItem{
+        ObjectId _id PK "embedded subdoc ใน Order.items"
+        ObjectId product_id FK "required"
+        number quantity "min: 1; default 1"
+        number unit_price "default 0"
+    }
+
+    %% ---------- โค้ดส่วนลด ----------
+    Promo_code{
+        ObjectId _id PK
+        string name
+        number discount_amount
+        string discount_type "enum: percent | baht"
+        number min_order_price
+        number max_use
+        boolean is_active
+        date promo_start
+        date expire_at
+        string description
+        date created_at
+        date createdAt
+        date updatedAt
+    }

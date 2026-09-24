@@ -39,7 +39,6 @@ const userSchema = new mongoose.Schema(
         {
           firstname: { type: String, trim: true },
           lastname: { type: String, trim: true },
-          phoneNumber: { type: String, trim: true },
           houseNo: { type: String, trim: true },
           street: { type: String, trim: true },
           subdistrict: { type: String, trim: true },
