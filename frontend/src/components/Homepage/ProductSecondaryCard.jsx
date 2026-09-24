@@ -17,7 +17,9 @@ const ProductSecondaryCard = ({ product, discount }) => {
           {product.category_id.category_name}
         </span>
       </div>
-      <div className="w-[80%] mx-auto my-4 text-white">
+      <div
+        className={`w-[80%] mx-auto my-4 text-white ${product.product_name.length > 15 && "h-41.25"}`}
+      >
         <h3 className="font-bold text-sm lg:text-xl">{product.product_name}</h3>
         <p className="text-sm h-30 overflow-auto font-light mt-4 scrollbar-thumb-gbase-1">
           {product.description}
