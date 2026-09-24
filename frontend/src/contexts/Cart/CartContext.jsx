@@ -14,8 +14,8 @@ export function CartProvider({ children }) {
   const getCart = async () => {
     setLoading(true);
     const response = await axios.get(`${url}/shoppingcart/${user._id}`);
-    setData(response.data.cart.items);
     setLoading(false);
+    setData(response.data.cart.items);
   };
   const addToCart = async (product) => {
     setCart([...cart, product]);
