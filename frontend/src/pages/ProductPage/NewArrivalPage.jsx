@@ -1,31 +1,33 @@
 import ProductSecondaryCard from "#components/Homepage/ProductSecondaryCard";
+import LoadingScreen from "#components/LoadingScreen";
 import { useAuth } from "@/contexts/Authentication/AuthContext";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import LoadingScreen from "@/components/LoadingScreen";
 
-const SalePage = () => {
-  const [loading, setLoading] = useState(null);
-  const [data, setData] = useState([]);
+const NewArrivalPage = () => {
   const { url } = useAuth();
+  const [loading, setLoading] = useState(null);
+  const [products, setProducts] = useState([]);
+
   const fetchData = async () => {
     setLoading(true);
-    const response = await axios.get(`${url}/products`);
-    setData(response.data.products);
+    const response = await axios.get(`${url}/products?sort=createAt`);
+    setProducts(response.data.products);
     setLoading(false);
+    console.log(response);
   };
+
   useEffect(() => {
     fetchData();
   }, []);
   return (
     <div className="min-h-screen relative z-10 w-full flex flex-col text-white">
-      {/* Show full-screen LoadingScreen while the products API request is being fetched */}
       {loading && <LoadingScreen />}
       <div className="h-60 border flex flex-col justify-center items-center border-gbase-1 bg-linear-to-br from-gbg-1 0% via-50% via-gbase-3 to-gpurple-5/40">
         <div className="text-white text-center">
-          <h3 className="font-bold tracking-widest">SALE</h3>
+          <h3 className="font-bold tracking-widest">OUR</h3>
           <h1 className="font-light text-7xl tracking-tighter capitalize">
-            Big Clearance
+            New Arrivals
             <span className="text-gcyan-light">.</span>
           </h1>
         </div>
@@ -34,10 +36,9 @@ const SalePage = () => {
         {/* <p>NO PRODUCTS</p> */}
         <div className="grid grid-cols-3 gap-16 w-8/12">
           {!loading &&
-            data?.slice(0, 3).map((item) => {
-              return (
-                <ProductSecondaryCard product={item} discount={0.7} />
-              );
+            products?.slice(0, 3).map((item) => {
+                console.log(item)
+              return <div key={item._id}><ProductSecondaryCard product={item} /></div>;
             })}
         </div>
       </div>
@@ -45,4 +46,4 @@ const SalePage = () => {
   );
 };
 
-export default SalePage;
+export default NewArrivalPage;

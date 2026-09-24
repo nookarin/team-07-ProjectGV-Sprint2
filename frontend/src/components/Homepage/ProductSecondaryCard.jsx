@@ -4,13 +4,19 @@ import React from "react";
 
 const ProductSecondaryCard = ({ product, discount }) => {
   const { addToCart } = useCart();
+  // console.log(product.category_id.category_name)
   return (
     <div className="border border-gpurple-2 bg-gbg-1/95 text-center rounded-2xl shadow-lg shadow-purple-900/50">
-      <img
-        className="rounded-t-2xl w-full h-80 object-cover"
-        src={product.image_url}
-        // alt={name}
-      />
+      <div className="relative">
+        <img
+          className="rounded-t-2xl w-full h-80 object-cover"
+          src={product.image_url}
+          alt={product.product_name}
+        />
+        <span className="text-xs absolute top-3 left-4 bg-white/15 border-2 border-white text-white py-0.5 px-4 rounded-2xl">
+          {product.category_id.category_name}
+        </span>
+      </div>
       <div className="w-[80%] mx-auto my-4 text-white">
         <h3 className="font-bold text-sm lg:text-xl">{product.product_name}</h3>
         <p className="text-sm h-30 overflow-auto font-light mt-4 scrollbar-thumb-gbase-1">
@@ -25,7 +31,9 @@ const ProductSecondaryCard = ({ product, discount }) => {
             >
               ${product.price}
             </p>
-            <p className={`text-red-500 ml-1 font-bold text-2xl ${!discount && "hidden"}`}>
+            <p
+              className={`text-red-500 ml-1 font-bold text-2xl ${!discount && "hidden"}`}
+            >
               {Math.floor(product.price * discount)}
             </p>
           </div>

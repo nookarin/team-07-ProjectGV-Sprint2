@@ -25,6 +25,7 @@ import PromotionPage from "./pages/Admin/PromotionPage";
 import { useAuth } from "./contexts/Authentication/AuthContext";
 import { useEffect } from "react";
 import AllProductPage from "./pages/ProductPage/AllProductPage";
+import NewArrivalPage from "./pages/ProductPage/NewArrivalPage";
 
 const router = createBrowserRouter([
   {
@@ -40,6 +41,7 @@ const router = createBrowserRouter([
       { path: "products/:id", element: <ProductListPage /> },
       { path: "product/:product_id", element: <ProductPage /> },
       { path: "/sale", element: <SalePage /> },
+      { path: "/new-arrival", element: <NewArrivalPage /> },
       { path: "*", element: <Homepage /> },
     ],
   },
@@ -69,6 +71,7 @@ const routerAuthen = createBrowserRouter([
       { path: "products", element: <AllProductPage /> },
       { path: "products/:id", element: <ProductListPage /> },
       { path: "/sale", element: <SalePage /> },
+      { path: "/new-arrival", element: <NewArrivalPage /> },
       { path: "*", element: <Homepage /> },
     ],
   },

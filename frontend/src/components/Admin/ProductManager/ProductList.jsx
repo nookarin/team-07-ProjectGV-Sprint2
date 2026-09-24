@@ -67,7 +67,7 @@ export default function ProductList({
               >
                 <div className="absolute -right-8 -top-8 size-28 rounded-full bg-violet-500/15 blur-2xl" />
                 <div className="relative">
-                  {(product.images?.[0] || product.image_url) && (
+                  {(product.images?.[0] || product?.image_url) && (
                     <div className="relative mb-4">
                       <img
                         src={product.images?.[0] || product.image_url}
