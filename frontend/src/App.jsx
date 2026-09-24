@@ -17,6 +17,8 @@ import AdminDashboard from "#components/Admin/AdminDashboard";
 import AdminSandbox from "#components/Admin/AdminSandbox";
 import UserManager from "#components/Admin/UserManager";
 import Login from "./pages/Login/Login";
+import ForgotPassword from "./pages/ForgotPassword/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword/ResetPassword";
 import SalePage from "./pages/ProductPage/SalePage";
 import { TruckElectric } from "lucide-react";
 import PromotionPage from "./pages/Admin/PromotionPage";
@@ -32,6 +34,8 @@ const router = createBrowserRouter([
       { index: true, element: <Homepage /> },
       { path: "register", element: <Register /> },
       { path: "login", element: <Login /> },
+      { path: "forgot-password", element: <ForgotPassword /> },
+      { path: "reset-password/:token", element: <ResetPassword /> },
       { path: "products", element: <AllProductPage /> },
       { path: "products/:id", element: <ProductListPage /> },
       { path: "product/:product_id", element: <ProductPage /> },
@@ -49,6 +53,8 @@ const routerAuthen = createBrowserRouter([
       { index: true, element: <Homepage /> },
       { path: "register", element: <Register /> },
       { path: "login", element: <Login /> },
+      { path: "forgot-password", element: <ForgotPassword /> },
+      { path: "reset-password/:token", element: <ResetPassword /> },
       { path: "edit-profile", element: <PersonalInfo /> },
       { path: "edit-profile/addresses", element: <Addresses /> },
       { path: "my-purchases", element: <MyPurchase /> },
