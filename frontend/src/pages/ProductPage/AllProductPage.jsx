@@ -2,7 +2,7 @@ import ProductCard from "#components/ProductCard/ProductCard";
 import { useAuth } from "@/contexts/Authentication/AuthContext";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { Ring } from "#components/ring";
+import LoadingScreen from "@/components/LoadingScreen";
 
 const AllProductPage = () => {
   const { url } = useAuth();
@@ -21,6 +21,8 @@ const AllProductPage = () => {
   }, []);
   return (
     <div className="min-h-screen relative z-10">
+      {/* Show full-screen LoadingScreen while the products API request is being fetched */}
+      {loading && <LoadingScreen />}
       <header className="h-60 border flex flex-col justify-center items-center border-gbase-1 bg-linear-to-br from-gbg-1 0% via-50% via-gbase-3 to-gpurple-5/40">
         <div className="text-white text-center">
           {/* <h3 className="font-bold tracking-widest">PRODUCTS</h3> */}
@@ -32,17 +34,14 @@ const AllProductPage = () => {
       </header>
       <div className="w-3/4 mx-auto py-20">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {!loading ? (
+          {!loading &&
             products?.map((item) => {
               return (
                 <div key={item._id}>
                   <ProductCard img={item.images[0]} product={item} />
                 </div>
               );
-            })
-          ) : (
-            <Ring className={'size-20'}/>
-          )}
+            })}
         </div>
       </div>
     </div>

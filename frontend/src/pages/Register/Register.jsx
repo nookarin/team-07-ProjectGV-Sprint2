@@ -12,6 +12,7 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "@/contexts/Authentication/AuthContext";
 import { toast } from "sonner";
+import LoadingScreen from "@/components/LoadingScreen";
 
 export default function Register() {
   const navigate = useNavigate();
@@ -81,6 +82,8 @@ export default function Register() {
       }}
       className="min-h-screen bg-cover bg-center bg-no-repeat flex items-center justify-center p-4"
     >
+      {/* Show full-screen LoadingScreen while the register API request is in flight */}
+      {loading && <LoadingScreen />}
       <div className="bg-[#000000]/50 backdrop-blur-lg relative z-10  border border-gbase-1 flex flex-col justify-center gap-8 items-center p-10 w-full max-w-lg rounded-2xl ">
         <div className="text-[#22D3EE]">Ready To Level Up?</div>
         <div className="text-white font-extrabold text-5xl [-webkit-text-stroke:0.5px_#22D3EE] text-shadow-[0_0_32px_#22D3EE]">

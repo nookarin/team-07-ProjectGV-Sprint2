@@ -13,6 +13,7 @@ import BannerCarousel from "#components/Homepage/BannerCarousel";
 import HeaderSection from "#components/Homepage/HeaderSection";
 import axios from "axios";
 import { useAuth } from "@/contexts/Authentication/AuthContext";
+import LoadingScreen from "@/components/LoadingScreen";
 
 const category = [
   { name: "headphone", img: img_cate1 },
@@ -60,6 +61,8 @@ const Homepage = () => {
   }, []);
   return (
     <div className="relative z-10">
+      {/* Show full-screen LoadingScreen while the products API request is being fetched */}
+      {loading && <LoadingScreen />}
       <BannerCarousel />
       <div className="w-3/4 mx-auto my-10">
         <HeaderSection name={"categories"} />

@@ -17,7 +17,7 @@ import {
 import Header from "#components/Admin/Header";
 import DialogForm from "#components/Admin/Promotion/DialogForm";
 import PromotionList from "#components/Admin/Promotion/PromotionList";
-import { Ring } from "#components/ring";
+import LoadingScreen from "@/components/LoadingScreen";
 import { Label } from "#components/ui/label";
 
 
@@ -96,6 +96,8 @@ const PromotionPage = () => {
 
   return (
     <main className="min-h-screen bg-[#090813] px-4 py-10 text-white sm:px-6 lg:px-10">
+      {/* Show full-screen LoadingScreen while the promotion API request is being fetched */}
+      {loading && <LoadingScreen />}
       <div className="mx-auto max-w-7xl">
         <header className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <Header
@@ -199,12 +201,8 @@ const PromotionPage = () => {
               </Button>
             </div>
           </div>
-          {!loading ? (
+          {!loading && (
             <PromotionList data={data} setData={setData} loading={loading} />
-          ) : (
-            <div className="flex justify-center">
-              <Ring className="size-20" />
-            </div>
           )}
         </div>
       </div>
