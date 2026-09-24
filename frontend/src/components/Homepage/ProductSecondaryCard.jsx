@@ -25,7 +25,9 @@ const ProductSecondaryCard = ({ product, discount }) => {
             >
               ${product.price}
             </p>
-            <p className={`text-red-500 ml-1 font-bold text-2xl ${!discount && "hidden"}`}>
+            <p
+              className={`text-red-500 ml-1 font-bold text-2xl ${!discount && "hidden"}`}
+            >
               {Math.floor(product.price * discount)}
             </p>
           </div>

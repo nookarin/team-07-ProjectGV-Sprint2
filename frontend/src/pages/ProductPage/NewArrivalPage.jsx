@@ -37,7 +37,8 @@ const NewArrivalPage = () => {
         <div className="grid grid-cols-3 gap-16 w-8/12">
           {!loading &&
             products?.slice(0, 3).map((item) => {
-              return <ProductSecondaryCard product={item} />;
+                console.log(item)
+              return <div key={item._id}><ProductSecondaryCard product={item} /></div>;
             })}
         </div>
       </div>

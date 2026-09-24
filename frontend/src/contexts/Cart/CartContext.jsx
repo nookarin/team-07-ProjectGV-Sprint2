@@ -18,13 +18,6 @@ export function CartProvider({ children }) {
     setLoading(false);
   };
   const addToCart = async (product) => {
-    if (!user) {
-      setErr("Please login first.");
-      toast.error(err, {
-        richColors: true,
-        position: "bottom-center",
-      });
-    }
     setCart([...cart, product]);
     try {
       const response = await axios.post(
@@ -39,11 +32,18 @@ export function CartProvider({ children }) {
       console.log(result);
       getCart();
     } catch (error) {
-      console.log("ERROR:", error?.response);
-      toast.error(error?.response?.data?.message, {
-        richColors: true,
-        position: "bottom-center",
-      });
+      console.log("ERROR:", error, error?.response);
+      if (!user) {
+        toast.error("Please login first.", {
+          richColors: true,
+          position: "bottom-center",
+        });
+      } else {
+        toast.error(error?.response?.data?.message, {
+          richColors: true,
+          position: "bottom-center",
+        });
+      }
     }
   };
 
