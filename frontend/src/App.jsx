@@ -59,7 +59,7 @@ const routerAuthen = createBrowserRouter([
       { path: "my-cancellations", element: <MyCancellations /> },
       { path: "wishlists", element: <MyWishlist /> },
       { path: "cart", element: <CartPage /> },
-      { path: "products/:category_id/:product_id", element: <ProductPage /> },
+      { path: "product/:product_id", element: <ProductPage /> },
       { path: "products", element: <AllProductPage /> },
       { path: "products/:id", element: <ProductListPage /> },
       { path: "/sale", element: <SalePage /> },
