@@ -80,7 +80,6 @@ userRouter.patch("/:userId", protect, async (req, res, next) => {
       password,
       firstname,
       lastname,
-      phoneNumber,
       role,
     } = req.body;
 
@@ -93,7 +92,6 @@ userRouter.patch("/:userId", protect, async (req, res, next) => {
     }
     if (firstname) updateFields.firstname = firstname;
     if (lastname) updateFields.lastname = lastname;
-    if (phoneNumber) updateFields.phoneNumber = phoneNumber;
     if (role && isAdmin) updateFields.role = role;
     if (Object.keys(updateFields).length === 0) {
       return res.status(400).json({
