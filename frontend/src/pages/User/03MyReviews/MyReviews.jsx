@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Star, Trash2, PencilLine } from "lucide-react";
 import AccountSidebar from "../AccountSidebar";
 import { useAuth } from "@/contexts/Authentication/AuthContext";
+import LoadingScreen from "@/components/LoadingScreen";
 
 const API_URL = import.meta.env.VITE_API_URL;
 const PRODUCTS_URL = import.meta.env.VITE_API_URL;
@@ -194,6 +195,8 @@ export default function MyReviews() {
 
   return (
     <main className="min-h-screen bg-[#090813] px-4 py-12 font-sans text-[#DDD6FE] sm:px-8 lg:px-14 lg:py-[72px]">
+      {/* Show full-screen LoadingScreen while the reviews API request is being fetched */}
+      {loading && <LoadingScreen />}
       <div className="mx-auto grid max-w-[920px] gap-12 lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-[60px]">
         <AccountSidebar active="/my-reviews" />
         <section aria-labelledby="reviews-heading">

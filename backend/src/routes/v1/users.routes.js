@@ -1,11 +1,20 @@
 import { Router } from "express";
 import bcrypt from "bcrypt";
+import multer from "multer";
 import { User } from "../../models/user.model.js";
 import jwt from "jsonwebtoken";
 import { protect } from "../../middlewares/protect.js";
 import { authorize } from "../../middlewares/authorize.js";
+import { cloudinary } from "../../config/cloudinary.js";
 
 export const userRouter = Router();
+
+// middleware ของ express สำหรับรับไฟล์รูปโปรไฟล์จาก req
+// multer.memoryStorage เก็บไฟล์จาก req ไว้บน memory ของ server ก่อน (เป็น Buffer)
+const uploadAvatar = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024, files: 1 }, // สูงสุด 5 MB ไฟล์เดียว
+}).single("avatar");
 
 //get all users (admin only)
 userRouter.get("/", protect, authorize(["admin"]), async (req, res, next) => {
@@ -206,6 +215,136 @@ userRouter.delete("/:userId/address/:addressId", protect, async (req, res, next)
     return res.status(200).json({
       success: true,
       message: "Deleted address successfully!",
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// upload profile picture to Cloudinary (owner or admin only)
+userRouter.post("/:userId/avatar", protect, uploadAvatar, async (req, res, next) => {
+  try {
+    const currentUser = req.user.user;
+    const isAdmin = currentUser.role === "admin";
+    const isSelf = currentUser._id.toString() === req.params.userId;
+
+    if (!isSelf && !isAdmin) {
+      return res.status(403).json({
+        success: false,
+        message: "Forbidden: you can only upload your own profile picture.",
+      });
+    }
+
+    // ตรวจสอบว่ามีไฟล์รูปภาพถูกส่งมาจาก req หรือไม่
+    if (!req.file) {
+      return res
+        .status(400)
+        .json({ success: false, message: "No image file provided!" });
+    }
+
+    // ตรวจสอบว่าในไฟล์ config มี cloud name ที่ใช้งานหรือไม่
+    if (!process.env.CLOUDINARY_CLOUD_NAME) {
+      return res.status(500).json({
+        success: false,
+        message: "Cloudinary is not configured on the server!",
+      });
+    }
+
+    const user = await User.findById(req.params.userId);
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found!" });
+    }
+
+    // เก็บ public_id ของรูปเดิมไว้ เพื่อลบออกจาก Cloudinary หลังอัปโหลดรูปใหม่สำเร็จ
+    const oldPublicId = user.avatar_public_id;
+
+    // อัปโหลดรูปโปรไฟล์ขึ้น Cloudinary
+    // cloudinary.uploader.upload_stream ทำงานแบบ callback จึงต้องห่อด้วย Promise เพื่อใช้ await
+    const upload = await new Promise((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        // ให้เก็บรูปไว้ในโฟลเดอร์ gearverse/avatars และระบุว่าเป็นรูปภาพ
+        { folder: "gearverse/avatars", resource_type: "image" },
+        (error, result) => (error ? reject(error) : resolve(result)),
+      );
+      stream.end(req.file.buffer);
+    });
+
+    // บันทึก URL และ public_id ของรูปใหม่ลงใน user document
+    const updatedUser = await User.findByIdAndUpdate(
+      req.params.userId,
+      { avatar: upload.secure_url, avatar_public_id: upload.public_id },
+      { new: true, runValidators: true },
+    ).select("-password");
+
+    if (!updatedUser) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found!" });
+    }
+
+    // ลบรูปโปรไฟล์เก่าออกจาก Cloudinary (ถ้ามี)
+    if (oldPublicId) {
+      await cloudinary.uploader.destroy(oldPublicId).catch(() => {});
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Profile picture uploaded successfully!",
+      avatar: updatedUser.avatar,
+      user: updatedUser,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// delete profile picture from Cloudinary (owner or admin only)
+userRouter.delete("/:userId/avatar", protect, async (req, res, next) => {
+  try {
+    const currentUser = req.user.user;
+    const isAdmin = currentUser.role === "admin";
+    const isSelf = currentUser._id.toString() === req.params.userId;
+
+    if (!isSelf && !isAdmin) {
+      return res.status(403).json({
+        success: false,
+        message: "Forbidden: you can only delete your own profile picture.",
+      });
+    }
+
+    const user = await User.findById(req.params.userId);
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found!" });
+    }
+
+    const publicId = user.avatar_public_id;
+
+    // ล้างค่า avatar ออกจาก user document
+    const updatedUser = await User.findByIdAndUpdate(
+      req.params.userId,
+      { $unset: { avatar: 1, avatar_public_id: 1 } },
+      { new: true, runValidators: true },
+    ).select("-password");
+
+    if (!updatedUser) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found!" });
+    }
+
+    // ลบรูปโปรไฟล์ออกจาก Cloudinary โดยใช้ public_id ที่เก็บไว้
+    if (publicId) {
+      await cloudinary.uploader.destroy(publicId).catch(() => {});
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Profile picture deleted successfully!",
+      user: updatedUser,
     });
   } catch (error) {
     next(error);

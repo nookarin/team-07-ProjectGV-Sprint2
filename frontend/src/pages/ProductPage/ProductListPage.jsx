@@ -5,7 +5,7 @@ import { useParams } from "react-router-dom";
 import { DollarSign } from "lucide-react";
 import axios from "axios";
 import { useAuth } from "@/contexts/Authentication/AuthContext";
-import { Ring } from "#components/ring";
+import LoadingScreen from "@/components/LoadingScreen";
 import { useDebounce } from "use-debounce";
 
 const ProductListPage = () => {
@@ -64,6 +64,8 @@ const ProductListPage = () => {
   );
   return (
     <div className="min-h-screen relative z-10">
+      {/* Show full-screen LoadingScreen while the products API request is being fetched */}
+      {loading && <LoadingScreen />}
       <div className="h-60 border flex flex-col justify-center items-center border-gbase-1 bg-linear-to-br from-gbg-1 0% via-50% via-gbase-3 to-gpurple-5/40">
         <div className="text-white text-center">
           <h3 className="font-bold tracking-widest">COLLECTION</h3>
@@ -143,17 +145,14 @@ const ProductListPage = () => {
         <div
           className={`${loading ? "flex justify-center" : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:gap-10 max-xl:gap-20"}`}
         >
-          {!loading ? (
+          {!loading &&
             filteredProducts?.map((product, index) => {
               return (
                 <div key={index}>
                   <ProductCard product={product} img={product.image_url} />
                 </div>
               );
-            })
-          ) : (
-            <Ring className={"size-20 text-white"} />
-          )}
+            })}
           {err && <p className="text-gray-500">{err}</p>}
         </div>
       </div>

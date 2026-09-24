@@ -44,6 +44,7 @@ import { useCart } from "@/contexts/Cart/CartProvider";
 import { useDebouncedCallback } from "use-debounce";
 import axios from "axios";
 import { toast } from "sonner";
+import LoadingScreen from "@/components/LoadingScreen";
 
 //เปิด browser
 export default function CartPage() {
@@ -109,6 +110,8 @@ export default function CartPage() {
 
   return (
     <div className="min-h-screen relative z-10 text-slate-100 py-6 sm:py-10 px-3 sm:px-6 lg:px-12 font-sans antialiased">
+      {/* Show full-screen LoadingScreen while the cart API request is being fetched */}
+      {loading && <LoadingScreen />}
       <div className="max-w-7xl mx-auto">
         {/* Main Grid Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">

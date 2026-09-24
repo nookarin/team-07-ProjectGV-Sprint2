@@ -65,7 +65,7 @@ wishlistRouter.delete("/:id", protect, async (req, res, next) => {
 
     return res.status(200).json({
       success: true,
-      message: "Product removed from wishlist successfully",
+      message: "Product removed from wishlist :(",
       data: updatedWishlist,
     });
   } catch (error) {

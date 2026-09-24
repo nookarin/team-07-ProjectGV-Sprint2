@@ -27,7 +27,7 @@ import MouseImg from "../../assets/image-product/Gemini_Generated_Image_cfukikcf
 import HeadsetImg from "../../assets/image-product/Gemini_Generated_Image_waq5aswaq5aswaq5.jpg";
 import axios from "axios";
 import { useAuth } from "@/contexts/Authentication/AuthContext";
-import { Ring } from "#components/ring";
+import LoadingScreen from "@/components/LoadingScreen";
 
 const PRODUCT_NAME = "League of Legends X GEARVERSE";
 const UNIT_PRICE = 399;
@@ -213,6 +213,8 @@ const ProductPage = () => {
 
   return (
     <div className="min-h-screen bg-[#07070A] font-['Kanit'] text-white overflow-x-hidden selection:bg-[#BF00FF] selection:text-white">
+      {/* Show full-screen LoadingScreen while the product API request is being fetched */}
+      {loading && <LoadingScreen />}
       {/* Top Announcement Banner */}
       <div className="bg-[#0A0A0A] border-b border-[#1C1C24] py-1.5 px-4 text-center text-[10px] font-medium tracking-wide text-[#8A8A93] flex items-center justify-center gap-2">
         <Star className="w-3 h-3 text-[#00FFFF] fill-[#00FFFF]" />
@@ -234,20 +236,18 @@ const ProductPage = () => {
             {/* Main Image Box */}
             <div className="w-full aspect-video lg:aspect-auto lg:h-[460px] bg-[#0C0C12] border border-[#2a2a35] rounded-xl flex items-center justify-center overflow-hidden relative group shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
               <div className="absolute inset-0 bg-gradient-to-r from-[#A78BFA]/10 to-[#00FFFF]/5 opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none"></div>
-              {!loading ? (
+              {!loading && (
                 <img
                   src={data.image_url}
                   alt={data.product_name}
                   className="w-full object-cover opacity-90 group-hover:scale-105 transition-transform duration-700 ease-out"
                 />
-              ) : (
-                <Ring className={"size-20"} />
               )}
             </div>
 
             {/* Thumbnails Gallery */}
             <div className="w-full grid grid-cols-2 sm:grid-cols-4 gap-4">
-              {!loading ? (
+              {!loading &&
                 data.images?.map((img, idx) => (
                   <div
                     key={idx}
@@ -264,10 +264,7 @@ const ProductPage = () => {
                       className="w-full h-full object-contain bg-black/40"
                     />
                   </div>
-                ))
-              ) : (
-                <Ring className={"size-20"} />
-              )}
+                ))}
             </div>
           </div>
 

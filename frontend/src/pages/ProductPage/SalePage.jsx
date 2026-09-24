@@ -2,6 +2,7 @@ import ProductSecondaryCard from "#components/Homepage/ProductSecondaryCard";
 import { useAuth } from "@/contexts/Authentication/AuthContext";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
+import LoadingScreen from "@/components/LoadingScreen";
 
 const SalePage = () => {
   const [loading, setLoading] = useState(null);
@@ -17,7 +18,9 @@ const SalePage = () => {
     fetchData();
   }, []);
   return (
-    <div className="h-screen w-full flex flex-col text-white">
+    <div className="min-h-screen w-full flex flex-col text-white">
+      {/* Show full-screen LoadingScreen while the products API request is being fetched */}
+      {loading && <LoadingScreen />}
       <div className="h-60 border flex flex-col justify-center items-center border-gbase-1 bg-linear-to-br from-gbg-1 0% via-50% via-gbase-3 to-gpurple-5/40">
         <div className="text-white text-center">
           <h3 className="font-bold tracking-widest">SALE</h3>
@@ -27,9 +30,9 @@ const SalePage = () => {
           </h1>
         </div>
       </div>
-      <div className="w-full flex flex-1 items-center justify-center">
+      <div className="w-full h-screen flex items-center justify-center">
         {/* <p>NO PRODUCTS</p> */}
-        <div className="grid grid-cols-3 gap-10 w-8/12">
+        <div className="grid grid-cols-3 gap-16 w-8/12">
           {!loading &&
             data?.slice(0, 3).map((item) => {
               return (
