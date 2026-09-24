@@ -15,6 +15,7 @@ const ADDRESS_FIELDS = [
   { key: "district", label: "District", placeholder: "e.g. Khlong Toei" },
   { key: "province", label: "Province", placeholder: "e.g. Bangkok" },
   { key: "zipCode", label: "Zip code", placeholder: "e.g. 10110" },
+  { key: "phoneNumber", label: "Phone number", placeholder: "e.g. 081-234-5678", inputMode: "tel" },
 ];
 
 function emptyAddress() {
@@ -27,6 +28,7 @@ function emptyAddress() {
     district: "",
     province: "",
     zipCode: "",
+    phoneNumber: "",
     isDefault: false,
   };
 }
@@ -262,6 +264,12 @@ export default function Addresses() {
                         <p className="mt-1 max-w-xl text-[13px] leading-5 text-[#AAA4C4]">
                           {formatAddress(item)}
                         </p>
+                        {/* แสดงเบอร์โทรศัพท์ของที่อยู่ ถ้าผู้ใช้กรอกไว้ */}
+                        {item.phoneNumber && (
+                          <p className="mt-1 text-[13px] text-[#AAA4C4]">
+                            Phone: {item.phoneNumber}
+                          </p>
+                        )}
                       </div>
                     </div>
 
@@ -332,7 +340,7 @@ export default function Addresses() {
 
             <form onSubmit={handleSave} noValidate>
               <div className="grid gap-4 sm:grid-cols-2">
-                {ADDRESS_FIELDS.map(({ key, label, placeholder }) => (
+                {ADDRESS_FIELDS.map(({ key, label, placeholder, inputMode }) => (
                   <div key={key}>
                     <label
                       htmlFor={`addr-${key}`}
@@ -342,7 +350,8 @@ export default function Addresses() {
                     </label>
                     <input
                       id={`addr-${key}`}
-                      inputMode={key === "zipCode" ? "numeric" : undefined}
+                      // ถ้ากำหนด inputMode ไว้ใน field (เช่น tel สำหรับเบอร์โทร) จะใช้ค่านั้น ไม่เช่นนั้นใช้กฎเดิมเฉพาะ zipCode
+                      inputMode={inputMode ?? (key === "zipCode" ? "numeric" : undefined)}
                       value={draft[key] ?? ""}
                       onChange={(event) => updateDraft(key, event.target.value)}
                       placeholder={placeholder}
