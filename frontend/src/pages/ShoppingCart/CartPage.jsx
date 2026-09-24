@@ -53,6 +53,9 @@ export default function CartPage() {
   const [quantities, setQuantities] = useState({});
   const [totalPrice, setTotalPrice] = useState(0);
   const [sumPrice, setSumPrice] = useState(0);
+  const [promoCode, setPromoCode] = useState("");
+  const [promotion, setPromotion] = useState([]);
+  const [errPromo, setErrPromo] = useState("");
   const shipping = 39;
 
   const handleRemoveItem = async (itemId) => {
@@ -109,17 +112,42 @@ export default function CartPage() {
     syncQuantity(itemId, newQuantity);
   };
 
+  const handleApplyPromo = async (e) => {
+    e.preventDefault();
+    setErrPromo("");
+    setPromotion([]);
+    const response = await axios.get(`${url}/promo?code=${promoCode}`);
+    console.log(response.data.data);
+    if (response.data.success === false) {
+      setErrPromo(response.data.message);
+      return;
+    } else {
+      setErrPromo("");
+      setPromotion(response.data.data);
+    }
+  };
+
   useEffect(() => {
     const grandTotal = async () => {
+      let discount;
       const priceArr = data.map((product) => {
         return product.quantity * product.product_id.price;
       });
       const total = priceArr.reduce((acc, currentVal) => acc + currentVal, 0);
       setTotalPrice(total);
-      setSumPrice(total + shipping);
+
+      console.log(promotion);
+      if (!promotion[0]) {
+        discount = 0;
+      } else if (promotion[0].discount_type === "baht") {
+        discount = promotion[0].discount_amount;
+      } else {
+        discount = total * (promotion[0].discount_amount / 100);
+      }
+      setSumPrice(total + shipping - discount);
     };
     grandTotal();
-  }, [data]);
+  }, [data, promotion]);
 
   return (
     <div className="min-h-screen relative z-10 text-slate-100 py-6 sm:py-10 px-3 sm:px-6 lg:px-12 font-sans antialiased">
@@ -349,13 +377,13 @@ export default function CartPage() {
                 </label>
 
                 <form
-                  // onSubmit={handleApplyPromo}
+                  onSubmit={handleApplyPromo}
                   className="flex flex-col sm:flex-row gap-2"
                 >
                   <Input
                     type="text"
-                    // value={promoInput}
-                    // onChange={(e) => setPromoInput(e.target.value)} //ทุกครั้งที่ช่อง Input เปลี่ยน เอาค่าที่ผู้ใช้พิมพ์มาเก็บไว้ใน promoInput
+                    value={promoCode}
+                    onChange={(e) => setPromoCode(e.target.value)} //ทุกครั้งที่ช่อง Input เปลี่ยน เอาค่าที่ผู้ใช้พิมพ์มาเก็บไว้ใน promoInput
                     placeholder="Enter code (e.g. GEAR30)"
                     className="bg-[#18152e] border-[#2e264f] text-white text-sm px-3.5 py-2.5 rounded-xl flex-1 focus:border-purple-500 font-mono tracking-wider placeholder-slate-500 uppercase h-auto"
                   />
@@ -378,19 +406,24 @@ export default function CartPage() {
                 </form>
 
                 {/* Applied Success banner */}
-                {/* {appliedPromo && (
+                {promotion.length > 0 ? (
                   <div className="flex items-center gap-1.5 text-[#10b981] text-xs font-semibold pt-1">
                     <Check className="w-4 h-4" />
-                    <span>{appliedPromo.description}</span>
+                    <span>
+                      Code '
+                      <span className="font-black">{promotion[0].name}</span>'
+                      saved you {promotion[0].discount_type === "baht" && "฿"}
+                      {promotion[0].discount_amount}
+                      {promotion[0].discount_type === "percent" && "%"}!
+                    </span>
                   </div>
-                )} */}
-
-                {/* Error message banner */}
-                {/* {promoError && (
+                ) : errPromo ? (
                   <p className="text-rose-400 text-xs font-medium pt-1">
-                    {promoError}
+                    {errPromo}
                   </p>
-                )} */}
+                ) : (
+                  <></>
+                )}
               </CardContent>
             </Card>
 
@@ -409,6 +442,11 @@ export default function CartPage() {
                     <span>Discount Applied</span>
                     <span className="font-bold text-[#10b981] text-base">
                       {/* {discount > 0 ? `-$${discount.toFixed(2)}` : "$0.00"} */}
+                      {!promotion[0]
+                        ? "฿0.00"
+                        : promotion[0].discount_type === "baht"
+                          ? `฿${promotion[0].discount_amount.toFixed(2)}`
+                          : `฿${(totalPrice * (promotion[0].discount_amount / 100)).toFixed(2)}`}
                     </span>
                   </div>
 
