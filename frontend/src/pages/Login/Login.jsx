@@ -31,11 +31,11 @@ export default function Login() {
       });
       navigate('/')
     } else {
-      toast.error("Login failed", {
-        richColors: true,
-        duration: 5000,
-        position: 'top-center'
-      });
+      // toast.error("Login failed", {
+      //   richColors: true,
+      //   duration: 5000,
+      //   position: 'top-center'
+      // });
     }
   };
   return (
