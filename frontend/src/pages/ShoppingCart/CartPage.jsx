@@ -49,12 +49,19 @@ import LoadingScreen from "@/components/LoadingScreen";
 //เปิด browser
 export default function CartPage() {
   const { user, url } = useAuth();
-  const { data, loading, updateQuantity, cart, setCart } = useCart();
+  const { data, getCart, setCart, loading } = useCart();
   const [quantities, setQuantities] = useState({});
-  const handleRemoveItem = async (itemId) =>{
-    const response = await axios.delete(`${url}/shoppingcart/${user._id}/items/${itemId}`)
-    setCart(response.data.items)
-  }
+  const [totalPrice, setTotalPrice] = useState(0);
+  const [sumPrice, setSumPrice] = useState(0);
+  const shipping = 39;
+
+  const handleRemoveItem = async (itemId) => {
+    const response = await axios.delete(
+      `${url}/shoppingcart/${user._id}/items/${itemId}`,
+    );
+    setCart(response.data.items);
+    getCart();
+  };
 
   const syncQuantity = useDebouncedCallback(async (itemId, newQuantity) => {
     try {
@@ -64,15 +71,12 @@ export default function CartPage() {
           quantity: newQuantity,
         },
       );
-
       if (response.data.success) {
         setCart(response.data.cart);
       }
     } catch (error) {
-      console.log(error);
-
       toast.error(error.response?.data?.message || "Something went wrong!", {
-        richColors: true
+        richColors: true,
       });
 
       setQuantities((prev) => {
@@ -94,19 +98,28 @@ export default function CartPage() {
     if (type === "increase") {
       newQuantity = currentQuantity + 1;
     }
-
     if (type === "decrease") {
       newQuantity = currentQuantity - 1;
     }
-
     // ป้องกันไม่ให้ต่ำกว่า 1
     if (newQuantity < 1) {
       return;
     }
-
     setQuantities((prev) => ({ ...prev, [itemId]: newQuantity }));
     syncQuantity(itemId, newQuantity);
   };
+
+  useEffect(() => {
+    const grandTotal = async () => {
+      const priceArr = data.map((product) => {
+        return product.quantity * product.product_id.price;
+      });
+      const total = priceArr.reduce((acc, currentVal) => acc + currentVal, 0);
+      setTotalPrice(total);
+      setSumPrice(total + shipping);
+    };
+    grandTotal();
+  }, [data]);
 
   return (
     <div className="min-h-screen relative z-10 text-slate-100 py-6 sm:py-10 px-3 sm:px-6 lg:px-12 font-sans antialiased">
@@ -128,23 +141,15 @@ export default function CartPage() {
                 </Badge>
               </div>
 
-              {/* {items.length > 0 ? (
+              {data?.length > 0 && (
                 <Button
                   variant="link"
-                  onClick={handleClearAll}
+                  // onClick={handleClearAll}
                   className="text-slate-400 hover:text-rose-400 text-sm font-medium underline underline-offset-4 p-0 h-auto cursor-pointer"
                 >
                   Clear All Gear
                 </Button>
-              ) : (
-                <Button
-                  variant="link"
-                  onClick={handleResetDemo}
-                  className="text-cyan-400 hover:text-cyan-300 text-sm font-medium p-0 h-auto flex items-center gap-1.5 cursor-pointer"
-                >
-                  <RotateCcw className="w-4 h-4" /> Reset Demo Items
-                </Button>
-              )} */}
+              )}
             </div>
 
             {/* Cart Items List */}
@@ -189,8 +194,13 @@ export default function CartPage() {
 
                           {/* Specs Badge */}
                           <div>
-                            <Badge className={`${item.product_id.subcategory_ids.length === 0 && 'hidden'} bg-[#1f1938] text-[#c084fc] hover:bg-[#2b214f] text-xs px-3 py-1 rounded-md font-medium border border-[#3b2a63]/50`}>
-                              {item.product_id.subcategory_ids.length !== 0 ?item.product_id.subcategory_ids[0]?.subcategory_name: ''}
+                            <Badge
+                              className={`${item.product_id.subcategory_ids.length === 0 && "hidden"} bg-[#1f1938] text-[#c084fc] hover:bg-[#2b214f] text-xs px-3 py-1 rounded-md font-medium border border-[#3b2a63]/50`}
+                            >
+                              {item.product_id.subcategory_ids.length !== 0
+                                ? item.product_id.subcategory_ids[0]
+                                    ?.subcategory_name
+                                : ""}
                             </Badge>
                           </div>
 
@@ -219,10 +229,7 @@ export default function CartPage() {
                               variant="ghost"
                               size="icon-xs"
                               onClick={() =>
-                                handleQuantity(
-                                  item._id,
-                                  "decrease",
-                                )
+                                handleQuantity(item._id, "decrease")
                               }
                               className="text-slate-300 hover:text-white hover:bg-[#282147] rounded cursor-pointer"
                               aria-label="Decrease quantity"
@@ -236,10 +243,7 @@ export default function CartPage() {
                               variant="ghost"
                               size="icon-xs"
                               onClick={() =>
-                                handleQuantity(
-                                  item._id,
-                                  "increase",
-                                )
+                                handleQuantity(item._id, "increase")
                               }
                               className="text-slate-300 hover:text-white hover:bg-[#282147] rounded cursor-pointer"
                               aria-label="Increase quantity"
@@ -344,21 +348,21 @@ export default function CartPage() {
                   Promo Code / Gift Card
                 </label>
 
-                {/* <form
-                  onSubmit={handleApplyPromo}
+                <form
+                  // onSubmit={handleApplyPromo}
                   className="flex flex-col sm:flex-row gap-2"
                 >
                   <Input
                     type="text"
-                    value={promoInput}
-                    onChange={(e) => setPromoInput(e.target.value)} //ทุกครั้งที่ช่อง Input เปลี่ยน เอาค่าที่ผู้ใช้พิมพ์มาเก็บไว้ใน promoInput
+                    // value={promoInput}
+                    // onChange={(e) => setPromoInput(e.target.value)} //ทุกครั้งที่ช่อง Input เปลี่ยน เอาค่าที่ผู้ใช้พิมพ์มาเก็บไว้ใน promoInput
                     placeholder="Enter code (e.g. GEAR30)"
                     className="bg-[#18152e] border-[#2e264f] text-white text-sm px-3.5 py-2.5 rounded-xl flex-1 focus:border-purple-500 font-mono tracking-wider placeholder-slate-500 uppercase h-auto"
                   />
-                  {appliedPromo ? (
+                  {!true ? (
                     <Button
                       type="button"
-                      onClick={handleRemovePromo}
+                      // onClick={handleRemovePromo}
                       className="bg-[#10b981] hover:bg-emerald-400 text-black font-extrabold px-4 py-2.5 rounded-xl text-sm shadow-md shadow-emerald-500/20 cursor-pointer h-auto"
                     >
                       Applied
@@ -371,7 +375,7 @@ export default function CartPage() {
                       Apply
                     </Button>
                   )}
-                </form> */}
+                </form>
 
                 {/* Applied Success banner */}
                 {/* {appliedPromo && (
@@ -397,7 +401,7 @@ export default function CartPage() {
                   <div className="flex justify-between items-center text-slate-300">
                     <span>Cart Subtotal</span>
                     <span className="font-bold text-white text-base">
-                      {/* ${subtotal.toFixed(2)} */}
+                      ${totalPrice.toFixed(2)}
                     </span>
                   </div>
 
@@ -411,7 +415,7 @@ export default function CartPage() {
                   <div className="flex justify-between items-center text-slate-300">
                     <span>Estimated Shipping</span>
                     <span className="font-bold text-white text-base">
-                      {/* ${shipping.toFixed(2)} */}
+                      ${shipping.toFixed(2)}
                     </span>
                   </div>
                 </div>
@@ -424,23 +428,23 @@ export default function CartPage() {
                     Grand Total
                   </span>
                   <span className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-                    {/* ${grandTotal.toFixed(2)} */}
+                    ${sumPrice}
                   </span>
                 </div>
 
                 {/* Proceed to Checkout Button */}
-                {/* <Button
-                  onClick={handleProceedToCheckout}
-                  disabled={items.length === 0}
+                <Button
+                  // onClick={handleProceedToCheckout}
+                  // disabled={items.length === 0}
                   className={`w-full py-4 h-auto rounded-xl font-black text-sm tracking-wider uppercase flex items-center justify-center gap-2 transition-all duration-300 shadow-xl ${
-                    items.length === 0
+                    data.length === 0
                       ? "bg-slate-800 text-slate-500 cursor-not-allowed"
                       : "bg-gradient-to-r from-[#ec4899] via-[#a855f7] to-[#06b6d4] text-slate-950 hover:brightness-110 hover:shadow-cyan-500/25 active:scale-[0.99] cursor-pointer"
                   }`}
                 >
                   <span>PROCEED TO CHECKOUT</span>
                   <ArrowRight className="w-4 h-4 stroke-[3]" />
-                </Button> */}
+                </Button>
 
                 {/* Security badge footer */}
                 <div className="flex items-center justify-center gap-1.5 text-slate-400 text-xs pt-1">
