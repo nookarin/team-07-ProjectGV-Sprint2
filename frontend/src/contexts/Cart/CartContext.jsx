@@ -12,6 +12,7 @@ export function CartProvider({ children }) {
   const [loading, setLoading] = useState(null);
   const [err, setErr] = useState("Please login first");
   const getCart = async () => {
+    if (!user) return;
     setLoading(true);
     try {
       const response = await axios.get(`${url}/shoppingcart/${user._id}`, {
@@ -25,7 +26,6 @@ export function CartProvider({ children }) {
     }
   };
   const addToCart = async (product) => {
-    setCart([...cart, product]);
     try {
       const response = await axios.post(
         `${url}/shoppingcart/${user._id}/items`,
@@ -34,9 +34,6 @@ export function CartProvider({ children }) {
           withCredentials: true,
         },
       );
-      const result = await axios.get(`${url}/shoppingcart/${user._id}`, {
-        withCredentials: true,
-      });
       toast.success("Added Product to Cart", {
         richColors: true,
         position: "bottom-center",
@@ -81,8 +78,12 @@ export function CartProvider({ children }) {
   };
 
   useEffect(() => {
-    getCart();
-  }, [cart]);
+    if (user) {
+      getCart();
+    } else {
+      setData([]);
+    }
+  }, [user]);
   return (
     <CartContext.Provider
       value={{
