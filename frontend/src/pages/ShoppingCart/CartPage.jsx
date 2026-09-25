@@ -18,27 +18,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
-
-//ฟังก์ชันจากไฟล์ .js
-import {
-  getInitialCart, //โหลด Cart
-  saveCart, //บันทึก Cart
-  getSavedPromo, //โหลด Promo
-  savePromo, //บันทึก Promo
-  validatePromoCode, //ตรวจ Promo
-  resetToDefaultCart, //Reset Cart
-  DEFAULT_SHIPPING, //ค่าส่ง
-} from "#lib/cart-service";
-
-//ฟังก์ชัน sync กับ backend (MongoDB) — tie เข้ากับ user_id
-import { fetchCart, syncCart } from "#lib/cart-api";
 import { useAuth } from "@/contexts/Authentication/AuthContext";
 import { useCart } from "@/contexts/Cart/CartProvider";
 import { useDebouncedCallback } from "use-debounce";
@@ -62,9 +41,11 @@ export default function CartPage() {
   const handleRemoveItem = async (itemId) => {
     const response = await axios.delete(
       `${url}/shoppingcart/${user._id}/items/${itemId}`,
+      {
+        withCredentials: true,
+      },
     );
-    setCart(response.data.items);
-    getCart();
+    getCart()
   };
 
   const syncQuantity = useDebouncedCallback(async (itemId, newQuantity) => {
@@ -73,6 +54,9 @@ export default function CartPage() {
         `${url}/shoppingcart/${user._id}/items/${itemId}`,
         {
           quantity: newQuantity,
+        },
+        {
+          withCredentials: true,
         },
       );
       if (response.data.success) {
@@ -117,7 +101,9 @@ export default function CartPage() {
     e.preventDefault();
     setErrPromo("");
     setPromotion([]);
-    const response = await axios.get(`${url}/promo?code=${promoCode}`);
+    const response = await axios.get(`${url}/promo?code=${promoCode}`, {
+      withCredentials: true,
+    });
     console.log(response.data.data);
     if (response.data.success === false) {
       setErrPromo(response.data.message);
@@ -137,7 +123,6 @@ export default function CartPage() {
       const total = priceArr.reduce((acc, currentVal) => acc + currentVal, 0);
       setTotalPrice(total);
 
-      console.log(promotion);
       if (!promotion[0]) {
         discount = 0;
       } else if (promotion[0].discount_type === "baht") {
@@ -182,10 +167,10 @@ export default function CartPage() {
             </div>
 
             {/* Cart Items List */}
-            {!loading ? (
+            {loading ? (
               <Card className="bg-[#121022] border-[#25203f] rounded-2xl p-12 text-center flex flex-col items-center justify-center space-y-4">
                 <div className="h-60 flex items-center justify-center">
-                  <Ring className={'size-20 text-gpurple-3'} />
+                  <Ring className={"size-20 text-gpurple-3"} />
                 </div>
               </Card>
             ) : data?.length === 0 ? (

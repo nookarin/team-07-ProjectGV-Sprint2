@@ -13,9 +13,16 @@ export function CartProvider({ children }) {
   const [err, setErr] = useState("Please login first");
   const getCart = async () => {
     setLoading(true);
-    const response = await axios.get(`${url}/shoppingcart/${user._id}`);
-    setLoading(false);
-    setData(response.data.cart.items);
+    try {
+      const response = await axios.get(`${url}/shoppingcart/${user._id}`, {
+        withCredentials: true,
+      });
+      setLoading(false);
+      setData(response.data.cart.items);
+    } catch (err) {
+      console.log(err);
+      setLoading(false);
+    }
   };
   const addToCart = async (product) => {
     setCart([...cart, product]);
@@ -23,8 +30,13 @@ export function CartProvider({ children }) {
       const response = await axios.post(
         `${url}/shoppingcart/${user._id}/items`,
         { product_id: product._id, quantity: 1 },
+        {
+          withCredentials: true,
+        },
       );
-      const result = await axios.get(`${url}/shoppingcart/${user._id}`);
+      const result = await axios.get(`${url}/shoppingcart/${user._id}`, {
+        withCredentials: true,
+      });
       toast.success("Added Product to Cart", {
         richColors: true,
         position: "bottom-center",
@@ -51,6 +63,7 @@ export function CartProvider({ children }) {
       const response = await axios.patch(
         `${url}/shoppingcart/${user._id}/items/${product_id}`,
         { quantity },
+        { withCredentials: true },
       );
       setCart(response.data.cart.items);
       getCart();
@@ -58,6 +71,13 @@ export function CartProvider({ children }) {
       console.log("TEST", error);
       getCart();
     }
+  };
+
+  const handleClearAll = async () => {
+    const response = await axios.delete(`${url}/shoppingcart/${user._id}`, {
+      withCredentials: true,
+    });
+    console.log(response);
   };
 
   useEffect(() => {
@@ -74,6 +94,7 @@ export function CartProvider({ children }) {
         data,
         updateQuantity,
         err,
+        handleClearAll,
       }}
     >
       {children}
