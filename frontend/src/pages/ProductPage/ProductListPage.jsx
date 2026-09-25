@@ -46,9 +46,7 @@ const ProductListPage = () => {
     setTags(response.data.subcategories);
   };
   useEffect(() => {
-    if (debouncedValue || filterTag) {
-      fetchData();
-    }
+    fetchData();
   }, [debouncedValue, filterTag]);
 
   useEffect(() => {
