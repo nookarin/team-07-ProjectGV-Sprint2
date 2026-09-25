@@ -1,9 +1,11 @@
 import { Router } from "express";
 import { ShoppingCart } from "../../models/cart.model.js";
 import { Product } from "../../models/product.model.js";
+import { protect } from "../../middlewares/protect.js";
 
 export const shoppingCartRouter = Router();
 
+shoppingCartRouter.use(protect)
 // GET /api/v1/shoppingcart/:userId - Get active cart for a user
 shoppingCartRouter.get("/:userId", async (req, res, next) => {
   try {
