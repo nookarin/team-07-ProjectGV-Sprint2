@@ -45,6 +45,7 @@ import { useDebouncedCallback } from "use-debounce";
 import axios from "axios";
 import { toast } from "sonner";
 import LoadingScreen from "@/components/LoadingScreen";
+import { Ring } from "#components/ring";
 
 //เปิด browser
 export default function CartPage() {
@@ -152,7 +153,7 @@ export default function CartPage() {
   return (
     <div className="min-h-screen relative z-10 text-slate-100 py-6 sm:py-10 px-3 sm:px-6 lg:px-12 font-sans antialiased">
       {/* Show full-screen LoadingScreen while the cart API request is being fetched */}
-      {loading && <LoadingScreen />}
+      {/* {loading && <LoadingScreen />} */}
       <div className="max-w-7xl mx-auto">
         {/* Main Grid Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
@@ -181,7 +182,13 @@ export default function CartPage() {
             </div>
 
             {/* Cart Items List */}
-            {data?.length === 0 ? (
+            {!loading ? (
+              <Card className="bg-[#121022] border-[#25203f] rounded-2xl p-12 text-center flex flex-col items-center justify-center space-y-4">
+                <div className="h-60 flex items-center justify-center">
+                  <Ring className={'size-20 text-gpurple-3'} />
+                </div>
+              </Card>
+            ) : data?.length === 0 ? (
               <Card className="bg-[#121022] border-[#25203f] rounded-2xl p-12 text-center flex flex-col items-center justify-center space-y-4">
                 <div className="w-16 h-16 rounded-full bg-[#1c1833] flex items-center justify-center text-slate-500">
                   <ShoppingBag className="w-8 h-8" />
