@@ -44,22 +44,26 @@ export function CartProvider({ children }) {
       setLoading(false);
     }
   };
-  const addToCart = async (product) => {
+  const addToCart = async (product, quantity = 1) => {
     try {
       await axios.post(
         `${url}/shoppingcart/${user._id}/items`,
-        { product_id: product._id, quantity: 1 },
+        { product_id: product._id, quantity },
         {
           withCredentials: true,
         },
       );
-      toast.success("Added Product to Cart", {
-        richColors: true,
-        position: "bottom-center",
-      });
+      toast.success(
+        `Added ${quantity} × ${product?.product_name ?? "product"} to cart`,
+        {
+          richColors: true,
+          position: "bottom-center",
+        },
+      );
       await getCart();
       setLastAddedProductId(product._id);
       openDrawer();
+      return true;
     } catch (error) {
       console.log("ERROR:", error, error?.response);
       if (!user) {
@@ -73,6 +77,7 @@ export function CartProvider({ children }) {
           position: "bottom-center",
         });
       }
+      return false;
     }
   };
 
