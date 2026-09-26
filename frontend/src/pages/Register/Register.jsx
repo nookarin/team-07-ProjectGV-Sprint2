@@ -90,7 +90,7 @@ export default function Register() {
     >
       {/* Show full-screen LoadingScreen while the register API request is in flight */}
       {loading && <LoadingScreen />}
-      <div className="bg-[#000000]/50 mt-30 mb-15 backdrop-blur-lg relative z-10  border border-gbase-1 flex flex-col justify-center gap-8 items-center p-10 w-full max-w-lg rounded-2xl ">
+      <div className="bg-[#000000]/50 mt-15 mb-15 backdrop-blur-lg relative z-10  border border-gbase-1 flex flex-col justify-center gap-8 items-center p-10 w-full max-w-lg rounded-2xl ">
         <div className="text-[#22D3EE]">Ready To Level Up?</div>
         <div className="text-white font-extrabold text-5xl [-webkit-text-stroke:0.5px_#22D3EE] text-shadow-[0_0_32px_#22D3EE]">
           JOIN GEARVERSE

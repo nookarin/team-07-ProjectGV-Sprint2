@@ -40,7 +40,7 @@ export default function Login() {
       }}
       className="min-h-[calc(100vh-4rem)] bg-cover bg-center bg-no-repeat flex items-center justify-center p-4"
     >
-      <div className="bg-[#000000]/50 mt-30 mb-15 backdrop-blur-lg relative z-10 border border-gbase-1 flex flex-col justify-center gap-8 items-center p-10 w-full max-w-md rounded-2xl ">
+      <div className="bg-[#000000]/50 mt-15 mb-15 backdrop-blur-lg relative z-10 border border-gbase-1 flex flex-col justify-center gap-8 items-center p-10 w-full max-w-md rounded-2xl ">
         <IoGameControllerOutline className="w-12 h-12 text-purple-400 " />
         <div className="text-white font-extrabold text-5xl [-webkit-text-stroke:0.5px_#22D3EE] text-shadow-[0_0_32px_#22D3EE]">
           WELCOME
@@ -128,11 +128,6 @@ export default function Login() {
             </div>
           </button>
         </form>
-        {/* {err && (
-          <div className="w-full text-center text-red-400 text-sm bg-red-500/10 border border-red-500/30 rounded-md py-2 px-4">
-            {err}
-          </div>
-        )} */}
         <div className="border-t-2 border-gray-500 w-full pt-8 flex justify-center items-center">
           <span className="text-white">
             Don't have an account?{" "}
