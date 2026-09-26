@@ -111,7 +111,7 @@ const CartDrawer = () => {
     drawerOpen,
     openDrawer,
     closeDrawer,
-    lastAddedId,
+    lastAddedProductId,
     updateQuantity,
     handleRemoveItem,
   } = useCart();
@@ -248,7 +248,7 @@ const CartDrawer = () => {
                   key={item._id}
                   item={item}
                   quantity={draftQuantities[item._id] ?? item.quantity ?? 0}
-                  isNewest={item.product_id?._id === lastAddedId}
+                  isNewest={item.product_id?._id === lastAddedProductId}
                   busy={busyItemIds.has(item._id)}
                   onChangeQuantity={handleChangeQuantity}
                   onRemove={(itemId) =>
