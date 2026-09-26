@@ -46,7 +46,8 @@ const NavbarAuthenticate = ({ setClick, click }) => {
       onClick={openDrawer}
       aria-haspopup="dialog"
       aria-expanded={drawerOpen}
-      className="relative border border-gbase-1 rounded-lg h-10 px-3 flex items-center gap-2 hover:bg-gbase-2 transition-colors"
+      aria-label="My Cart"
+      className="relative border border-gbase-1 rounded-lg h-10 px-2 lg:px-3 flex items-center gap-2 hover:bg-gbase-2 transition-colors"
     >
       <span className="relative flex items-center">
         <ShoppingBag size={20} color="#22D3EE" />
@@ -61,7 +62,7 @@ const NavbarAuthenticate = ({ setClick, click }) => {
           </span>
         )}
       </span>
-      My Cart
+      <span className="hidden md:inline">My Cart</span>
     </button>
   );
 
@@ -78,10 +79,13 @@ const NavbarAuthenticate = ({ setClick, click }) => {
           </NavigationMenuItem> */}
           <NavigationMenuItem>
             <NavigationMenuTrigger
-              className={"border border-gbase-1 rounded-lg h-10 hover:bg-gbase-2"}
+              aria-label="Profile"
+              className={
+                "border border-gbase-1 rounded-lg h-10 px-2 lg:px-3 hover:bg-gbase-2"
+              }
             >
-              <User size={20} color="#22D3EE" className="mr-2" />
-              PROFILE
+              <User size={20} color="#22D3EE" />
+              <span className="hidden md:inline">PROFILE</span>
             </NavigationMenuTrigger>
             <NavigationMenuContent className={"w-52"}>
               <NavigationMenuLink
