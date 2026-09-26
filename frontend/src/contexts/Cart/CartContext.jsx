@@ -100,7 +100,7 @@ export function CartProvider({ children }) {
     const response = await axios.delete(`${url}/shoppingcart/${user._id}`, {
       withCredentials: true,
     });
-    console.log(response);
+    // console.log(response);
   };
 
   const handleRemoveItem = async (itemId) => {
