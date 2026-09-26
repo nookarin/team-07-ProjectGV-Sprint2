@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import {
   Minus,
   Plus,
@@ -15,7 +15,6 @@ import {
 import confetti from "canvas-confetti";
 import { toast } from "sonner";
 import { soundEngine } from "../../utils/audio";
-import { addToCart } from "#lib/cart-service";
 import CustomKeyboardLOLDImg from "../../assets/custom_keyboard_lol_collab.png";
 import CustomKeyboardLOLWhiteImg from "../../assets/custom_keyboard_lol_white.png";
 import CustomKeyboardLOLPurpleImg from "../../assets/custom_keyboard_lol_purple.png";
@@ -27,9 +26,9 @@ import MouseImg from "../../assets/image-product/Gemini_Generated_Image_cfukikcf
 import HeadsetImg from "../../assets/image-product/Gemini_Generated_Image_waq5aswaq5aswaq5.jpg";
 import axios from "axios";
 import { useAuth } from "@/contexts/Authentication/AuthContext";
+import { useCart } from "@/contexts/Cart/CartProvider";
 import LoadingScreen from "@/components/LoadingScreen";
 
-const PRODUCT_NAME = "League of Legends X GEARVERSE";
 const UNIT_PRICE = 399;
 
 const SWITCH_OPTIONS = [
@@ -83,11 +82,12 @@ const RELATED_PRODUCTS = [
 ];
 
 const ProductPage = () => {
-  const navigate = useNavigate();
   const param = useParams();
   const [data, setData] = useState({});
   const [loading, setLoading] = useState(null);
   const { url } = useAuth();
+  const { addToCart } = useCart();
+  const [adding, setAdding] = useState(false);
   // Array of placeholder images for gallery
   const images = [
     CustomKeyboardLOLDImg, // 0 (Black)
@@ -184,16 +184,13 @@ const ProductPage = () => {
   const isKeyboard =
     data?.category_id?.category_name?.toLowerCase() === "keyboard";
 
-  const handleAddToCart = () => {
-    addToCart({
-      id: `lol-gearverse-${activeSwitch.id}-${activeColor.id}`,
-      name: PRODUCT_NAME,
-      tag: `${activeSwitch.name} • ${activeColor.name}`,
-      unitPrice: UNIT_PRICE,
-      quantity,
-      delivery: "Est. Delivery: 2-3 Business Days",
-      image: activeImage,
-    });
+  const handleAddToCart = async () => {
+    if (!data?._id || adding) return;
+    setAdding(true);
+    // เพิ่มลงตะกร้าจริงผ่าน CartContext (ตะกร้าเดียวกับที่ navbar / drawer ใช้)
+    const added = await addToCart(data, quantity);
+    setAdding(false);
+    if (!added) return;
 
     confetti({
       particleCount: 100,
@@ -201,18 +198,10 @@ const ProductPage = () => {
       origin: { y: 0.6 },
       colors: ["#BF00FF", "#00FFFF", "#FF007F"],
     });
-
-    toast.success(`Added ${quantity} × ${PRODUCT_NAME} to your cart`, {
-      action: {
-        label: "View cart",
-        onClick: () => navigate("/cart"),
-        position: "top-center",
-      },
-    });
   };
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-[#07070A] font-['Kanit'] text-white overflow-x-hidden selection:bg-[#BF00FF] selection:text-white">
+    <div className="min-h-[calc(100vh-4rem)] relative z-10 font-['Kanit'] text-white overflow-x-hidden selection:bg-[#BF00FF] selection:text-white">
       {/* Show full-screen LoadingScreen while the product API request is being fetched */}
       {loading && <LoadingScreen />}
       {/* Top Announcement Banner */}
@@ -424,10 +413,13 @@ const ProductPage = () => {
             <div className="flex items-center gap-3 mt-2">
               <button
                 onClick={handleAddToCart}
-                className="flex-1 bg-[#9F7AEA] hover:bg-[#8B5CF6] transition-all h-[44px] rounded-[4px] flex items-center justify-center font-bold text-[14px] tracking-wide shadow-[0_0_15px_rgba(159,122,234,0.4)] relative overflow-hidden group"
+                disabled={!data?._id || adding}
+                className="flex-1 bg-[#9F7AEA] hover:bg-[#8B5CF6] transition-all h-[44px] rounded-[4px] flex items-center justify-center font-bold text-[14px] tracking-wide shadow-[0_0_15px_rgba(159,122,234,0.4)] relative overflow-hidden group disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 <span className="relative z-10">
-                  Add to cart – {UNIT_PRICE * quantity} $
+                  {adding
+                    ? "Adding..."
+                    : `Add to cart – ${(data.price ?? UNIT_PRICE) * quantity} $`}
                 </span>
                 <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform"></div>
               </button>
