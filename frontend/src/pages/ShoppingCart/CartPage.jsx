@@ -29,7 +29,7 @@ import { Ring } from "#components/ring";
 //เปิด browser
 export default function CartPage() {
   const { user, url } = useAuth();
-  const { data, getCart, setCart, loading } = useCart();
+  const { data, getCart, setCart, loading, handleClearAll } = useCart();
   const [quantities, setQuantities] = useState({});
   const [totalPrice, setTotalPrice] = useState(0);
   const [sumPrice, setSumPrice] = useState(0);
@@ -158,7 +158,7 @@ export default function CartPage() {
               {data?.length > 0 && (
                 <Button
                   variant="link"
-                  // onClick={handleClearAll}
+                  onClick={handleClearAll}
                   className="text-slate-400 hover:text-rose-400 text-sm font-medium underline underline-offset-4 p-0 h-auto cursor-pointer"
                 >
                   Clear All Gear
