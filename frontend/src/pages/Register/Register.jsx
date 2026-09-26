@@ -34,13 +34,19 @@ export default function Register() {
       const response = await axios.post(`${url}/users/register`, data);
       setLoading(false);
       if (response.data.success) {
+        toast.success("Register successful.", {
+          richColors: true,
+          duration: 5000,
+          position: "top-center",
+        });
         navigate("/login");
       }
     } catch (error) {
       setLoading(false);
       if (error.response?.status === 500) {
-        toast.error(error.response?.data?.message, {
+        toast.error(`Register failed: ${error.response?.data?.message}`, {
           richColors: true,
+          duration: 5000,
           position: "top-center",
         });
       }
@@ -49,25 +55,25 @@ export default function Register() {
   };
 
   const handleSubmit = (e) => {
+
     e.preventDefault();
+
     if (data.confirmpassword !== data.password) {
       toast.error("Passwords do not match!", {
+        richColors: true,
+        duration: 5000,
         position: "top-center",
-        style: {
-          background: "#12121A",
-          color: "#fb2c36",
-          border: "1px solid #fb2c36",
-          borderRadius: "10px",
-        },
       });
       return;
     }
+
     const submitData = {
       firstname: data.firstname,
       lastname: data.lastname,
       email: data.email,
       password: data.password,
     };
+
     register(submitData);
   };
 
@@ -84,7 +90,7 @@ export default function Register() {
     >
       {/* Show full-screen LoadingScreen while the register API request is in flight */}
       {loading && <LoadingScreen />}
-      <div className="bg-[#000000]/50 backdrop-blur-lg relative z-10  border border-gbase-1 flex flex-col justify-center gap-8 items-center p-10 w-full max-w-lg rounded-2xl ">
+      <div className="bg-[#000000]/50 mt-30 mb-15 backdrop-blur-lg relative z-10  border border-gbase-1 flex flex-col justify-center gap-8 items-center p-10 w-full max-w-lg rounded-2xl ">
         <div className="text-[#22D3EE]">Ready To Level Up?</div>
         <div className="text-white font-extrabold text-5xl [-webkit-text-stroke:0.5px_#22D3EE] text-shadow-[0_0_32px_#22D3EE]">
           JOIN GEARVERSE

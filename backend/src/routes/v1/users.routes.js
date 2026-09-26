@@ -47,11 +47,6 @@ userRouter.post("/register", async (req, res, next) => {
       email,
       password: newPassword,
     });
-    if (!user) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Can not create user!" });
-    }
     return res
       .status(201)
       .json({ success: true, message: "Created user successfully!", user });
@@ -74,14 +69,7 @@ userRouter.patch("/:userId", protect, async (req, res, next) => {
       });
     }
 
-    const {
-      username,
-      email,
-      password,
-      firstname,
-      lastname,
-      role,
-    } = req.body;
+    const { username, email, password, firstname, lastname, role } = req.body;
 
     const updateFields = {};
     if (username) updateFields.username = username;
@@ -187,116 +175,125 @@ userRouter.patch("/:userId/address", protect, async (req, res, next) => {
 });
 
 // delete address (owner or admin only)
-userRouter.delete("/:userId/address/:addressId", protect, async (req, res, next) => {
-  try {
-    const currentUser = req.user.user;
-    const isAdmin = currentUser.role === "admin";
-    const isSelf = currentUser._id.toString() === req.params.userId;
+userRouter.delete(
+  "/:userId/address/:addressId",
+  protect,
+  async (req, res, next) => {
+    try {
+      const currentUser = req.user.user;
+      const isAdmin = currentUser.role === "admin";
+      const isSelf = currentUser._id.toString() === req.params.userId;
 
-    if (!isSelf && !isAdmin) {
-      return res.status(403).json({
-        success: false,
-        message: "Forbidden: you can only manage your own address.",
+      if (!isSelf && !isAdmin) {
+        return res.status(403).json({
+          success: false,
+          message: "Forbidden: you can only manage your own address.",
+        });
+      }
+
+      const updatedUser = await User.findOneAndUpdate(
+        { _id: req.params.userId },
+        { $pull: { address: { _id: req.params.addressId } } },
+        { new: true, runValidators: true },
+      );
+      if (!updatedUser) {
+        return res
+          .status(404)
+          .json({ success: false, message: "User or address not found!" });
+      }
+      return res.status(200).json({
+        success: true,
+        message: "Deleted address successfully!",
       });
+    } catch (error) {
+      next(error);
     }
-
-    const updatedUser = await User.findOneAndUpdate(
-      { _id: req.params.userId },
-      { $pull: { address: { _id: req.params.addressId } } },
-      { new: true, runValidators: true },
-    );
-    if (!updatedUser) {
-      return res
-        .status(404)
-        .json({ success: false, message: "User or address not found!" });
-    }
-    return res.status(200).json({
-      success: true,
-      message: "Deleted address successfully!",
-    });
-  } catch (error) {
-    next(error);
-  }
-});
+  },
+);
 
 // upload profile picture to Cloudinary (owner or admin only)
-userRouter.post("/:userId/avatar", protect, uploadAvatar, async (req, res, next) => {
-  try {
-    const currentUser = req.user.user;
-    const isAdmin = currentUser.role === "admin";
-    const isSelf = currentUser._id.toString() === req.params.userId;
+userRouter.post(
+  "/:userId/avatar",
+  protect,
+  uploadAvatar,
+  async (req, res, next) => {
+    try {
+      const currentUser = req.user.user;
+      const isAdmin = currentUser.role === "admin";
+      const isSelf = currentUser._id.toString() === req.params.userId;
 
-    if (!isSelf && !isAdmin) {
-      return res.status(403).json({
-        success: false,
-        message: "Forbidden: you can only upload your own profile picture.",
+      if (!isSelf && !isAdmin) {
+        return res.status(403).json({
+          success: false,
+          message: "Forbidden: you can only upload your own profile picture.",
+        });
+      }
+
+      // ตรวจสอบว่ามีไฟล์รูปภาพถูกส่งมาจาก req หรือไม่
+      if (!req.file) {
+        return res
+          .status(400)
+          .json({ success: false, message: "No image file provided!" });
+      }
+
+      // ตรวจสอบว่าในไฟล์ config มี cloud name ที่ใช้งานหรือไม่
+      if (!process.env.CLOUDINARY_CLOUD_NAME) {
+        return res.status(500).json({
+          success: false,
+          message: "Cloudinary is not configured on the server!",
+        });
+      }
+
+      const user = await User.findById(req.params.userId);
+      if (!user) {
+        return res
+          .status(404)
+          .json({ success: false, message: "User not found!" });
+      }
+
+      // เก็บ public_id ของรูปเดิมไว้ เพื่อลบออกจาก Cloudinary หลังอัปโหลดรูปใหม่สำเร็จ
+      const oldPublicId = user.avatar_public_id;
+
+      // อัปโหลดรูปโปรไฟล์ขึ้น Cloudinary
+      // cloudinary.uploader.upload_stream ทำงานแบบ callback จึงต้องห่อด้วย Promise เพื่อใช้ await
+      const upload = await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          // ให้เก็บรูปไว้ในโฟลเดอร์ gearverse/avatars และระบุว่าเป็นรูปภาพ
+          { folder: "gearverse/avatars", resource_type: "image" },
+          (error, result) => (error ? reject(error) : resolve(result)),
+        );
+        stream.end(req.file.buffer);
       });
-    }
 
-    // ตรวจสอบว่ามีไฟล์รูปภาพถูกส่งมาจาก req หรือไม่
-    if (!req.file) {
-      return res
-        .status(400)
-        .json({ success: false, message: "No image file provided!" });
-    }
+      // บันทึก URL และ public_id ของรูปใหม่ลงใน user document
+      const updatedUser = await User.findByIdAndUpdate(
+        req.params.userId,
+        { avatar: upload.secure_url, avatar_public_id: upload.public_id },
+        { new: true, runValidators: true },
+      ).select("-password");
 
-    // ตรวจสอบว่าในไฟล์ config มี cloud name ที่ใช้งานหรือไม่
-    if (!process.env.CLOUDINARY_CLOUD_NAME) {
-      return res.status(500).json({
-        success: false,
-        message: "Cloudinary is not configured on the server!",
+      if (!updatedUser) {
+        return res
+          .status(404)
+          .json({ success: false, message: "User not found!" });
+      }
+
+      // ลบรูปโปรไฟล์เก่าออกจาก Cloudinary (ถ้ามี)
+      if (oldPublicId) {
+        await cloudinary.uploader.destroy(oldPublicId).catch(() => {});
+      }
+
+      return res.status(200).json({
+        success: true,
+        message: "Profile picture uploaded successfully!",
+        avatar: updatedUser.avatar,
+        user: updatedUser,
       });
+    } catch (error) {
+      next(error);
     }
-
-    const user = await User.findById(req.params.userId);
-    if (!user) {
-      return res
-        .status(404)
-        .json({ success: false, message: "User not found!" });
-    }
-
-    // เก็บ public_id ของรูปเดิมไว้ เพื่อลบออกจาก Cloudinary หลังอัปโหลดรูปใหม่สำเร็จ
-    const oldPublicId = user.avatar_public_id;
-
-    // อัปโหลดรูปโปรไฟล์ขึ้น Cloudinary
-    // cloudinary.uploader.upload_stream ทำงานแบบ callback จึงต้องห่อด้วย Promise เพื่อใช้ await
-    const upload = await new Promise((resolve, reject) => {
-      const stream = cloudinary.uploader.upload_stream(
-        // ให้เก็บรูปไว้ในโฟลเดอร์ gearverse/avatars และระบุว่าเป็นรูปภาพ
-        { folder: "gearverse/avatars", resource_type: "image" },
-        (error, result) => (error ? reject(error) : resolve(result)),
-      );
-      stream.end(req.file.buffer);
-    });
-
-    // บันทึก URL และ public_id ของรูปใหม่ลงใน user document
-    const updatedUser = await User.findByIdAndUpdate(
-      req.params.userId,
-      { avatar: upload.secure_url, avatar_public_id: upload.public_id },
-      { new: true, runValidators: true },
-    ).select("-password");
-
-    if (!updatedUser) {
-      return res
-        .status(404)
-        .json({ success: false, message: "User not found!" });
-    }
-
-    // ลบรูปโปรไฟล์เก่าออกจาก Cloudinary (ถ้ามี)
-    if (oldPublicId) {
-      await cloudinary.uploader.destroy(oldPublicId).catch(() => {});
-    }
-
-    return res.status(200).json({
-      success: true,
-      message: "Profile picture uploaded successfully!",
-      avatar: updatedUser.avatar,
-      user: updatedUser,
-    });
-  } catch (error) {
-    next(error);
-  }
-});
+  },
+);
 
 // delete profile picture from Cloudinary (owner or admin only)
 userRouter.delete("/:userId/avatar", protect, async (req, res, next) => {
@@ -324,6 +321,8 @@ userRouter.delete("/:userId/avatar", protect, async (req, res, next) => {
     // ล้างค่า avatar ออกจาก user document
     const updatedUser = await User.findByIdAndUpdate(
       req.params.userId,
+      // ลบฟิลด์ avatar และ avatar_public_id ออกจาก document ใน MongoDB
+      // $unset เป็นคำสั่งสำหรับลบฟิลด์ออกทั้งชื่อและค่าที่เก็บไว้
       { $unset: { avatar: 1, avatar_public_id: 1 } },
       { new: true, runValidators: true },
     ).select("-password");
@@ -336,7 +335,9 @@ userRouter.delete("/:userId/avatar", protect, async (req, res, next) => {
 
     // ลบรูปโปรไฟล์ออกจาก Cloudinary โดยใช้ public_id ที่เก็บไว้
     if (publicId) {
-      await cloudinary.uploader.destroy(publicId).catch(() => {});
+      await cloudinary.uploader.destroy(publicId).catch((error) => {
+        console.error("Failed to delete image on Cloudinary:", error.message);
+      });
     }
 
     return res.status(200).json({
@@ -350,23 +351,28 @@ userRouter.delete("/:userId/avatar", protect, async (req, res, next) => {
 });
 
 //delete user (admin only)
-userRouter.delete("/:userId", protect, authorize(["admin"]), async (req, res, next) => {
-  try {
-    const deletedUser = await User.findByIdAndDelete(req.params.userId);
+userRouter.delete(
+  "/:userId",
+  protect,
+  authorize(["admin"]),
+  async (req, res, next) => {
+    try {
+      const deletedUser = await User.findByIdAndDelete(req.params.userId);
 
-    if (!deletedUser) {
+      if (!deletedUser) {
+        return res
+          .status(404)
+          .json({ success: false, message: "User not found!" });
+      }
+
       return res
-        .status(404)
-        .json({ success: false, message: "User not found!" });
+        .status(200)
+        .json({ success: true, message: "Deleted user succesfully!" });
+    } catch (error) {
+      next(error);
     }
-
-    return res
-      .status(200)
-      .json({ success: true, message: "Deleted user succesfully!" });
-  } catch (error) {
-    next(error);
-  }
-});
+  },
+);
 
 //get current user from cookie
 userRouter.get("/me", protect, async (req, res, next) => {
@@ -411,11 +417,8 @@ userRouter.get("/:userId", protect, async (req, res, next) => {
         message: "User not found.",
       });
     }
-    return res.json({
-      data: user,
-    });
+    return res.status(200).json({ success: true, user });
   } catch (error) {
-    console.log(error);
     next(error);
   }
 });
@@ -469,7 +472,6 @@ userRouter.post("/login", async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.log(error);
     next(error);
   }
 });
@@ -488,7 +490,6 @@ userRouter.post("/logout", (req, res, next) => {
       message: "Logout successfully.",
     });
   } catch (error) {
-    console.log(error);
     next(error);
   }
 });
