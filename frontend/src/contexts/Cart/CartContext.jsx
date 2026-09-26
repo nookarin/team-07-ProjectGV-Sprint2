@@ -12,7 +12,7 @@ export function CartProvider({ children }) {
   const [loading, setLoading] = useState(null);
   const [err, setErr] = useState("Please login first");
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [lastAddedId, setLastAddedId] = useState(null);
+  const [lastAddedProductId, setLastAddedProductId] = useState(null);
   const openDrawer = () => setDrawerOpen(true);
   const closeDrawer = () => setDrawerOpen(false);
 
@@ -57,7 +57,9 @@ export function CartProvider({ children }) {
         richColors: true,
         position: "bottom-center",
       });
-      getCart();
+      await getCart();
+      setLastAddedProductId(product._id);
+      openDrawer();
     } catch (error) {
       console.log("ERROR:", error, error?.response);
       if (!user) {
@@ -101,7 +103,12 @@ export function CartProvider({ children }) {
       await axios.delete(`${url}/shoppingcart/${user._id}/items/${itemId}`, {
         withCredentials: true,
       });
-      setLastAddedId((current) => (current === itemId ? null : current));
+      setLastAddedProductId((current) => {
+        const removedProductId = data.find(
+          (item) => item._id === itemId,
+        )?.product_id?._id;
+        return current && current === removedProductId ? null : current;
+      });
       getCart();
     } catch (error) {
       console.log("ERROR:", error, error?.response);
@@ -118,6 +125,7 @@ export function CartProvider({ children }) {
       getCart();
     } else {
       setData([]);
+      setLastAddedProductId(null);
     }
   }, [user]);
   return (
@@ -136,7 +144,7 @@ export function CartProvider({ children }) {
         drawerOpen,
         openDrawer,
         closeDrawer,
-        lastAddedId,
+        lastAddedProductId,
         cartCount,
         cartSubtotal,
       }}

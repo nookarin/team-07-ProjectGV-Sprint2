@@ -66,7 +66,7 @@ const NavbarAuthenticate = ({ setClick, click }) => {
   );
 
   return (
-    <div className="flex justify-end shrink-0">
+    <div className="flex justify-end gap-2 shrink-0">
       <NavigationMenu>
         <NavigationMenuList className={"flex gap-2"}>
           {/* <NavigationMenuItem>
@@ -130,11 +130,6 @@ const NavbarAuthenticate = ({ setClick, click }) => {
                 Logout
               </NavigationMenuLink>
             </NavigationMenuContent>
-          </NavigationMenuItem>
-          <NavigationMenuItem>
-            <NavigationMenuLink className={"cursor-pointer hidden xl:block"}>
-              USD/THB
-            </NavigationMenuLink>
           </NavigationMenuItem>
         </NavigationMenuList>
       </NavigationMenu>

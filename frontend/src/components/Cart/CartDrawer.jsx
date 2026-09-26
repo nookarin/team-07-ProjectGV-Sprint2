@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useDebouncedCallback } from "use-debounce";
 import { Loader2, Minus, Plus, ShoppingBag, Sparkles, Trash2, X } from "lucide-react";
 import {
   Drawer,
@@ -17,9 +18,18 @@ import img_default from "/images/headset.jpg";
 const formatPrice = (value) =>
   new Intl.NumberFormat("th-TH", { maximumFractionDigits: 0 }).format(value || 0);
 
-const CartLineItem = ({ item, isNewest, busy, onChangeQuantity, onRemove }) => {
+const QUANTITY_SYNC_DELAY = 400;
+const QUANTITY_SYNC_MAX_WAIT = 1500;
+
+const CartLineItem = ({
+  item,
+  quantity,
+  isNewest,
+  busy,
+  onChangeQuantity,
+  onRemove,
+}) => {
   const product = item.product_id;
-  const quantity = item.quantity || 0;
   const atMaxStock = typeof product?.stock === "number" && quantity >= product.stock;
 
   return (
@@ -101,22 +111,82 @@ const CartDrawer = () => {
     drawerOpen,
     openDrawer,
     closeDrawer,
-    lastAddedId,
+    lastAddedProductId,
     updateQuantity,
     handleRemoveItem,
   } = useCart();
-  const [pendingItemId, setPendingItemId] = useState(null);
+  const [busyItemIds, setBusyItemIds] = useState(() => new Set());
+  const [draftQuantities, setDraftQuantities] = useState({});
+  const draftsRef = useRef({});
+  const queuedItemIdsRef = useRef(new Set());
 
   const isEmpty = !loading && data.length === 0;
 
+  const setBusyItem = (itemId, isBusy) => {
+    setBusyItemIds((current) => {
+      if (current.has(itemId) === isBusy) return current;
+      const next = new Set(current);
+      if (isBusy) {
+        next.add(itemId);
+      } else {
+        next.delete(itemId);
+      }
+      return next;
+    });
+  };
+
   const withBusyItem = async (itemId, action) => {
-    setPendingItemId(itemId);
+    setBusyItem(itemId, true);
     try {
       await action();
     } finally {
-      setPendingItemId(null);
+      setBusyItem(itemId, false);
     }
   };
+
+  const syncDraftQuantities = useDebouncedCallback(
+    async () => {
+      const cartItemIds = new Set(data.map((item) => item._id));
+      const entries = Object.entries(draftsRef.current).filter(([itemId]) =>
+        cartItemIds.has(itemId),
+      );
+
+      entries.forEach(([itemId]) => queuedItemIdsRef.current.delete(itemId));
+      if (entries.length === 0) return;
+
+      await Promise.all(
+        entries.map(([itemId, quantity]) =>
+          withBusyItem(itemId, () => updateQuantity(itemId, quantity)),
+        ),
+      );
+    },
+    QUANTITY_SYNC_DELAY,
+    { maxWait: QUANTITY_SYNC_MAX_WAIT, flushOnExit: true },
+  );
+
+  const handleChangeQuantity = (itemId, nextQuantity) => {
+    draftsRef.current[itemId] = nextQuantity;
+    queuedItemIdsRef.current.add(itemId);
+    setDraftQuantities((current) => ({ ...current, [itemId]: nextQuantity }));
+    syncDraftQuantities();
+  };
+
+  useEffect(() => {
+    const draftIds = Object.keys(draftsRef.current);
+    if (draftIds.length === 0) return;
+
+    const syncedIds = draftIds.filter(
+      (itemId) => !queuedItemIdsRef.current.has(itemId),
+    );
+    if (syncedIds.length === 0) return;
+
+    syncedIds.forEach((itemId) => delete draftsRef.current[itemId]);
+    setDraftQuantities((current) => {
+      const next = { ...current };
+      syncedIds.forEach((itemId) => delete next[itemId]);
+      return next;
+    });
+  }, [data]);
 
   const goToCart = () => {
     closeDrawer();
@@ -129,7 +199,7 @@ const CartDrawer = () => {
       onOpenChange={(next) => (next ? openDrawer() : closeDrawer())}
       swipeDirection="right"
     >
-      <DrawerContent className="rounded-l-4xl rounded-r-none border-gpurple-2/40 bg-gbase-3 text-white sm:[--drawer-content-width:26rem]">
+      <DrawerContent className="shadow-2xl shadow-gpurple-4/50 rounded-l-4xl border-gpurple-2/40 bg-gbase-3 text-white sm:[--drawer-content-width:26rem]">
         <DrawerHeader className="border-b border-gbase-1 pb-4 pr-14">
           <DrawerTitle className="flex items-center gap-2 text-lg font-bold text-white">
             <ShoppingBag size={18} className="text-gcyan-light" />
@@ -177,13 +247,10 @@ const CartDrawer = () => {
                 <CartLineItem
                   key={item._id}
                   item={item}
-                  isNewest={item.product_id?._id === lastAddedId}
-                  busy={pendingItemId === item._id}
-                  onChangeQuantity={(itemId, nextQuantity) =>
-                    withBusyItem(itemId, () =>
-                      updateQuantity(itemId, nextQuantity),
-                    )
-                  }
+                  quantity={draftQuantities[item._id] ?? item.quantity ?? 0}
+                  isNewest={item.product_id?._id === lastAddedProductId}
+                  busy={busyItemIds.has(item._id)}
+                  onChangeQuantity={handleChangeQuantity}
                   onRemove={(itemId) =>
                     withBusyItem(itemId, () => handleRemoveItem(itemId))
                   }
