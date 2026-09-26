@@ -199,7 +199,7 @@ const CartDrawer = () => {
       onOpenChange={(next) => (next ? openDrawer() : closeDrawer())}
       swipeDirection="right"
     >
-      <DrawerContent className="rounded-l-4xl rounded-r-none border-gpurple-2/40 bg-gbase-3 text-white sm:[--drawer-content-width:26rem]">
+      <DrawerContent className="shadow-2xl shadow-gpurple-4/50 rounded-l-4xl border-gpurple-2/40 bg-gbase-3 text-white sm:[--drawer-content-width:26rem]">
         <DrawerHeader className="border-b border-gbase-1 pb-4 pr-14">
           <DrawerTitle className="flex items-center gap-2 text-lg font-bold text-white">
             <ShoppingBag size={18} className="text-gcyan-light" />
