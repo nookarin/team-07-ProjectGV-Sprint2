@@ -2,6 +2,7 @@ import { Outlet } from "react-router-dom";
 import Navbar from "./Navbar/Navbar";
 import Footer from "./Footer";
 import Chatbot from "./Chatbot";
+import CartDrawer from "./Cart/CartDrawer";
 import { Toaster } from "./ui/sonner";
 import { useEffect } from "react";
 
@@ -26,6 +27,7 @@ const Layout = () => {
       </div>
       <Footer />
       <Chatbot />
+      <CartDrawer />
       <Toaster />
     </>
   );
