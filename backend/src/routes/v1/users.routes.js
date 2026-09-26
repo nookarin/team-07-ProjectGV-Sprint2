@@ -417,7 +417,7 @@ userRouter.get("/:userId", protect, async (req, res, next) => {
         message: "User not found.",
       });
     }
-    return res.status(200).json({ success: true, user });
+    return res.status(200).json({ success: true, data: user });
   } catch (error) {
     next(error);
   }
