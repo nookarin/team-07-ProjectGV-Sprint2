@@ -49,7 +49,7 @@ const PromotionDetailDialog = ({ item, url }) => {
       ...item,
       description,
     });
-    console.log(response);
+    // console.log(response);
   };
 
   return (

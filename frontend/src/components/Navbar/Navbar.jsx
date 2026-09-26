@@ -123,7 +123,7 @@ const Navbar = () => {
 
       {/* เมนูมือถือ — แสดงเป็น panel เต็มความกว้างใต้ navbar แทนการยัดเรียงในแถวเดียว */}
       {mobileMenuOpen && (
-        <div className="md:hidden absolute top-16 left-0 w-full bg-gbg-2 border-t border-white/10 flex flex-col p-4 gap-1 shadow-xl shadow-gpurple-4/80">
+        <div className="lg:hidden absolute top-16 left-0 w-full bg-gbg-2 border-t border-white/10 flex flex-col p-4 gap-1 shadow-xl shadow-gpurple-4/80">
           <Link
             to={"/products"}
             onClick={() => setMobileMenuOpen(false)}
@@ -155,7 +155,7 @@ const Navbar = () => {
           <Link
             to={"/sale"}
             onClick={() => setMobileMenuOpen(false)}
-            className="mx-3 mt-2 px-3 py-2 text-center border border-pink-300 text-pink-300 rounded-lg"
+            className="mx-3 mt-2 px-3 py-2 text-center border border-pink-300 text-pink-300 hover:bg-gpink-3 rounded-lg"
           >
             SALE
           </Link>

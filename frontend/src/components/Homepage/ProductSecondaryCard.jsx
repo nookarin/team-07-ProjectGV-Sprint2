@@ -13,7 +13,7 @@ const ProductSecondaryCard = ({ product, discount }) => {
           src={product.image_url}
           alt={product.product_name}
         />
-        <span className="text-xs absolute top-3 left-4 bg-white/15 border-2 border-white text-white py-0.5 px-4 rounded-2xl">
+        <span className="text-xs absolute top-3 left-4 bg-gpurple-4/70 border border-gpurple-3 text-white py-0.5 px-4 rounded-2xl">
           {product.category_id.category_name}
         </span>
       </div>

@@ -30,9 +30,9 @@ const SalePage = () => {
           </h1>
         </div>
       </div>
-      <div className="w-full h-screen flex items-center justify-center">
+      <div className="w-full my-10 flex items-center justify-center">
         {/* <p>NO PRODUCTS</p> */}
-        <div className="grid grid-cols-3 gap-16 w-8/12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-16 w-8/12">
           {!loading &&
             data?.slice(0, 3).map((item) => {
               return (

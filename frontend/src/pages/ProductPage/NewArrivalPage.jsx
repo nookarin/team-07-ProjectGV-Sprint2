@@ -14,7 +14,6 @@ const NewArrivalPage = () => {
     const response = await axios.get(`${url}/products?createdAt=1`);
     setProducts(response.data.products);
     setLoading(false);
-    console.log(response);
   };
 
   useEffect(() => {
@@ -32,12 +31,11 @@ const NewArrivalPage = () => {
           </h1>
         </div>
       </div>
-      <div className="w-full h-screen flex items-center justify-center">
+      <div className="w-full my-10 flex items-center justify-center">
         {/* <p>NO PRODUCTS</p> */}
-        <div className="grid grid-cols-3 gap-16 w-8/12">
+        <div className="grid grid-cols-1 md:w-10/12 md:grid-cols-2 xl:grid-cols-3 gap-16 w-8/12">
           {!loading &&
             products?.slice(0, 3).map((item) => {
-                console.log(item)
               return <div key={item._id}><ProductSecondaryCard product={item} /></div>;
             })}
         </div>
