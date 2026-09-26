@@ -17,17 +17,17 @@ const bannerData = [
     id: "banner1",
     src: video_banner1,
     overlay: (
-      <div className="absolute w-full h-full flex flex-col justify-center items-center text-white">
-        <h1 className="font-black text-7xl text-shadow-[0px_0px_20px_#A78BFA]">
+      <div className="absolute inset-0 z-10 flex flex-col justify-center items-center text-center text-white px-4 sm:px-6">
+        <h1 className="font-black text-4xl leading-tight sm:text-6xl lg:text-7xl text-shadow-[0px_0px_20px_#A78BFA]">
           PRECISION TO VICTORY.
         </h1>
-        <p>
-          Precision gear designed for ultimate control. Upgrade today.A78BFA
+        <p className="mt-2 max-w-xl text-sm sm:text-base lg:text-lg">
+          Precision gear designed for ultimate control. Upgrade today.
         </p>
         <Button
           variant="outline"
           className={
-            "rounded-lg mt-20 px-8 py-5 shadow-lg shadow-gpurple-2 text-gpurple-2 inset-shadow-sm inset-shadow-gpurple-1"
+            "rounded-lg mt-8 sm:mt-12 lg:mt-20 px-6 py-3 sm:px-8 sm:py-5 text-sm sm:text-base shadow-lg shadow-gpurple-2 text-gpurple-2 inset-shadow-sm inset-shadow-gpurple-1"
           }
         >
           <Link to="/products">SHOP NOW {"⮞"}</Link>
@@ -39,15 +39,17 @@ const bannerData = [
     id: "banner2",
     src: video_banner2,
     overlay: (
-      <div className="absolute w-full h-full flex flex-col justify-center items-center text-white">
+      <div className="absolute inset-0 z-10 flex flex-col justify-center items-center text-center text-white px-4 sm:px-6">
         <div>
-          <Badge variant="outline" className={"bg-red-500/25"}>
+          <Badge variant="outline" className={"bg-red-500/25 text-xs sm:text-sm"}>
             NEW ARRIVAL
           </Badge>
-          <h2 className="font-extrabold text-6xl tracking-wide text-shadow-lg text-shadow-pink-500 my-2">
+          <h2 className="font-extrabold text-3xl sm:text-5xl lg:text-6xl tracking-wide text-shadow-lg text-shadow-pink-500 my-2">
             GearVerse Magnetic Keyboard MK II
           </h2>
-          <p className="uppercase font-bold text-xl">Light up your typing</p>
+          <p className="uppercase font-bold text-sm sm:text-lg lg:text-xl">
+            Light up your typing
+          </p>
         </div>
       </div>
     ),
@@ -56,16 +58,16 @@ const bannerData = [
     id: "banner3",
     src: video_banner3,
     overlay: (
-      <div className="absolute w-full h-full flex flex-col gap-3 justify-center items-center text-white">
-        <p className="font-extrabold tracking-wider text-xl text-shadow-xs text-shadow-pink-600">
+      <div className="absolute inset-0 z-10 flex flex-col gap-3 justify-center items-center text-center text-white px-4 sm:px-6">
+        <p className="font-extrabold tracking-wider text-sm sm:text-lg lg:text-xl text-shadow-xs text-shadow-pink-600">
           SPECIAL OFFER
         </p>
-        <h1 className="font-black text-6xl bg-[#c42976] p-4 rounded-2xl shadow-2xl shadow-[#bd427f]">
+        <h1 className="font-black text-3xl sm:text-5xl lg:text-6xl bg-[#c42976] p-3 sm:p-4 rounded-2xl shadow-2xl shadow-[#bd427f]">
           BACK TO SCHOOL
         </h1>
-        <h3 className="text-4xl font-semibold">
+        <h3 className="text-2xl sm:text-4xl font-semibold">
           GET{" "}
-          <span className="text-5xl font-extrabold text-pink-400 underline">
+          <span className="text-4xl sm:text-5xl font-extrabold text-pink-400 underline">
             70%
           </span>{" "}
           OFF
@@ -112,11 +114,11 @@ const BannerSlide = ({ banner, index }) => {
   };
 
   return (
-    <CarouselItem>
+    <CarouselItem className="relative overflow-hidden">
       {banner.overlay}
       <video
         ref={videoRef}
-        className="border w-full h-175 object-cover"
+        className="border w-full h-[60svh] sm:h-[70svh] lg:h-175 object-cover"
         src={banner.src}
         muted
         playsInline

@@ -71,7 +71,7 @@ const Homepage = () => {
       <BannerCarousel />
       <div className="w-3/4 mx-auto my-10">
         <HeaderSection name={"categories"} />
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
           {category.map((item, index) => {
             return <CategoryCard img={item.img} name={item.name} key={index} />;
           })}
@@ -79,7 +79,7 @@ const Homepage = () => {
       </div>
       <div className="w-3/4 mx-auto py-10">
         <HeaderSection name={"trending gear"} />
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-12 text-white">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-12 text-white">
           {!loading &&
             products?.slice(0, 3).map((item, index) => {
               return (

@@ -73,27 +73,29 @@ const ProductListPage = () => {
           </h1>
         </div>
       </div>
-      <aside className="bg-gbg-2/30 border backdrop-blur-xl border-gbase-1 w-9/12 flex flex-col gap-2 mx-auto mt-10 rounded-2xl text-white px-10 py-4">
+      <aside className="bg-gbg-2/30 border backdrop-blur-xl border-gbase-1 w-11/12 sm:w-9/12 flex flex-col gap-3 sm:gap-2 mx-auto mt-10 rounded-2xl text-white px-4 sm:px-6 lg:px-10 py-4">
         <div className="flex flex-col">
-          <label htmlFor="name">Search name</label>
+          <label htmlFor="name" className="text-sm sm:text-base">
+            Search name
+          </label>
           <input
             type="text"
             id="name"
             placeholder="GearVerse Nova III"
             onChange={(e) => setFilter(e.target.value)}
-            className="border border-gbase-2 bg-gbase-3/30 rounded-lg mt-2 py-1 px-2"
+            className="w-full border border-gbase-2 bg-gbase-3/30 rounded-lg mt-2 py-2 sm:py-1 px-2"
           />
         </div>
-        <div className="flex gap-5 w-full">
-          <div className="flex flex-col gap-2">
+        <div className="flex flex-col lg:flex-row gap-5 w-full">
+          <div className="flex flex-col gap-2 w-full lg:w-1/2">
             <label>Price:</label>
-            <div className="flex items-center">
-              <div className="flex items-center border border-gbase-2 bg-gbase-3/30 px-2 py-1 rounded-lg">
-                <DollarSign size={14} color="gray" />
+            <div className="flex items-center gap-1 sm:gap-0">
+              <div className="flex flex-1 items-center min-w-0 border border-gbase-2 bg-gbase-3/30 px-2 py-1.5 sm:py-1 rounded-lg">
+                <DollarSign size={14} color="gray" className="shrink-0" />
                 <input
                   type="number"
                   name="min"
-                  className="outline-0 w-24 sm:w-40"
+                  className="outline-0 w-full min-w-0 sm:w-40"
                   placeholder="min price"
                   value={price.min === 0 ? "" : price.min}
                   onChange={(e) =>
@@ -101,13 +103,13 @@ const ProductListPage = () => {
                   }
                 />
               </div>
-              <span className="mx-2">-</span>
-              <div className="flex items-center border border-gbase-2 bg-gbase-3/30 px-2 py-1 rounded-lg">
-                <DollarSign size={14} color="gray" />
+              <span className="shrink-0 mx-1 sm:mx-2">-</span>
+              <div className="flex flex-1 items-center min-w-0 border border-gbase-2 bg-gbase-3/30 px-2 py-1.5 sm:py-1 rounded-lg">
+                <DollarSign size={14} color="gray" className="shrink-0" />
                 <input
                   type="number"
                   name="max"
-                  className="outline-0 w-24 sm:w-40"
+                  className="outline-0 w-full min-w-0 sm:w-40"
                   placeholder="max price"
                   value={price.max === 20000 ? "" : price.max}
                   onChange={(e) =>
@@ -117,15 +119,17 @@ const ProductListPage = () => {
               </div>
             </div>
           </div>
-          <div className="hidden md:flex flex-col gap-2 w-full">
-            <label htmlFor="">Tags:</label>
-            <div className="flex gap-2 h-10 w-full overflow-y-scroll flex-wrap scrollbar-thumb-gbase-1 scrollbar-track-gbase-3/50 scrollbar-thin">
+          <div className="flex flex-col gap-2 w-full lg:w-1/2">
+            <label htmlFor="" className="text-sm sm:text-base">
+              Tags:
+            </label>
+            <div className="flex gap-2 min-h-10 max-h-24 w-full overflow-y-auto flex-wrap scrollbar-thumb-gbase-1 scrollbar-track-gbase-3/50 scrollbar-thin">
               {!loading ? (
                 tags?.map((tag, index) => {
                   return (
                     <button
                       key={index}
-                      className="border border-gpurple-2/40 px-2 py-1 rounded-xl bg-gpink-3/30 hover:bg-gpink-2"
+                      className="border border-gpurple-2/40 px-2 py-1.5 sm:py-1 rounded-xl bg-gpink-3/30 hover:bg-gpink-2"
                       // onClick={(e) => setFilterTag(tag.subcategory_name)}
                     >
                       {tag.subcategory_name}
@@ -141,7 +145,7 @@ const ProductListPage = () => {
       </aside>
       <div className="w-9/12 py-14 mx-auto">
         <div
-          className={`${loading ? "flex justify-center" : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:gap-10 max-xl:gap-20"}`}
+          className={`${loading ? "flex justify-center" : "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 xl:gap-10 max-xl:gap-20"}`}
         >
           {!loading &&
             filteredProducts?.map((product, index) => {

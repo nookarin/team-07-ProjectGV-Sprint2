@@ -34,7 +34,7 @@ const CartLineItem = ({
 
   return (
     <div
-      className={`flex gap-3 rounded-xl border p-3 transition-colors ${
+      className={`flex gap-3 rounded-xl border p-3 transition-colors hover:bg-gpurple-5 ${
         isNewest
           ? "border-gpurple-2 bg-gpurple-4/25 ring-1 ring-gpurple-2/60"
           : "border-gbase-1 bg-gbase-3"
@@ -217,7 +217,7 @@ const CartDrawer = () => {
           </DrawerDescription>
         </DrawerHeader>
 
-        <div className="min-h-0 flex-1 overflow-y-auto p-4">
+        <div className="min-h-0 flex-1 overflow-y-auto p-4 scrollbar-thumb-gpurple-4/50">
           {loading && data.length === 0 ? (
             <div className="flex h-full flex-col items-center justify-center gap-3 text-gpurple-1/70">
               <Loader2 className="animate-spin" size={28} />
