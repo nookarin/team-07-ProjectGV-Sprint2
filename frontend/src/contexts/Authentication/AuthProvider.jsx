@@ -23,11 +23,11 @@ export function AuthProvider({ children }) {
       setLoading(false);
       return true;
     } catch (error) {
-      console.log(error);
-      console.log(error.response);
+      // console.log(error);
+      // console.log(error.response);
       setErr(error.response?.data?.message || error.message);
       setLoading(false);
-      toast.error(error.response.data.message, {
+      toast.error(`Login failed: ${error.response.data.message}`, {
         richColors: true,
         position: "top-center",
       });

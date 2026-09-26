@@ -2,13 +2,13 @@ import bgImage from "../../assets/bg-2-edited.jpg";
 import { LuMail, LuEye, LuEyeClosed } from "react-icons/lu";
 import { PiLockKeyBold } from "react-icons/pi";
 import { IoEnter, IoGameControllerOutline } from "react-icons/io5";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/Authentication/AuthContext";
 import { toast } from "sonner";
 
 export default function Login() {
-  const { login, err, user } = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
   const [data, setData] = useState({
     email: "",
@@ -27,17 +27,12 @@ export default function Login() {
       toast.success("Login successful.", {
         richColors: true,
         duration: 5000,
-        position: 'top-center'
+        position: "top-center",
       });
-      navigate('/')
-    } else {
-      // toast.error("Login failed", {
-      //   richColors: true,
-      //   duration: 5000,
-      //   position: 'top-center'
-      // });
+      navigate("/");
     }
   };
+
   return (
     <div
       style={{
@@ -45,7 +40,7 @@ export default function Login() {
       }}
       className="min-h-screen bg-cover bg-center bg-no-repeat flex items-center justify-center p-4"
     >
-      <div className="bg-[#000000]/50 backdrop-blur-lg relative z-10 border border-gbase-1 flex flex-col justify-center gap-8 items-center p-10 w-full max-w-md rounded-2xl ">
+      <div className="bg-[#000000]/50 mt-30 mb-15 backdrop-blur-lg relative z-10 border border-gbase-1 flex flex-col justify-center gap-8 items-center p-10 w-full max-w-md rounded-2xl ">
         <IoGameControllerOutline className="w-12 h-12 text-purple-400 " />
         <div className="text-white font-extrabold text-5xl [-webkit-text-stroke:0.5px_#22D3EE] text-shadow-[0_0_32px_#22D3EE]">
           WELCOME
@@ -133,11 +128,11 @@ export default function Login() {
             </div>
           </button>
         </form>
-        {err && (
+        {/* {err && (
           <div className="w-full text-center text-red-400 text-sm bg-red-500/10 border border-red-500/30 rounded-md py-2 px-4">
             {err}
           </div>
-        )}
+        )} */}
         <div className="border-t-2 border-gray-500 w-full pt-8 flex justify-center items-center">
           <span className="text-white">
             Don't have an account?{" "}
