@@ -43,7 +43,7 @@ export default function Login() {
       style={{
         backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(${bgImage})`,
       }}
-      className="min-h-screen bg-cover bg-center bg-no-repeat flex items-center justify-center p-4"
+      className="min-h-[calc(100vh-4rem)] bg-cover bg-center bg-no-repeat flex items-center justify-center p-4"
     >
       <div className="bg-[#000000]/50 backdrop-blur-lg relative z-10 border border-gbase-1 flex flex-col justify-center gap-8 items-center p-10 w-full max-w-md rounded-2xl ">
         <IoGameControllerOutline className="w-12 h-12 text-purple-400 " />

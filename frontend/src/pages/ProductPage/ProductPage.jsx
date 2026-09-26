@@ -212,7 +212,7 @@ const ProductPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#07070A] font-['Kanit'] text-white overflow-x-hidden selection:bg-[#BF00FF] selection:text-white">
+    <div className="min-h-[calc(100vh-4rem)] bg-[#07070A] font-['Kanit'] text-white overflow-x-hidden selection:bg-[#BF00FF] selection:text-white">
       {/* Show full-screen LoadingScreen while the product API request is being fetched */}
       {loading && <LoadingScreen />}
       {/* Top Announcement Banner */}

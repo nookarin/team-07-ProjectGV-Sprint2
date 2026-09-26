@@ -19,7 +19,7 @@ const Layout = () => {
   return (
     <>
       <Navbar />
-      <div className="bg-gbg-3">
+      <div className="bg-gbg-3 pt-16">
         <Outlet />
         <div className="fixed top-0 left-0 z-2 pointer-events-none">
           <canvas id="fluid" className="w-screen h-screen" />

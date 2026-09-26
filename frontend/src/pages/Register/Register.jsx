@@ -80,7 +80,7 @@ export default function Register() {
       style={{
         backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(${bgImage})`,
       }}
-      className="min-h-screen bg-cover bg-center bg-no-repeat flex items-center justify-center p-4"
+      className="min-h-[calc(100vh-4rem)] bg-cover bg-center bg-no-repeat flex items-center justify-center p-4"
     >
       {/* Show full-screen LoadingScreen while the register API request is in flight */}
       {loading && <LoadingScreen />}

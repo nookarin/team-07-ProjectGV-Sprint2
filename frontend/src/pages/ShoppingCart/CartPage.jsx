@@ -136,7 +136,7 @@ export default function CartPage() {
   }, [data, promotion]);
 
   return (
-    <div className="min-h-screen relative z-10 text-slate-100 py-6 sm:py-10 px-3 sm:px-6 lg:px-12 font-sans antialiased">
+    <div className="min-h-[calc(100vh-4rem)] relative z-10 text-slate-100 py-6 sm:py-10 px-3 sm:px-6 lg:px-12 font-sans antialiased">
       {/* Show full-screen LoadingScreen while the cart API request is being fetched */}
       {/* {loading && <LoadingScreen />} */}
       <div className="max-w-7xl mx-auto">
