@@ -99,6 +99,7 @@ export default function CartPage() {
 
   const handleApplyPromo = async (e) => {
     e.preventDefault();
+    if (!promoCode.trim()) return;
     setErrPromo("");
     setPromotion([]);
     const response = await axios.get(`${url}/promo?code=${promoCode}`, {
@@ -112,6 +113,12 @@ export default function CartPage() {
       setErrPromo("");
       setPromotion(response.data.data);
     }
+  };
+
+  const handleRemovePromo = () => {
+    setPromotion([]);
+    setErrPromo("");
+    setPromoCode("");
   };
 
   useEffect(() => {
@@ -379,10 +386,11 @@ export default function CartPage() {
                     placeholder="Enter code (e.g. GEAR30)"
                     className="bg-[#18152e] border-[#2e264f] text-white text-sm px-3.5 py-2.5 rounded-xl flex-1 focus:border-purple-500 font-mono tracking-wider placeholder-slate-500 uppercase h-auto"
                   />
-                  {!true ? (
+                  {promotion.length > 0 ? (
                     <Button
                       type="button"
-                      // onClick={handleRemovePromo}
+                      onClick={handleRemovePromo}
+                      title="Remove promo code"
                       className="bg-[#10b981] hover:bg-emerald-400 text-black font-extrabold px-4 py-2.5 rounded-xl text-sm shadow-md shadow-emerald-500/20 cursor-pointer h-auto"
                     >
                       Applied
@@ -390,7 +398,8 @@ export default function CartPage() {
                   ) : (
                     <Button
                       type="submit"
-                      className="bg-purple-600 hover:bg-purple-500 text-white font-bold px-4 py-2.5 rounded-xl text-sm cursor-pointer h-auto"
+                      disabled={!promoCode.trim()}
+                      className="bg-purple-600 hover:bg-purple-500 text-white font-bold px-4 py-2.5 rounded-xl text-sm cursor-pointer disabled:bg-slate-800 disabled:text-slate-500 disabled:cursor-not-allowed disabled:opacity-100 h-auto"
                     >
                       Apply
                     </Button>
