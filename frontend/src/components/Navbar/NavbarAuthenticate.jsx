@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -25,14 +25,46 @@ import axios from "axios";
 const NavbarAuthenticate = ({ setClick, click }) => {
   const navigate = useNavigate();
   const { url, logout, user } = useAuth();
-  const { loading, data } = useCart();
+  const { cartCount, drawerOpen, openDrawer } = useCart();
+  const [badgeBump, setBadgeBump] = useState(0);
+  const previousCount = useRef(cartCount);
   const handleLogout = () => {
     logout();
     navigate("/");
   };
 
   useEffect(() => {
-  }, [data])
+    if (cartCount > previousCount.current) {
+      setBadgeBump((bump) => bump + 1);
+    }
+    previousCount.current = cartCount;
+  }, [cartCount]);
+
+  const cartButton = (
+    <button
+      type="button"
+      onClick={openDrawer}
+      aria-haspopup="dialog"
+      aria-expanded={drawerOpen}
+      className="relative border border-gbase-1 rounded-lg h-10 px-3 flex items-center gap-2 hover:bg-gbase-2 transition-colors"
+    >
+      <span className="relative flex items-center">
+        <ShoppingBag size={20} color="#22D3EE" />
+        {cartCount > 0 && (
+          <span
+            key={badgeBump}
+            className={`absolute -top-2 -right-2.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-gpink-2 px-1 text-[10px] font-bold leading-none text-white ring-2 ring-gbg-2 ${
+              badgeBump > 0 ? "animate-[bounce_0.6s_ease-out_1]" : ""
+            }`}
+          >
+            {cartCount > 99 ? "99+" : cartCount}
+          </span>
+        )}
+      </span>
+      My Cart
+    </button>
+  );
+
   return (
     <div className="flex justify-end shrink-0">
       <NavigationMenu>
@@ -100,51 +132,13 @@ const NavbarAuthenticate = ({ setClick, click }) => {
             </NavigationMenuContent>
           </NavigationMenuItem>
           <NavigationMenuItem>
-            <NavigationMenuTrigger
-              className={"border border-gbase-1 rounded-lg h-10 hover:bg-gbase-2"}
-              render={<Link to={"/cart"} />}
-            >
-              <ShoppingBag size={20} color="#22D3EE" />
-            </NavigationMenuTrigger>
-            <NavigationMenuContent className={"text-white flex flex-col gap-4"}>
-              <div className="flex flex-col gap-4">
-                {!loading &&
-                  data?.map((item) => {
-                    return (
-                      <div
-                        key={item.product_id._id}
-                        className="flex gap-2 items-center border-b border-gbase-1 pb-2"
-                      >
-                        <img
-                          src={item.product_id.image_url}
-                          alt=""
-                          className="w-10 h-10 object-cover rounded-lg"
-                        />
-                        <div>
-                          <p>{item.product_id.product_name}</p>
-                          <p>Price: {item.product_id.price}</p>
-                        </div>
-                      </div>
-                    );
-                  })}
-              </div>
-              <NavigationMenuLink
-                render={<Link to={"/cart"} />}
-                className={
-                  "cursor-pointer font-bold tracking-wide bg-gpink-2 text-center flex items-center justify-center"
-                }
-              >
-                My Cart
-              </NavigationMenuLink>
-            </NavigationMenuContent>
-          </NavigationMenuItem>
-          <NavigationMenuItem>
             <NavigationMenuLink className={"cursor-pointer hidden xl:block"}>
               USD/THB
             </NavigationMenuLink>
           </NavigationMenuItem>
         </NavigationMenuList>
       </NavigationMenu>
+      {cartButton}
     </div>
   );
 };

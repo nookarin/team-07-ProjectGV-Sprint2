@@ -34,7 +34,7 @@ const Navbar = () => {
     fetchData();
   }, []);
   return (
-    <nav className="bg-gbg-2 w-full h-16 flex items-center justify-between gap-4 px-4 sm:px-10 text-white relative z-20 shadow-xl shadow-gpurple-4/80">
+    <nav className="bg-gbg-2 fixed w-full h-16 flex items-center justify-between gap-4 px-4 sm:px-10 text-white z-20 shadow-xl shadow-gpurple-4/80">
       <Link
         to={"/"}
         className="flex items-center gap-2 sm:gap-4 shrink-0 w-1/3 md:w-1/4"
