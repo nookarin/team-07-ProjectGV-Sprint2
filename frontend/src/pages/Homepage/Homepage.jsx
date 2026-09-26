@@ -52,9 +52,14 @@ const Homepage = () => {
   const { url } = useAuth();
   const getProducts = async () => {
     setLoading(true);
-    const response = await axios.get(`${url}/products`);
-    setProducts(response.data.products);
-    setLoading(false);
+    try {
+      const response = await axios.get(`${url}/products`);
+      setProducts(response.data.products);
+    } catch (error) {
+      console.error("Failed to fetch products:", error);
+    } finally {
+      setLoading(false);
+    }
   };
   useEffect(() => {
     getProducts();
