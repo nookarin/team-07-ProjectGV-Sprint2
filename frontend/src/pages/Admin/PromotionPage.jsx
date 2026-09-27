@@ -49,6 +49,19 @@ const PromotionPage = () => {
     description: "",
   });
   const [formErrors, setFormErrors] = useState(null);
+  const [sortConfig, setSortConfig] = useState({ field: null, order: "desc" });
+
+  const sortByField = (field) => {
+    const nextOrder =
+      sortConfig.field === field && sortConfig.order === "asc" ? "desc" : "asc";
+    setSortConfig({ field, order: nextOrder });
+    const sorted = [...data].sort((a, b) => {
+      const dateA = new Date(a[field]);
+      const dateB = new Date(b[field]);
+      return nextOrder === "asc" ? dateA - dateB : dateB - dateA;
+    });
+    setData(sorted);
+  };
 
   const validateInput = () => {
     Object.keys(form).map((item) => {
@@ -186,17 +199,35 @@ const PromotionPage = () => {
             <Label>Sort by</Label>
             <div className="mt-2 flex gap-2">
               <Button
-                className={"border border-gbase-1 bg-gbase-3"}
+                className={`border border-gbase-1 ${sortConfig.field === "created_at" ? "bg-gpurple-3 border-gpurple-2" : "bg-gbase-3"}`}
                 type="button"
+                onClick={() => sortByField("created_at")}
               >
                 Created at
                 <ArrowUpDown />
               </Button>
               <Button
-                className={"border border-gbase-1 bg-gbase-3"}
+                className={`border border-gbase-1 ${sortConfig.field === "updated_at" ? "bg-gpurple-3 border-gpurple-2" : "bg-gbase-3"}`}
                 type="button"
+                onClick={() => sortByField("updated_at")}
               >
                 Updated at
+                <ArrowUpDown />
+              </Button>
+              <Button
+                className={`border border-gbase-1 ${sortConfig.field === "promo_start" ? "bg-gpurple-3 border-gpurple-2" : "bg-gbase-3"}`}
+                type="button"
+                onClick={() => sortByField("promo_start")}
+              >
+                Started at
+                <ArrowUpDown />
+              </Button>
+              <Button
+                className={`border border-gbase-1 ${sortConfig.field === "expire_at" ? "bg-gpurple-3 border-gpurple-2" : "bg-gbase-3"}`}
+                type="button"
+                onClick={() => sortByField("expire_at")}
+              >
+                Ended at
                 <ArrowUpDown />
               </Button>
             </div>
