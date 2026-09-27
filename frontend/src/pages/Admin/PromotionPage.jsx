@@ -208,14 +208,14 @@ const PromotionPage = () => {
                 Created at
                 <ArrowUpDown />
               </Button>
-              <Button
+              {/* <Button
                 className={`border border-gbase-1 ${sortConfig.field === "updated_at" ? "bg-gpurple-3 border-gpurple-2" : "bg-gbase-3"}`}
                 type="button"
                 onClick={() => sortByField("updated_at")}
               >
                 Updated at
                 <ArrowUpDown />
-              </Button>
+              </Button> */}
               <Button
                 className={`border border-gbase-1 ${sortConfig.field === "promo_start" ? "bg-gpurple-3 border-gpurple-2" : "bg-gbase-3"}`}
                 type="button"
