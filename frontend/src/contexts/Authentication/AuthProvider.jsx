@@ -20,18 +20,19 @@ export function AuthProvider({ children }) {
         withCredentials: true,
       });
       setUser(response.data.user);
-      setLoading(false);
       return true;
     } catch (error) {
-      // console.log(error);
-      // console.log(error.response);
-      setErr(error.response?.data?.message || error.message);
-      setLoading(false);
-      toast.error(`Login failed: ${error.response.data.message}`, {
+      const message = error.response?.data?.message ||
+        (error.response ? "Unable to log in. Please try again." :
+          "Unable to connect to the server. Please try again.");
+      setErr(message);
+      toast.error(`Login failed: ${message}`, {
         richColors: true,
         position: "top-center",
       });
       return false;
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -52,7 +53,6 @@ export function AuthProvider({ children }) {
         const response = await fetch(`${url}/users/me`, {
           credentials: "include",
         });
-        console.log(response);
         if (response.ok) {
           const res = await response.json();
           setUser(res.user);

@@ -52,7 +52,7 @@ export default function Login() {
           className="flex flex-col gap-8 w-full p-4"
         >
           <div className="flex flex-col">
-            <label className="text-white" for="email">
+            <label className="text-white" htmlFor="email">
               Email Address
             </label>
             <div className="relative w-full">
@@ -73,12 +73,12 @@ export default function Login() {
           </div>
           <div className="flex flex-col">
             <div className="flex justify-between items-center">
-              <label className="text-white" for="password">
+              <label className="text-white" htmlFor="password">
                 Password
               </label>
               <label
                 className="text-purple-400 text-xs cursor-pointer"
-                for="password"
+                htmlFor="password"
               >
                 <button
                   type="button"

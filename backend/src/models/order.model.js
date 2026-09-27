@@ -125,6 +125,9 @@ const orderSchema = new mongoose.Schema(
     promo_code: { type: String, default: null },
     // เก็บอีเมลที่ใช้ยืนยัน PromptPay ไว้ แม้ผู้ใช้แก้อีเมลในโปรไฟล์ภายหลัง
     payment_email: { type: String },
+    // กำหนดครั้งเดียวเมื่อเริ่มออก QR; refresh หรือลองจ่ายซ้ำไม่ต่ออายุ
+    payment_expires_at: { type: Date, default: null },
+    payment_expired_at: { type: Date, default: null },
 
     total_quantity: {
       type: Number,
@@ -203,5 +206,7 @@ const orderSchema = new mongoose.Schema(
     timestamps: true,
   },
 );
+
+orderSchema.index({ payment_method: 1, status: 1, payment_expires_at: 1 });
 
 export const Order = mongoose.model("Order", orderSchema);

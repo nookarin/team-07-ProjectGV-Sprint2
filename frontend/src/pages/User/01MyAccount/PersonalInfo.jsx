@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import userAvatar from "../../../assets/user.png";
 import AccountSidebar from "../AccountSidebar";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/Authentication/AuthContext";
 import LoadingScreen from "@/components/LoadingScreen";
 import {
@@ -16,18 +17,23 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "#components/ui/button";
 import { toast } from "sonner";
-import { Trash2, Loader2 } from "lucide-react";
+import { Trash2, Loader2, Eye, EyeClosed } from "lucide-react";
 
 const PASSWORD_MASK = "••••••••••••••••••";
 
 export default function PersonalInfo() {
-  const { url, user } = useAuth();
+  const { url, user, logout } = useAuth();
+  const navigate = useNavigate();
   const [avatar, setAvatar] = useState(userAvatar);
   const [data, setData] = useState({});
   const [loading, setLoading] = useState(null);
   const [editing, setEditing] = useState(null);
   const [draft, setDraft] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [accountDeleting, setAccountDeleting] = useState(false);
+  const deleteInProgress = useRef(false);
   const fileInput = useRef(null);
   // เก็บสถานะการอัปโหลด / ลบรูปโปรไฟล์ เพื่อแสดง loading บนปุ่ม
   const [avatarUpdating, setAvatarUpdating] = useState(false);
@@ -101,6 +107,32 @@ export default function PersonalInfo() {
     }
   }
 
+  async function handleDeleteAccount() {
+    if (!user?._id || deleteInProgress.current) return;
+    deleteInProgress.current = true;
+    setAccountDeleting(true);
+    try {
+      await axios.delete(`${url}/users/${user._id}`, {
+        withCredentials: true,
+      });
+      setDeleteDialogOpen(false);
+      await logout();
+      navigate("/login", { replace: true });
+      toast.success("Your account has been deleted.", {
+        richColors: true,
+        position: "top-center",
+      });
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Unable to delete your account. Please try again.", {
+        richColors: true,
+        position: "top-center",
+      });
+    } finally {
+      deleteInProgress.current = false;
+      setAccountDeleting(false);
+    }
+  }
+
   async function fetchData() {
     setLoading(true);
     try {
@@ -127,7 +159,14 @@ export default function PersonalInfo() {
 
   function openEditor(label, value) {
     setEditing(label);
-    setDraft(value ?? "");
+    setDraft(label === "password" ? "" : (value ?? ""));
+    setShowPassword(false);
+  }
+
+  function closeEditor() {
+    setEditing(null);
+    setDraft("");
+    setShowPassword(false);
   }
 
   async function handleSave() {
@@ -157,7 +196,7 @@ export default function PersonalInfo() {
         position: 'top-center'
       });
       await fetchData();
-      setEditing(null);
+      closeEditor();
     } catch (error) {
       console.log(error);
       toast.error(error.response?.data?.message || "Failed to update.", {
@@ -194,7 +233,7 @@ export default function PersonalInfo() {
                       <Dialog
                         open={editing === label}
                         onOpenChange={(open) =>
-                          open ? openEditor(label, value) : setEditing(null)
+                          open ? openEditor(label, value) : closeEditor()
                         }
                       >
                         <DialogTrigger className="text-[#22D3EE] transition-colors hover:text-[#A5F3FC]">
@@ -209,16 +248,35 @@ export default function PersonalInfo() {
                               <label className="capitalize" htmlFor={label}>
                                 {label}
                               </label>
-                              <input
-                                className="border border-gpurple-3 rounded-xl py-2 px-2"
-                                id={label}
-                                type={secret ? "password" : "text"}
-                                value={draft}
-                                onChange={(event) =>
-                                  setDraft(event.target.value)
-                                }
-                                autoFocus
-                              />
+                              <span className="relative block">
+                                <input
+                                  className={`w-full border border-gpurple-3 rounded-xl py-2 px-2 ${secret ? "pr-12" : ""}`}
+                                  id={label}
+                                  type={secret && !showPassword ? "password" : "text"}
+                                  autoComplete={secret ? "new-password" : undefined}
+                                  value={draft}
+                                  onChange={(event) =>
+                                    setDraft(event.target.value)
+                                  }
+                                  autoFocus
+                                />
+                                {secret && (
+                                  <button
+                                    type="button"
+                                    className="absolute right-1 top-1/2 -translate-y-1/2 rounded-lg p-2 text-white/80 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#22D3EE] cursor-pointer"
+                                    onClick={() => setShowPassword((visible) => !visible)}
+                                    aria-label={showPassword ? "Hide password" : "Show password"}
+                                    aria-controls={label}
+                                    title={showPassword ? "Hide password" : "Show password"}
+                                  >
+                                    {showPassword ? (
+                                      <EyeClosed className="size-5" aria-hidden="true" />
+                                    ) : (
+                                      <Eye className="size-5" aria-hidden="true" />
+                                    )}
+                                  </button>
+                                )}
+                              </span>
                             </DialogDescription>
                           </DialogHeader>
                           <DialogFooter>
@@ -241,12 +299,46 @@ export default function PersonalInfo() {
               ))}
           </dl>
 
-          <button
-            type="button"
-            className="ml-3 mt-4 min-w-45 rounded-lg bg-[#9D174D] px-8 py-2.5 text-[13px] font-bold text-white transition-colors hover:bg-[#EC4899]"
+          <Dialog
+            open={deleteDialogOpen}
+            onOpenChange={(open) => {
+              if (!deleteInProgress.current) setDeleteDialogOpen(open);
+            }}
           >
-            Delete Account
-          </button>
+            <DialogTrigger
+              disabled={loading || saving || avatarUpdating || avatarDeleting || accountDeleting}
+              className="ml-3 mt-4 min-w-45 rounded-lg bg-[#9D174D] px-8 py-2.5 text-[13px] font-bold text-white transition-colors hover:bg-[#EC4899] disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Delete Account
+            </DialogTrigger>
+            <DialogContent
+              className="border border-rose-400/20 bg-[#11101d] text-white"
+              showCloseButton={!accountDeleting}
+            >
+              <DialogHeader>
+                <DialogTitle>Delete your account?</DialogTitle>
+                <DialogDescription className="text-slate-400">
+                  Your account will be permanently deleted and you will be signed out.
+                  This action cannot be undone.
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <DialogClose
+                  disabled={accountDeleting}
+                  render={<Button type="button" variant="outline">Cancel</Button>}
+                />
+                <Button
+                  type="button"
+                  variant="destructive"
+                  onClick={handleDeleteAccount}
+                  disabled={accountDeleting}
+                >
+                  {accountDeleting && <Loader2 className="size-4 animate-spin" aria-hidden="true" />}
+                  {accountDeleting ? "Deleting..." : "Delete Account"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </section>
 
         <section

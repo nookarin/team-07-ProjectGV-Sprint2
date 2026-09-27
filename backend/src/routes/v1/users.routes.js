@@ -1,6 +1,7 @@
 import { Router } from "express";
 import bcrypt from "bcrypt";
 import multer from "multer";
+import mongoose from "mongoose";
 import { User } from "../../models/user.model.js";
 import jwt from "jsonwebtoken";
 import { protect } from "../../middlewares/protect.js";
@@ -350,13 +351,23 @@ userRouter.delete("/:userId/avatar", protect, async (req, res, next) => {
   }
 });
 
-//delete user (admin only)
+// Delete an account: users can delete themselves; admins can delete any user.
 userRouter.delete(
   "/:userId",
   protect,
-  authorize(["admin"]),
   async (req, res, next) => {
     try {
+      const currentUser = req.user.user;
+      const isSelf = currentUser._id.toString() === req.params.userId;
+      if (!isSelf && currentUser.role !== "admin") {
+        return res.status(403).json({
+          success: false,
+          message: "Forbidden: you can only delete your own account.",
+        });
+      }
+      if (!mongoose.isValidObjectId(req.params.userId)) {
+        return res.status(400).json({ success: false, message: "Invalid user ID." });
+      }
       const deletedUser = await User.findByIdAndDelete(req.params.userId);
 
       if (!deletedUser) {
@@ -365,9 +376,18 @@ userRouter.delete(
           .json({ success: false, message: "User not found!" });
       }
 
+      if (isSelf) {
+        res.clearCookie("accessToken", {
+          httpOnly: true,
+          secure: true,
+          sameSite: "none",
+          path: "/",
+        });
+      }
+
       return res
         .status(200)
-        .json({ success: true, message: "Deleted user succesfully!" });
+        .json({ success: true, message: "Account deleted successfully." });
     } catch (error) {
       next(error);
     }
@@ -426,27 +446,28 @@ userRouter.get("/:userId", protect, async (req, res, next) => {
 //user login
 userRouter.post("/login", async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    const { email, password } = req.body ?? {};
 
-    if (!email || !password) {
+    if (typeof email !== "string" || !email.trim() ||
+        typeof password !== "string" || !password) {
       return res
         .status(400)
         .json({ success: false, message: "Email and password are required!" });
     }
 
-    const user = await User.findOne({ email }).select("+password");
+    const user = await User.findOne({ email: email.trim().toLowerCase() }).select("+password");
 
     if (!user) {
       return res
-        .status(404)
-        .json({ success: false, message: "User not found!" });
+        .status(401)
+        .json({ success: false, message: "Invalid email or password." });
     }
 
     const isPasswordMatched = await bcrypt.compare(password, user.password);
     if (!isPasswordMatched) {
       return res
-        .status(400)
-        .json({ success: false, message: "Incorrect password!" });
+        .status(401)
+        .json({ success: false, message: "Invalid email or password." });
     }
 
     const token = jwt.sign({ userId: user._id }, process.env.SECRET_KEY, {
