@@ -8,7 +8,6 @@ import { router as apiRoutes } from "./routes/index.js";
 // ✅ เพิ่มอันนี้
 import { stripeWebhookRouter } from "./routes/stripeWebhook.route.js";
 
-
 const corsOptions = {
   origin: [
     "http://localhost:5173",
@@ -17,22 +16,16 @@ const corsOptions = {
   credentials: true,
 };
 
-
 const app = express();
 
 const port = process.env.PORT || 3000;
 
-
 // =======================================
 // Stripe Webhook
-// สำคัญ: ต้องอยู่ก่อน express.json()
+// สำคัญ: ต้องอยู่ก่อน express.json() เพื่อให้ Stripe ตรวจลายเซ็นด้วย raw body ต้นฉบับ
 // =======================================
 
-app.use(
-  "/api/v1/stripe",
-  stripeWebhookRouter
-);
-
+app.use("/api/v1/stripe", stripeWebhookRouter);
 
 // =======================================
 // Middleware ปกติ
@@ -44,25 +37,27 @@ app.use(cookieParser());
 
 app.use(cors(corsOptions));
 
-
 // =======================================
 // API Routes ปกติ
 // =======================================
 
 app.use("/api", apiRoutes);
 
-
 // =======================================
 // Error Handler
 // =======================================
 
 app.use((err, req, res, next) => {
-  return res.status(500).json({
+  // ถ้าส่ง response ไปแล้วให้ Express จัดการต่อ ห้ามส่ง JSON ซ้ำ
+  if (res.headersSent) return next(err);
+  // ข้อมูลผิด schema ของ Mongoose ตอบ 400; error อื่นตอบ 500
+  // validation ทางธุรกิจ เช่น ยอดไม่ตรง จะ return res.status() จาก route ไปก่อนแล้ว
+  return res.status(err.name === "ValidationError" ? 400 : 500).json({
+    success: false,
     error: "Something went wrong on the server!",
     message: err.message,
   });
 });
-
 
 // =======================================
 // Start Server
@@ -76,10 +71,7 @@ async function start() {
       console.log(`Server running on port: ${port} 🏃‍♀️`);
     });
   } catch (err) {
-    console.error(
-      "Failed to connect to MongoDB:",
-      err.message
-    );
+    console.error("Failed to connect to MongoDB:", err.message);
 
     process.exit(1);
   }

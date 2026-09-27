@@ -193,6 +193,11 @@ const CartDrawer = () => {
     navigate("/cart");
   };
 
+  const goToShop = () => {
+    closeDrawer()
+    navigate("/products")
+  }
+
   return (
     <Drawer
       open={drawerOpen}
@@ -235,7 +240,7 @@ const CartDrawer = () => {
                 </p>
               </div>
               <Button
-                onClick={goToCart}
+                onClick={goToShop}
                 className="bg-gpink-2 text-white hover:bg-gpink-3"
               >
                 เลือกซื้อสินค้า

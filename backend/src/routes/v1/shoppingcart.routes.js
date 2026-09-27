@@ -6,6 +6,13 @@ import { protect } from "../../middlewares/protect.js";
 export const shoppingCartRouter = Router();
 
 shoppingCartRouter.use(protect)
+// ใช้ผู้ใช้จาก login ตรวจ :userId ป้องกันการแก้ URL เพื่ออ่านหรือแก้ตะกร้าของคนอื่น
+shoppingCartRouter.param("userId", (req, res, next, userId) => {
+  if (String(req.user.user._id) !== userId) {
+    return res.status(403).json({ success: false, message: "You can only manage your own cart." });
+  }
+  next();
+});
 // GET /api/v1/shoppingcart/:userId - Get active cart for a user
 shoppingCartRouter.get("/:userId", async (req, res, next) => {
   try {

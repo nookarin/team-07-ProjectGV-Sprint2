@@ -1,3 +1,4 @@
+import { useAuth } from "@/contexts/Authentication/AuthContext";
 import {
   CircleUserRound,
   ClipboardList,
@@ -21,9 +22,10 @@ const navigation = [
 ];
 
 export default function AccountSidebar({ active }) {
+  const { user } = useAuth();
   return (
     <aside className="text-sm font-semibold">
-      <p className="mb-4 pl-9 text-base">Hi, &nbsp;John Doe</p>
+      <p className="mb-4 pl-9 text-base">Hi, &nbsp;{user.username} 👋😊</p>
       <div className="mb-3 h-px bg-[#2A2A45]" />
 
       <nav aria-label="Account navigation" className="space-y-1.5">
@@ -40,34 +42,37 @@ export default function AccountSidebar({ active }) {
                   isActive ? "text-[#F9A8D4]" : ""
                 }`}
               >
-                <Icon className="mt-0.5 size-4 shrink-0 text-[#A78BFA]" strokeWidth={1.8} />
+                <Icon
+                  className="mt-0.5 size-4 shrink-0 text-[#A78BFA]"
+                  strokeWidth={1.8}
+                />
                 <span className="whitespace-pre-line leading-5">{label}</span>
               </Link>
 
-            {index === 0 && (
-              <div className="ml-10 space-y-0.5">
-                <Link
-                  to="/edit-profile"
-                  className={`block rounded-xl px-4 py-1.5 font-medium ${
-                    active === "/edit-profile"
-                      ? "border border-[#2A2A45] bg-[#1A1A2E] text-[#F9A8D4]"
-                      : "text-[#DDD6FE]"
-                  }`}
-                >
-                  Personal Information
-                </Link>
-                <Link
-                  to="/edit-profile/addresses"
-                  className={`block rounded-xl px-4 py-1.5 font-medium ${
-                    active === "/edit-profile/addresses"
-                      ? "border border-[#2A2A45] bg-[#1A1A2E] text-[#F9A8D4]"
-                      : "text-[#DDD6FE]"
-                  }`}
-                >
-                  Addresses
-                </Link>
-              </div>
-            )}
+              {index === 0 && (
+                <div className="ml-10 space-y-0.5">
+                  <Link
+                    to="/edit-profile"
+                    className={`block rounded-xl px-4 py-1.5 font-medium ${
+                      active === "/edit-profile"
+                        ? "border border-[#2A2A45] bg-[#1A1A2E] text-[#F9A8D4]"
+                        : "text-[#DDD6FE]"
+                    }`}
+                  >
+                    Personal Information
+                  </Link>
+                  <Link
+                    to="/edit-profile/addresses"
+                    className={`block rounded-xl px-4 py-1.5 font-medium ${
+                      active === "/edit-profile/addresses"
+                        ? "border border-[#2A2A45] bg-[#1A1A2E] text-[#F9A8D4]"
+                        : "text-[#DDD6FE]"
+                    }`}
+                  >
+                    Addresses
+                  </Link>
+                </div>
+              )}
             </div>
           );
         })}

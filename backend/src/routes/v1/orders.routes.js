@@ -1,450 +1,164 @@
 import { Router } from "express";
 import mongoose from "mongoose";
 import { Order } from "../../models/order.model.js";
-import { Product } from "../../models/product.model.js";
+import { User } from "../../models/user.model.js";
+import { Promo } from "../../models/promocode.model.js";
 import { protect } from "../../middlewares/protect.js";
 import { authorize } from "../../middlewares/authorize.js";
-import { ShoppingCart } from "../../models/cart.model.js";
-import { User } from "../../models/user.model.js";
+import { quoteCart } from "../../services/checkout.js";
+import { toSatang } from "../../services/pricing.js";
+import { paymentService } from "../../services/paymentService.js";
 
 export const orderRouter = Router();
+orderRouter.use(protect);
 
-// GET / - Fetch all orders (admin only)
-orderRouter.get("/", protect, /*authorize(["admin"]),*/ async (req, res, next) => {
+// ทุกเส้นทางต้องเข้าสู่ระบบ; เฉพาะ admin ดูรายการของผู้ใช้ทั้งหมดได้
+orderRouter.get("/", authorize(["admin"]), async (req, res, next) => {
   try {
-    const orders = await Order.find()
-      .populate("user_id", "username email firstname lastname")
-      .populate("items.product_id", "product_name price image")
-      .sort({ createdAt: -1 });
-
-    return res.status(200).json({
-      success: true,
-      count: orders.length,
-      orders,
-    });
-  } catch (error) {
-    next(error);
-  }
+    const orders = await Order.find().populate("user_id", "username email firstname lastname")
+      .populate("items.product_id", "product_name price images image_url").sort({ createdAt: -1 });
+    return res.status(200).json({ success: true, count: orders.length, orders });
+  } catch (error) { next(error); }
 });
-
-// GET /user/:user_id - Fetch all orders of a specific user (owner or admin)
-orderRouter.get("/user/:user_id", protect, async (req, res, next) => {
+// ลูกค้าดูประวัติของตัวเองได้ ส่วน admin ดูของผู้ใช้ที่ระบุได้
+orderRouter.get("/user/:user_id", async (req, res, next) => {
   try {
-    const currentUser = req.user.user;
-
-    const isAdmin = currentUser.role === "admin";
-    const isOwner = currentUser._id.toString() === req.params.user_id;
-
-    if (!isAdmin && !isOwner) {
+    if (req.user.user.role !== "admin" && String(req.user.user._id) !== req.params.user_id) {
       return res.status(403).json({ success: false, message: "Forbidden." });
     }
     const orders = await Order.find({ user_id: req.params.user_id })
-      .populate("items.product_id", "product_name price image")
-      .sort({ createdAt: -1 });
-
-    return res.status(200).json({
-      success: true,
-      count: orders.length,
-      orders,
-    });
-  } catch (error) {
-    next(error);
-  }
+      .populate("items.product_id", "product_name price images image_url").sort({ createdAt: -1 });
+    return res.status(200).json({ success: true, count: orders.length, orders });
+  } catch (error) { next(error); }
 });
-
-// GET /:id - Get single order by ID (owner or admin)
-orderRouter.get("/:id", protect, async (req, res, next) => {
+// คำนวณยอดให้หน้า Cart แสดงก่อนจ่าย โดยยังไม่สร้างออเดอร์หรือใช้โควตาโปรโมชัน
+orderRouter.post("/quote", async (req, res, next) => {
   try {
-    const order = await Order.findById(req.params.id);
-
-    if (!order) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Order not found!" });
+    const { cart_id, promo_code } = req.body ?? {};
+    if (!mongoose.isValidObjectId(cart_id)) return res.status(400).json({ success: false, message: "Invalid cart ID." });
+    const result = await quoteCart(req.user.user._id, cart_id, promo_code);
+    if (result.success === false) {
+      return res.status(result.status).json({ success: false, message: result.message });
     }
-
-    const currentUser = req.user.user;
-
-    const isAdmin = currentUser.role === "admin";
-    const isOwner = order.user_id.toString() === currentUser._id.toString();
-
-    if (!isAdmin && !isOwner) {
-      return res.status(403).json({ success: false, message: "Forbidden." });
-    }
-
-    // ตรวจสิทธิ์ก่อน populate
-    await order.populate([
-      {
-        path: "user_id",
-        select: "username email firstname lastname",
-      },
-      {
-        path: "items.product_id",
-        select: "product_name price image",
-      },
-    ]);
-
-    return res.status(200).json({ success: true, order });
-  } catch (error) {
-    next(error);
-  }
+    return res.status(200).json({ success: true, quote: result.totals });
+  } catch (error) { next(error); }
 });
-
-// POST / - Create a new order (User - Checkout)
-orderRouter.post("/", protect, async (req, res, next) => {
+// ยืนยันออเดอร์ด้วยราคา ค่าส่ง และส่วนลดจาก backend แล้วเก็บยอดนั้นสำหรับ Stripe
+orderRouter.post("/", async (req, res, next) => {
   try {
-    const { cart_id, payment_method } = req.body ?? {};
-    // อ่าน user_id จาก token ที่ user log in เข้าใช้งาน
+    const { cart_id, payment_method = "promptpay", promo_code, expected_total } = req.body ?? {};
+    if (!mongoose.isValidObjectId(cart_id)) return res.status(400).json({ success: false, message: "Invalid cart ID." });
+    if (!Order.schema.path("payment_method").enumValues.includes(payment_method)) {
+      return res.status(400).json({ success: false, message: "Unsupported payment method." });
+    }
+    if (expected_total !== undefined && toSatang(expected_total) === null) {
+      return res.status(400).json({ success: false, message: "Invalid price." });
+    }
     const user_id = req.user.user._id;
-
-    if (!cart_id || !payment_method) {
-      return res.status(400).json({
-        success: false,
-        message: "Cart_id and payment_method are required!",
-      });
-    }
-
-    // เริ่มทำงานกับฐานข้อมูลแบบ transaction แล้วรอผลลัพธ์มาเก็บในตัวแปร order
-    // Transaction คือการรวมหลายขั้นตอนให้เป็นงานชุดเดียว
-    const order = await mongoose.connection.transaction(async (session) => {
-      // หาตะกร้าที่เป็นของผู้ใช้และยัง active
-      const cart = await ShoppingCart.findOne({
-        _id: cart_id,
-        user_id,
-        status: "active",
-      }).session(session);
-
-      // กรณีที่ cart ไม่มีตะกร้าที่เป็น active
-      if (!cart) {
-        return res.status(409).json({
-          success: false,
-          message: "Cart is unavailable or already checked out!",
-        });
+    // transaction ทำให้ออเดอร์ การปิดตะกร้า และโควตาโปรโมชันบันทึกสำเร็จหรือย้อนกลับร่วมกัน
+    const order = await mongoose.connection.transaction(async session => {
+      // ถ้ากด checkout ซ้ำหลังสร้างสำเร็จ ให้คืนออเดอร์เดิมของตะกร้านี้
+      const existing = await Order.findOne({ cart_id, user_id }).session(session);
+      if (existing) return existing;
+      const result = await quoteCart(user_id, cart_id, promo_code, session);
+      if (result.success === false) return result;
+      const { cart, items, promo, totals } = result;
+      // expected_total ใช้ตรวจว่ายอดเปลี่ยนจากที่ลูกค้าเห็นหรือไม่ ไม่ได้นำมาเป็นยอดเรียกเก็บ
+      if (expected_total !== undefined && toSatang(expected_total) !== toSatang(totals.total_price)) {
+        return { success: false, status: 409, message: "Order total changed. Please refresh the cart before paying." };
       }
-
-      // กรณีที่สินค้าในตะกร้าไม่มีอยู่เลย
-      if (cart.items.length === 0) {
-        return res
-          .status(400)
-          .json({ success: false, message: "Your cart is empty!" });
-      }
-
-      // อ่านข้อมูล User ล่าสุดและหา default address
       const user = await User.findById(user_id).session(session);
-
-      if (!user) {
-        return res
-          .status(404)
-          .json({ success: false, message: "User not found!" });
+      const addresses = user?.address.filter(address => address.isDefault) ?? [];
+      if (addresses.length !== 1) return { success: false, status: 400, message: "Please select exactly one default shipping address!" };
+      const address = addresses[0];
+      // คัดลอกที่อยู่ ณ ตอนสั่งซื้อ เพื่อให้ประวัติออเดอร์ไม่เปลี่ยนตามการแก้โปรไฟล์ภายหลัง
+      const shipping_address = Object.fromEntries(
+        ["firstname", "lastname", "phoneNumber", "houseNo", "street", "subdistrict", "district", "province", "zipCode"]
+          .map(key => [key, address[key]]),
+      );
+      // นับการใช้โปรโมชันตอนสร้างออเดอร์ รวมออเดอร์ pending และที่ยกเลิกภายหลังด้วย
+      // ตรวจโควตาอีกครั้งตอนเพิ่ม used_count เพื่อรับมือหลายคนใช้โค้ดพร้อมกัน
+      if (promo) {
+        const reserved = await Promo.updateOne({ _id: promo._id,
+          $expr: { $lt: [{ $ifNull: ["$used_count", 0] }, "$max_use"] } },
+          { $inc: { used_count: 1 } }, { session });
+        if (!reserved.modifiedCount) return { success: false, status: 409, message: "This promotion is fully used." };
       }
-
-      // กรอง default address
-      const defaultAddresses = user.address.filter(
-        (address) => address.isDefault === true,
-      );
-
-      // ถ้าไม่มี default address เลย
-      if (defaultAddresses.length !== 1) {
-        return res.status(400).json({
-          success: false,
-          message: "Please select exactly one default shipping address!",
-        });
-      }
-
-      // ป้องกันกรณีมี default address หลายอัน ให้เลือกอันแรก
-      const address = defaultAddresses[0];
-
-      // ใส่ค่า address ที่ใช้จัดส่งด้วย default address
-      const shipping_address = {
-        firstname: address.firstname,
-        lastname: address.lastname,
-        phoneNumber: address.phoneNumber,
-        houseNo: address.houseNo,
-        street: address.street,
-        subdistrict: address.subdistrict,
-        district: address.district,
-        province: address.province,
-        zipCode: address.zipCode,
-      };
-
-      // หารายการสินค้าใน cart เก็บไว้ใน productIds
-      const productIds = cart.items.map((item) => item.product_id);
-
-      // ค้นหา Product ที่ _id ตรงกับ ID ตัวใดตัวหนึ่งใน productIds
-      const products = await Product.find({
-        _id: { $in: productIds },
-      }).session(session);
-
-      // วนสินค้าใน Cart แล้วหาข้อมูล Product ที่ตรงกัน
-      const items = cart.items.map((item) => {
-        const product = products.find(
-          (product) => product._id.toString() === item.product_id.toString(),
-        );
-
-        if (!product) {
-          return res.status(409).json({
-            success: false,
-            message: "Some products are no longer available!",
-          });
-        }
-
-        if (!Number.isInteger(item.quantity) || item.quantity < 1) {
-          return res.status(400).json({
-            success: false,
-            message: "Product quantity must be a positive integer!",
-          });
-        }
-
-        // isFinite เช็กว่าเป็นตัวเลขไหม
-        if (!Number.isFinite(product.price) || product.price < 0) {
-          return res.status(409).json({
-            success: false,
-            message: "Some products have an invalid price!",
-          });
-        }
-
-        return {
-          product_id: product._id,
-          quantity: item.quantity,
-          unit_price: product.price,
-        };
-      });
-
-      // คำนวณยอดรวมจำนวนสินค้า
-      const total_quantity = items.reduce(
-        (sum, item) => sum + item.quantity,
-        0,
-      );
-
-      // คำนวณยอดรวมราคาสินค้าทั้งหมด
-      const total_price = items.reduce(
-        (sum, item) => sum + item.unit_price * item.quantity,
-        0,
-      );
-
-      // สร้าง Order
-      const newOrder = new Order({
-        cart_id: cart._id,
-        user_id,
-        items,
-        total_quantity,
-        total_price,
-        shipping_address,
-        payment_method: payment_method.trim(),
-        status: "pending",
-      });
-
+      const newOrder = new Order({ cart_id, user_id, items, ...totals, shipping_address,
+        payment_method, payment_email: user.email, status: "pending" });
       await newOrder.save({ session });
-
-      // เปลี่ยนสถานะ Cart ภายใน transaction เดียวกัน
       cart.status = "checked_out";
       await cart.save({ session });
-
       return newOrder;
     });
-
-    return res.status(201).json({
-      success: true,
-      message: "Created order successfully!",
-      order,
-    });
-  } catch (error) {
-    next(error);
-  }
+    // validation ที่ไม่ผ่านจะคืนข้อมูลก่อนมีการเขียน ส่วน database error จะ throw เพื่อ rollback
+    // ส่ง HTTP response นอก callback เพียงจุดเดียว หลัง transaction จบแล้ว
+    if (order.success === false) {
+      return res.status(order.status).json({ success: false, message: order.message });
+    }
+    return res.status(201).json({ success: true, order });
+  } catch (error) { next(error); }
 });
 
-// PUT /:id - Update order status (admin full access; owner can update status only)
-orderRouter.put("/:id", protect, async (req, res) => {
+// โหลดออเดอร์และตรวจสิทธิ์ร่วมกันก่อนเข้า GET/PUT/DELETE ที่ใช้ :id
+orderRouter.param("id", async (req, res, next, id) => {
   try {
-    const { status } = req.body ?? {};
-
-    const validStatuses = [
-      "pending",
-      "paid",
-      "shipped",
-      "completed",
-      "cancelled",
-    ];
-
-    if (!validStatuses.includes(status)) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Invalid order status!" });
-    }
-
-    const order = await Order.findById(req.params.id);
-
-    if (!order) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Order not found!" });
-    }
-
-    const currentUser = req.user.user;
-
-    const isAdmin = currentUser.role === "admin";
-    const isOwner = order.user_id.toString() === currentUser._id.toString();
-
-    if (!isAdmin && !isOwner) {
+    if (!mongoose.isValidObjectId(id)) return res.status(400).json({ success: false, message: "Invalid order ID." });
+    const order = await Order.findById(id);
+    if (!order) return res.status(404).json({ success: false, message: "Order not found!" });
+    if (req.user.user.role !== "admin" && String(order.user_id) !== String(req.user.user._id)) {
       return res.status(403).json({ success: false, message: "Forbidden." });
     }
-
-    if (!isAdmin) {
-      // ลูกค้าขอยกเลิกได้อย่างเดียว
-      if (status !== "cancelled") {
-        return res
-          .status(403)
-          .json({ success: false, message: "You can only cancel your order!" });
-      }
-
-      if (order.status !== "pending") {
-        return res
-          .status(409)
-          .json({
-            success: false,
-            message: "Only pending orders can be cancelled!",
-          });
-      }
-    } else {
-      // กติกาตัวอย่างสำหรับ admin
-      // COD ส่งของก่อน แล้วจึงยืนยันเก็บเงินตอน completed
-      const allowedTransitions =
-        order.payment_method === "cod"
-          ? {
-              pending: ["shipped", "cancelled"],
-              paid: ["shipped"],
-              shipped: ["completed"],
-              completed: [],
-              cancelled: [],
-            }
-          : {
-              pending: ["paid", "cancelled"],
-              paid: ["shipped"],
-              shipped: ["completed"],
-              completed: [],
-              cancelled: [],
-            };
-
-      const allowedStatuses = allowedTransitions[order.status] ?? [];
-
-      if (!allowedStatuses.includes(status)) {
-         return res
-          .status(409)
-          .json({
-            success: false,
-            message: `Cannot change status from ${order.status} to ${status}.`,
-          });
-      }
-
-      // ก่อนตั้ง paid:
-      // admin ต้องตรวจสอบการชำระเงินจริงก่อน
-      // โค้ดนี้ไม่ได้ตรวจสอบกับผู้ให้บริการชำระเงิน
-    }
-
-    // ใส่สถานะเดิมในเงื่อนไข
-    // ป้องกันการเขียนทับสถานะที่เปลี่ยนไปแล้ว
-    const updatedOrder = await Order.findOneAndUpdate(
-      {
-        _id: order._id,
-        status: order.status,
-      },
-      {
-        $set: { status },
-      },
-      {
-        new: true,
-        runValidators: true,
-      },
-    );
-
-    if (!updatedOrder) {
-       return res
-          .status(409)
-          .json({
-            success: false,
-            message: "Order status has changed. Please refresh and try again!",
-          });
-    }
-
-    return res.status(200).json({
-      success: true,
-      message: "Order status updated successfully!",
-      updatedOrder,
-    });
-  } catch (error) {
-    next(error)
-  }
+    req.order = order;
+    next();
+  } catch (error) { next(error); }
 });
-
-// DELETE /:id - Delete/cancel an order (owner or admin)
-orderRouter.delete("/:id", protect, async (req, res) => {
+orderRouter.get("/:id", async (req, res, next) => {
   try {
-    const order = await Order.findById(req.params.id);
-
-    if (!order) {
-      return res.status(404).json({
-      success: false,
-      message: "Order not found!",
-    });
-    }
-
-    const currentUser = req.user.user;
-
-    const isAdmin = currentUser.role === "admin";
-    const isOwner =
-      order.user_id.toString() === currentUser._id.toString();
-
-    if (!isAdmin && !isOwner) {
-      return res.status(403).json({
-      success: false,
-      message:  "Forbidden!",
-    });
-      
-    }
-
-    // ยกเลิกไปแล้ว ตอบกลับข้อมูลเดิม
-    if (order.status === "cancelled") {
-      return res.status(200).json({
-        success: true,
-        message: "Order is already cancelled!",
-        order,
-      });
-    }
-
-    if (order.status !== "pending") {
-       return res.status(409).json({
-        success: false,
-        message: "Only pending orders can be cancelled!",
-      });
-    }
-
-    const cancelledOrder = await Order.findOneAndUpdate(
-      {
-        _id: order._id,
-        status: "pending",
-      },
-      {
-        $set: { status: "cancelled" },
-      },
-      {
-        new: true,
-        runValidators: true,
+    await req.order.populate("items.product_id", "product_name images image_url");
+    return res.status(200).json({ success: true, order: req.order });
+  } catch (error) { next(error); }
+});
+// ลูกค้าทำได้เฉพาะยกเลิก ส่วน admin เปลี่ยนขั้นตอนจัดส่งตามลำดับที่กำหนด
+orderRouter.put("/:id", async (req, res, next) => {
+  try {
+    const { status } = req.body ?? {};
+    const order = req.order;
+    if (status === "cancelled") {
+      const result = await paymentService.cancel(order);
+      if (result.success === false) {
+        return res.status(result.status).json({ success: false, message: result.message });
       }
-    );
-
-    if (!cancelledOrder) {
-      return res.status(409).json({
-        success: false,
-        message: "Order status has changed. Please refresh and try again!",
-      });
+      return res.status(200).json({ success: true, updatedOrder: result });
     }
-
-    return res.status(200).json({
-      success: true,
-      message: "Order cancelled successfully!",
-      cancelledOrder,
-    });
-  } catch (error) {
-    next(error)
-  }
+    if (req.user.user.role !== "admin") return res.status(403).json({ success: false, message: "You can only cancel your order." });
+    // PromptPay ต้อง paid ก่อนจัดส่ง ส่วน COD รับเงินเมื่อส่งมอบเสร็จ
+    const allowed = order.payment_method === "cod"
+      ? { pending: ["shipped"], processing: ["shipped"], shipped: ["completed"] }
+      : { processing: ["shipped"], shipped: ["completed"] };
+    if (!allowed[order.status]?.includes(status) ||
+        (order.payment_method !== "cod" && order.payment_status !== "paid")) {
+      return res.status(409).json({ success: false, message: "Order is unpaid or the status transition is invalid." });
+    }
+    const changes = { status };
+    if (order.payment_method === "cod" && status === "completed") {
+      changes.payment_status = "paid";
+      changes.paid_at = new Date();
+    }
+    // ใส่สถานะเดิมในเงื่อนไข เพื่อไม่เขียนทับการเปลี่ยนสถานะจากคำขออื่น
+    const updatedOrder = await Order.findOneAndUpdate({ _id: order._id, status: order.status },
+      { $set: changes }, { new: true, runValidators: true });
+    if (!updatedOrder) return res.status(409).json({ success: false, message: "Order status changed. Please refresh." });
+    return res.status(200).json({ success: true, updatedOrder });
+  } catch (error) { next(error); }
+});
+// DELETE ใน flow นี้หมายถึงยกเลิกออเดอร์ผ่าน service ไม่ได้ลบประวัติออกจากฐานข้อมูล
+orderRouter.delete("/:id", async (req, res, next) => {
+  try {
+    const result = await paymentService.cancel(req.order);
+    if (result.success === false) {
+      return res.status(result.status).json({ success: false, message: result.message });
+    }
+    return res.status(200).json({ success: true, cancelledOrder: result });
+  } catch (error) { next(error); }
 });
