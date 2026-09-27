@@ -26,6 +26,7 @@ import { useAuth } from "./contexts/Authentication/AuthContext";
 import { useEffect } from "react";
 import AllProductPage from "./pages/ProductPage/AllProductPage";
 import NewArrivalPage from "./pages/ProductPage/NewArrivalPage";
+import PromptPayPage from "./pages/Payment/PromptPayPage";
 
 const router = createBrowserRouter([
   {
@@ -67,6 +68,8 @@ const routerAuthen = createBrowserRouter([
       { path: "my-cancellations", element: <MyCancellations /> },
       { path: "wishlists", element: <MyWishlist /> },
       { path: "cart", element: <CartPage /> },
+      // หน้าจ่าย QR อยู่ใน router ของผู้ใช้ที่เข้าสู่ระบบ; backend ตรวจเจ้าของออเดอร์อีกชั้น
+      { path: "payment/:orderId", element: <PromptPayPage /> },
       { path: "product/:product_id", element: <ProductPage /> },
       { path: "products", element: <AllProductPage /> },
       { path: "products/:id", element: <ProductListPage /> },

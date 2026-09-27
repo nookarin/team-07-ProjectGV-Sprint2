@@ -9,6 +9,8 @@ export function CartProvider({ children }) {
   const { url, user } = useAuth();
   const [cart, setCart] = useState([]);
   const [data, setData] = useState([]);
+  // เก็บ ID ตะกร้าจาก backend เพื่อใช้ขอใบสรุปยอดและสร้างออเดอร์ของตะกร้าเดียวกัน
+  const [cartId, setCartId] = useState(null);
   const [loading, setLoading] = useState(null);
   const [err, setErr] = useState("Please login first");
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -39,6 +41,8 @@ export function CartProvider({ children }) {
       });
       setLoading(false);
       setData(response.data?.cart?.items ?? []);
+      // หลัง checkout อาจไม่มีตะกร้า active แล้ว จึงใช้ null หาก backend ไม่ส่งตะกร้ากลับมา
+      setCartId(response.data?.cart?._id ?? null);
     } catch (err) {
       console.log(err);
       setLoading(false);
@@ -130,6 +134,8 @@ export function CartProvider({ children }) {
       getCart();
     } else {
       setData([]);
+      // ออกจากระบบแล้วต้องล้าง ID ด้วย เพื่อไม่ใช้ตะกร้าของบัญชีเดิมสร้างออเดอร์
+      setCartId(null);
       setLastAddedProductId(null);
     }
   }, [user]);
@@ -137,6 +143,8 @@ export function CartProvider({ children }) {
     <CartContext.Provider
       value={{
         cart,
+        // ส่งให้ CartPage ใช้อ้างอิงตะกร้าที่ backend ตรวจสอบได้
+        cartId,
         setCart,
         addToCart,
         getCart,

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react"; //เก็บสถานะที่ React กำลังใช้แสดงหน้าเว็บ, สั่งให้ React ทำอะไรบางอย่าง หลังจาก Component ถูกโหลด
+import { useState, useEffect, useRef } from "react";
 import {
   Truck,
   X,
@@ -9,11 +9,9 @@ import {
   Headphones,
   Minus,
   Plus,
-  RotateCcw,
   ShoppingBag,
 } from "lucide-react";
-
-// Import shadcn UI Components
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -23,125 +21,210 @@ import { useCart } from "@/contexts/Cart/CartProvider";
 import { useDebouncedCallback } from "use-debounce";
 import axios from "axios";
 import { toast } from "sonner";
-import LoadingScreen from "@/components/LoadingScreen";
 import { Ring } from "#components/ring";
 
-//เปิด browser
 export default function CartPage() {
   const { user, url } = useAuth();
-  const { data, getCart, setCart, loading, handleClearAll } = useCart();
-  const [quantities, setQuantities] = useState({});
-  const [totalPrice, setTotalPrice] = useState(0);
-  const [sumPrice, setSumPrice] = useState(0);
+  const { data, cartId, getCart, loading } = useCart();
+  const navigate = useNavigate();
+  // แยกโค้ดที่กำลังพิมพ์ออกจากโค้ดที่กด Apply แล้ว เพื่อไม่เรียกคำนวณยอดทุกตัวอักษร
   const [promoCode, setPromoCode] = useState("");
-  const [promotion, setPromotion] = useState([]);
-  const [errPromo, setErrPromo] = useState("");
-  const shipping = 39;
+  const [appliedCode, setAppliedCode] = useState("");
+  // เก็บยอดที่ backend ตรวจแล้วคู่กับ key ของตะกร้า ป้องกันการใช้ยอดของข้อมูลชุดเก่า
+  const [quoteState, setQuoteState] = useState(null);
+  const [quoteError, setQuoteError] = useState("");
+  const [busy, setBusy] = useState(false);
+  // state แสดงจำนวนใหม่ทันที ส่วน ref เก็บค่าล่าสุดให้คลิกต่อเนื่องได้ก่อน React render
+  const [quantities, setQuantities] = useState({});
+  const pendingQuantities = useRef({});
+  const hasPendingQuantities = Object.keys(quantities).length > 0;
+  // ref ล็อกคำขอได้ทันที ส่วน busy ใช้แสดง/ปิดปุ่มระหว่างส่งข้อมูล
+  const actionLock = useRef(false);
+  const quoteKey = JSON.stringify([
+    cartId,
+    appliedCode,
+    data.map((item) => [item._id, item.quantity, item.product_id?.price]),
+  ]);
+  // ใช้ยอดได้เมื่อไม่มีจำนวนค้างส่ง และ key ตรงกับตะกร้าปัจจุบันเท่านั้น
+  const quote =
+    !hasPendingQuantities && !busy && quoteState?.key === quoteKey
+      ? quoteState.value
+      : null;
+  const totalPrice = quote?.subtotal_price ?? 0;
+  const sumPrice = quote?.total_price ?? 0;
+  const shipping = quote?.shipping_fee ?? 39;
 
-  const handleRemoveItem = async (itemId) => {
-    const response = await axios.delete(
-      `${url}/shoppingcart/${user._id}/items/${itemId}`,
-      {
-        withCredentials: true,
-      },
-    );
-    getCart()
-  };
-
-  const syncQuantity = useDebouncedCallback(async (itemId, newQuantity) => {
-    try {
-      const response = await axios.patch(
-        `${url}/shoppingcart/${user._id}/items/${itemId}`,
-        {
-          quantity: newQuantity,
-        },
-        {
-          withCredentials: true,
-        },
-      );
-      if (response.data.success) {
-        setCart(response.data.cart);
+  // โหลด subtotal/ส่วนลด/ค่าส่งใหม่เมื่อตะกร้าหรือโค้ดเปลี่ยน และบันทึกจำนวนเสร็จแล้ว
+  useEffect(() => {
+    if (!cartId || !data.length || hasPendingQuantities || busy) return;
+    const controller = new AbortController();
+    // แยก async ไว้ใน effect เพื่อให้ effect คืนฟังก์ชัน cleanup ได้ ไม่คืน Promise
+    const fetchQuote = async () => {
+      try {
+        const { data: result } = await axios.post(
+          `${url}/orders/quote`,
+          { cart_id: cartId, promo_code: appliedCode },
+          {
+            withCredentials: true,
+            signal: controller.signal,
+          },
+        );
+        setQuoteState({ key: quoteKey, value: result.quote });
+        setQuoteError("");
+      } catch (error) {
+        // การยกเลิก request เก่าจาก cleanup เป็นเหตุการณ์ปกติ ไม่ต้องแสดง error
+        if (!axios.isCancel(error))
+          setQuoteError(
+            error.response?.data?.message ||
+              "Unable to calculate your order total.",
+          );
       }
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Something went wrong!", {
-        richColors: true,
-      });
+    };
+    fetchQuote();
+    // ยกเลิกคำขอเดิมเมื่อ dependency เปลี่ยนหรือออกจากหน้า
+    return () => controller.abort();
+  }, [
+    url,
+    cartId,
+    appliedCode,
+    quoteKey,
+    data.length,
+    hasPendingQuantities,
+    busy,
+  ]);
 
-      setQuantities((prev) => {
-        const next = { ...prev };
-        delete next[itemId];
-        return next;
-      });
+  // รอหยุดกด 500 ms แล้วส่งจำนวนสุดท้ายของทุกสินค้าที่เปลี่ยน ไม่ใช่เฉพาะชิ้นที่กดล่าสุด
+  const syncQuantity = useDebouncedCallback(async () => {
+    const updates = Object.entries(pendingQuantities.current);
+    if (!updates.length || actionLock.current) return;
+    actionLock.current = true;
+    setBusy(true);
+    try {
+      // ส่งทีละรายการ เพราะ backend บันทึกเอกสารตะกร้าเดียวกัน ลดการเขียนทับกันระหว่างคำขอ
+      for (const [itemId, quantity] of updates) {
+        try {
+          await axios.patch(
+            `${url}/shoppingcart/${user._id}/items/${itemId}`,
+            { quantity },
+            { withCredentials: true },
+          );
+        } catch (error) {
+          toast.error(
+            error.response?.data?.message || "Unable to update quantity.",
+            {
+              richColors: true,
+              duration: 5000,
+              position: "top-center",
+            },
+          );
+        }
+      }
+      // โหลดจำนวนที่บันทึกจริงกลับมา รวมกรณีบางรายการถูกปฏิเสธ เช่น สต็อกไม่พอ
+      await getCart();
+    } finally {
+      // ล้างจำนวนชั่วคราวเพื่อกลับไปแสดงข้อมูล backend และให้ effect คำนวณยอดใหม่
+      pendingQuantities.current = {};
+      setQuantities({});
+      actionLock.current = false;
+      setBusy(false);
     }
   }, 500);
 
+  // ออกจากหน้าก่อนครบ 500 ms ให้ยกเลิก callback ที่ยังไม่ได้เริ่มส่ง
+  useEffect(() => () => syncQuantity.cancel(), [syncQuantity]);
+
+  // ใช้ร่วมกับลบสินค้า/ล้างตะกร้า ป้องกันชนกับการบันทึกจำนวนหรือสร้างออเดอร์
+  const mutateCart = async (action) => {
+    if (actionLock.current || Object.keys(pendingQuantities.current).length)
+      return;
+    actionLock.current = true;
+    setBusy(true);
+    try {
+      await action();
+      await getCart();
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Unable to update cart.", {
+        richColors: true,
+        duration: 5000,
+        position: "top-center",
+      });
+    } finally {
+      actionLock.current = false;
+      setBusy(false);
+    }
+  };
+  const handleRemoveItem = (itemId) =>
+    mutateCart(() =>
+      axios.delete(`${url}/shoppingcart/${user._id}/items/${itemId}`, {
+        withCredentials: true,
+      }),
+    );
+  // เปลี่ยนตัวเลขทันที จำกัดต่ำสุดที่ 1 แล้วเลื่อนเวลาส่ง API ออกไปตาม debounce
   const handleQuantity = (itemId, type) => {
-    const currentQuantity =
-      quantities[itemId] ??
+    if (actionLock.current) return;
+    const current =
+      pendingQuantities.current[itemId] ??
       data.find((item) => item._id === itemId)?.quantity ??
       1;
-
-    let newQuantity = currentQuantity;
-
-    if (type === "increase") {
-      newQuantity = currentQuantity + 1;
-    }
-    if (type === "decrease") {
-      newQuantity = currentQuantity - 1;
-    }
-    // ป้องกันไม่ให้ต่ำกว่า 1
-    if (newQuantity < 1) {
-      return;
-    }
-    setQuantities((prev) => ({ ...prev, [itemId]: newQuantity }));
-    syncQuantity(itemId, newQuantity);
-  };
-
-  const handleApplyPromo = async (e) => {
-    e.preventDefault();
-    if (!promoCode.trim()) return;
-    setErrPromo("");
-    setPromotion([]);
-    const response = await axios.get(`${url}/promo?code=${promoCode}`, {
-      withCredentials: true,
-    });
-    console.log(response.data.data);
-    if (response.data.success === false) {
-      setErrPromo(response.data.message);
-      return;
-    } else {
-      setErrPromo("");
-      setPromotion(response.data.data);
-    }
-  };
-
-  const handleRemovePromo = () => {
-    setPromotion([]);
-    setErrPromo("");
-    setPromoCode("");
-  };
-
-  useEffect(() => {
-    const grandTotal = async () => {
-      let discount;
-      const priceArr = data.map((product) => {
-        return product.quantity * product.product_id.price;
-      });
-      const total = priceArr.reduce((acc, currentVal) => acc + currentVal, 0);
-      setTotalPrice(total);
-
-      if (!promotion[0]) {
-        discount = 0;
-      } else if (promotion[0].discount_type === "baht") {
-        discount = promotion[0].discount_amount;
-      } else {
-        discount = total * (promotion[0].discount_amount / 100);
-      }
-      setSumPrice(total + shipping - discount);
+    const quantity = current + (type === "increase" ? 1 : -1);
+    if (quantity < 1) return;
+    pendingQuantities.current = {
+      ...pendingQuantities.current,
+      [itemId]: quantity,
     };
-    grandTotal();
-  }, [data, promotion]);
-
+    setQuantities(pendingQuantities.current);
+    // ยอดเก่าใช้ checkout ไม่ได้แล้ว เพราะจำนวนบนจอเปลี่ยนไป
+    setQuoteState(null);
+    syncQuantity();
+  };
+  // ให้ effect ส่งโค้ดไปตรวจที่ backend; frontend ไม่ตัดสินเองว่าโค้ดใช้ได้หรือไม่
+  const handleApplyPromo = (e) => {
+    e.preventDefault();
+    // ไม่ส่งโค้ดว่างไปตรวจ ตามพฤติกรรมปุ่ม Apply ที่เพิ่มมาจาก main
+    if (!promoCode.trim()) return;
+    setQuoteError("");
+    setAppliedCode(promoCode.trim().toLowerCase());
+  };
+  // รอจำนวนและยอดที่ยืนยันแล้ว ส่ง expected_total ให้ backend ตรวจว่ายอดเปลี่ยนหรือไม่
+  const handleProceedToCheckout = async () => {
+    if (
+      actionLock.current ||
+      Object.keys(pendingQuantities.current).length ||
+      !quote ||
+      !cartId
+    )
+      return;
+    actionLock.current = true;
+    setBusy(true);
+    try {
+      const { data: result } = await axios.post(
+        `${url}/orders`,
+        {
+          cart_id: cartId,
+          payment_method: "promptpay",
+          promo_code: appliedCode,
+          expected_total: quote.total_price,
+        },
+        { withCredentials: true },
+      );
+      // เปิดหน้าจ่ายภายใน GearVerse แล้วโหลดตะกร้าที่ถูก checkout ใหม่
+      navigate(`/payment/${result.order._id}`);
+      await getCart();
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || "Unable to create your order.",
+        {
+          richColors: true,
+          duration: 5000,
+          position: "top-center",
+        },
+      );
+      await getCart();
+    } finally {
+      actionLock.current = false;
+      setBusy(false);
+    }
+  };
   return (
     <div className="min-h-[calc(100vh-4rem)] relative z-10 text-slate-100 py-6 sm:py-10 px-3 sm:px-6 lg:px-12 font-sans antialiased">
       {/* Show full-screen LoadingScreen while the cart API request is being fetched */}
@@ -165,7 +248,14 @@ export default function CartPage() {
               {data?.length > 0 && (
                 <Button
                   variant="link"
-                  onClick={handleClearAll}
+                  disabled={busy || hasPendingQuantities}
+                  onClick={() =>
+                    mutateCart(() =>
+                      axios.delete(`${url}/shoppingcart/${user._id}`, {
+                        withCredentials: true,
+                      }),
+                    )
+                  }
                   className="text-slate-400 hover:text-rose-400 text-sm font-medium underline underline-offset-4 p-0 h-auto cursor-pointer"
                 >
                   Clear All Gear
@@ -173,8 +263,9 @@ export default function CartPage() {
               )}
             </div>
 
-            {/* Cart Items List */}
-            {loading ? (
+            {/* แสดง loading เมื่อยังไม่มีสินค้าให้แสดงเท่านั้น
+                ถ้าโหลดตะกร้าซ้ำหลัง checkout ผิดพลาด ให้คงรายการเดิมไว้จนข้อมูลใหม่มาถึง */}
+            {loading && !data.length ? (
               <Card className="bg-[#121022] border-[#25203f] rounded-2xl p-12 text-center flex flex-col items-center justify-center space-y-4">
                 <div className="h-60 flex items-center justify-center">
                   <Ring className={"size-20 text-gpurple-3"} />
@@ -196,6 +287,7 @@ export default function CartPage() {
             ) : (
               <div className="space-y-4">
                 {data?.map((item) => {
+                  // ระหว่าง debounce ใช้จำนวนที่กดล่าสุด หลังบันทึกแล้วใช้จำนวนจาก backend
                   const displayQuantity = quantities[item._id] ?? item.quantity;
                   const itemTotal = item.product_id.price * displayQuantity;
                   return (
@@ -234,7 +326,7 @@ export default function CartPage() {
                           {/* Delivery Info */}
                           <div className="flex items-center justify-center sm:justify-start gap-1.5 text-[#10b981] text-xs font-semibold pt-1">
                             <Truck className="w-3.5 h-3.5" />
-                            <span>Free Delivery</span>
+                            <span>Shipping ฿39 per order</span>
                           </div>
                         </div>
 
@@ -246,7 +338,7 @@ export default function CartPage() {
                               Unit Price
                             </span>
                             <span className="text-white font-bold text-sm">
-                              ${item.product_id.price.toFixed(2)}
+                              ฿{item.product_id.price.toFixed(2)}
                             </span>
                           </div>
 
@@ -260,6 +352,7 @@ export default function CartPage() {
                               }
                               className="text-slate-300 hover:text-white hover:bg-[#282147] rounded cursor-pointer"
                               aria-label="Decrease quantity"
+                              disabled={busy || displayQuantity <= 1}
                             >
                               <Minus className="w-3.5 h-3.5" />
                             </Button>
@@ -274,6 +367,7 @@ export default function CartPage() {
                               }
                               className="text-slate-300 hover:text-white hover:bg-[#282147] rounded cursor-pointer"
                               aria-label="Increase quantity"
+                              disabled={busy}
                             >
                               <Plus className="w-3.5 h-3.5" />
                             </Button>
@@ -285,7 +379,7 @@ export default function CartPage() {
                               Total
                             </span>
                             <span className="text-white font-extrabold text-base tracking-tight">
-                              ${itemTotal.toFixed(2)}
+                              ฿{itemTotal.toFixed(2)}
                             </span>
                           </div>
 
@@ -296,6 +390,7 @@ export default function CartPage() {
                             onClick={() => handleRemoveItem(item._id)}
                             className="bg-[#27152b] hover:bg-[#3d183f] text-[#f43f5e] hover:text-rose-300 rounded-lg border border-[#4a1b3f]/60 cursor-pointer"
                             title="Remove item"
+                            disabled={busy || hasPendingQuantities}
                           >
                             <X className="w-4 h-4" />
                           </Button>
@@ -381,24 +476,30 @@ export default function CartPage() {
                 >
                   <Input
                     type="text"
+                    disabled={busy}
                     value={promoCode}
                     onChange={(e) => setPromoCode(e.target.value)} //ทุกครั้งที่ช่อง Input เปลี่ยน เอาค่าที่ผู้ใช้พิมพ์มาเก็บไว้ใน promoInput
                     placeholder="Enter code (e.g. GEAR30)"
                     className="bg-[#18152e] border-[#2e264f] text-white text-sm px-3.5 py-2.5 rounded-xl flex-1 focus:border-purple-500 font-mono tracking-wider placeholder-slate-500 uppercase h-auto"
                   />
-                  {promotion.length > 0 ? (
+                  {appliedCode ? (
                     <Button
                       type="button"
-                      onClick={handleRemovePromo}
+                      onClick={() => {
+                        setAppliedCode("");
+                        setPromoCode("");
+                        setQuoteError("");
+                      }}
                       title="Remove promo code"
+                      disabled={busy}
                       className="bg-[#10b981] hover:bg-emerald-400 text-black font-extrabold px-4 py-2.5 rounded-xl text-sm shadow-md shadow-emerald-500/20 cursor-pointer h-auto"
                     >
-                      Applied
+                      Remove
                     </Button>
                   ) : (
                     <Button
                       type="submit"
-                      disabled={!promoCode.trim()}
+                      disabled={busy || !data.length || !promoCode.trim()}
                       className="bg-purple-600 hover:bg-purple-500 text-white font-bold px-4 py-2.5 rounded-xl text-sm cursor-pointer disabled:bg-slate-800 disabled:text-slate-500 disabled:cursor-not-allowed disabled:opacity-100 h-auto"
                     >
                       Apply
@@ -407,20 +508,18 @@ export default function CartPage() {
                 </form>
 
                 {/* Applied Success banner */}
-                {promotion.length > 0 ? (
+                {quote?.promo_code ? (
                   <div className="flex items-center gap-1.5 text-[#10b981] text-xs font-semibold pt-1">
                     <Check className="w-4 h-4" />
                     <span>
                       Code '
-                      <span className="font-black">{promotion[0].name}</span>'
-                      saved you {promotion[0].discount_type === "baht" && "฿"}
-                      {promotion[0].discount_amount}
-                      {promotion[0].discount_type === "percent" && "%"}!
+                      <span className="font-black">{quote.promo_code}</span>'
+                      saved you ฿{quote.discount_amount.toFixed(2)}!
                     </span>
                   </div>
-                ) : errPromo ? (
+                ) : quoteError ? (
                   <p className="text-rose-400 text-xs font-medium pt-1">
-                    {errPromo}
+                    {quoteError}
                   </p>
                 ) : (
                   <></>
@@ -435,7 +534,7 @@ export default function CartPage() {
                   <div className="flex justify-between items-center text-slate-300">
                     <span>Cart Subtotal</span>
                     <span className="font-bold text-white text-base">
-                      ${totalPrice.toFixed(2)}
+                      {quote ? `฿${totalPrice.toFixed(2)}` : "—"}
                     </span>
                   </div>
 
@@ -443,18 +542,14 @@ export default function CartPage() {
                     <span>Discount Applied</span>
                     <span className="font-bold text-[#10b981] text-base">
                       {/* {discount > 0 ? `-$${discount.toFixed(2)}` : "$0.00"} */}
-                      {!promotion[0]
-                        ? "฿0.00"
-                        : promotion[0].discount_type === "baht"
-                          ? `฿${promotion[0].discount_amount.toFixed(2)}`
-                          : `฿${(totalPrice * (promotion[0].discount_amount / 100)).toFixed(2)}`}
+                      {quote ? `฿${quote.discount_amount.toFixed(2)}` : "—"}
                     </span>
                   </div>
 
                   <div className="flex justify-between items-center text-slate-300">
                     <span>Estimated Shipping</span>
                     <span className="font-bold text-white text-base">
-                      ${shipping.toFixed(2)}
+                      ฿{shipping.toFixed(2)}
                     </span>
                   </div>
                 </div>
@@ -467,21 +562,21 @@ export default function CartPage() {
                     Grand Total
                   </span>
                   <span className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-                    ${sumPrice}
+                    {quote ? `฿${sumPrice.toFixed(2)}` : "—"}
                   </span>
                 </div>
 
-                {/* Proceed to Checkout Button */}
+                {/* ปิดปุ่มจ่ายเมื่อกำลังบันทึก/โหลด หรือยังไม่มียอด backend ที่ตรงกับตะกร้าปัจจุบัน */}
                 <Button
-                  // onClick={handleProceedToCheckout}
-                  // disabled={items.length === 0}
+                  onClick={handleProceedToCheckout}
+                  disabled={busy || loading || !data.length || !quote}
                   className={`w-full py-4 h-auto rounded-xl font-black text-sm tracking-wider uppercase flex items-center justify-center gap-2 transition-all duration-300 shadow-xl ${
                     data.length === 0
                       ? "bg-slate-800 text-slate-500 cursor-not-allowed"
                       : "bg-gradient-to-r from-[#ec4899] via-[#a855f7] to-[#06b6d4] text-slate-950 hover:brightness-110 hover:shadow-cyan-500/25 active:scale-[0.99] cursor-pointer"
                   }`}
                 >
-                  <span>PROCEED TO CHECKOUT</span>
+                  <span>{busy ? "PLEASE WAIT…" : "PAY WITH PROMPTPAY"}</span>
                   <ArrowRight className="w-4 h-4 stroke-[3]" />
                 </Button>
 

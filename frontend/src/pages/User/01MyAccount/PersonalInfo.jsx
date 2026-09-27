@@ -255,7 +255,7 @@ export default function PersonalInfo() {
         >
           <img
             src={avatar}
-            alt="John Doe profile"
+            alt="user avatar profile"
             className="h-[148px] w-[148px] rounded-[25px] border-2 border-[#A78BFA] object-cover"
           />
           <input

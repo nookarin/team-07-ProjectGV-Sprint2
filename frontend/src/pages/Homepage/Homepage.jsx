@@ -70,10 +70,6 @@ const Homepage = () => {
       {/* Show full-screen LoadingScreen while the products API request is being fetched */}
       {loading && <LoadingScreen />}
       <BannerCarousel />
-      {/* <div className="w-3/4 mx-auto my-10">
-        <HeaderSection name={"Coupon"} />
-        
-      </div> */}
       <div className="w-3/4 mx-auto my-10">
         <HeaderSection name={"categories"} />
         <div className="grid grid-cols-2 md:grid-cols-4 gap-5">

@@ -118,6 +118,14 @@ const orderSchema = new mongoose.Schema(
       min: [0, "Total price cannot be negative"],
     },
 
+    // เก็บยอดแยกส่วนเป็นบาท ณ ตอนสร้างออเดอร์ เพื่อแสดงตรงกับยอดที่ใช้สร้าง QR
+    subtotal_price: { type: Number, min: 0 },
+    shipping_fee: { type: Number, min: 0, default: 0 },
+    discount_amount: { type: Number, min: 0, default: 0 },
+    promo_code: { type: String, default: null },
+    // เก็บอีเมลที่ใช้ยืนยัน PromptPay ไว้ แม้ผู้ใช้แก้อีเมลในโปรไฟล์ภายหลัง
+    payment_email: { type: String },
+
     total_quantity: {
       type: Number,
       required: true,
