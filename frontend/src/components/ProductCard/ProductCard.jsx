@@ -63,7 +63,7 @@ const ProductCard = ({ img, product }) => {
             className="border border-gbase-1 bg-gbase-3 rounded-lg p-2 hover:bg-gpurple-4">
             <Heart
               color="#ffffff"
-              className={isWishlisted ? "fill-red-600 stroke-red-600" : ""}
+              className={isWishlisted ? "fill-gpurple-2 stroke-gpurple-2" : ""}
             />
           </Button>
           <Button

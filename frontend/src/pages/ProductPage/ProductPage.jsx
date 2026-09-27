@@ -28,6 +28,7 @@ import axios from "axios";
 import { useAuth } from "@/contexts/Authentication/AuthContext";
 import { useCart } from "@/contexts/Cart/CartProvider";
 import LoadingScreen from "@/components/LoadingScreen";
+import { useWishlist } from "@/contexts/Wishlist/WishlistProvider";
 
 const UNIT_PRICE = 399;
 
@@ -55,33 +56,8 @@ const SWITCH_OPTIONS = [
   },
 ];
 
-const RELATED_PRODUCTS = [
-  {
-    id: "vortex-wireless-mouse",
-    name: "Vortex Wireless Mouse",
-    image: MouseImg,
-    price: 129,
-    to: "/products/mouse",
-    badge: "NEW",
-  },
-  {
-    id: "sonic-pro-headset",
-    name: "Sonic Pro Headset",
-    image: HeadsetImg,
-    price: 189,
-    oldPrice: 219,
-    to: "/products/headset",
-  },
-  {
-    id: "cyber-desk-mat",
-    name: "Cyber Desk Mat",
-    image: CustomMousepadTeemoImg,
-    price: 39,
-    to: "/products/custom",
-  },
-];
-
 const ProductPage = () => {
+  const { addToWishlist, products, removeFromWishlist } = useWishlist();
   const param = useParams();
   const [data, setData] = useState({});
   const [loading, setLoading] = useState(null);
@@ -111,14 +87,18 @@ const ProductPage = () => {
   const [activeImage, setActiveImage] = useState(colors[0].image);
   const [activeSwitch, setActiveSwitch] = useState(SWITCH_OPTIONS[0]);
   const [quantity, setQuantity] = useState(1);
-  const [isWishlisted, setIsWishlisted] = useState(false);
+  // const [isWishlisted, setIsWishlisted] = useState(false);
+  const isWishlisted = products.some((p) => p._id === data._id);
   const [playingSwitch, setPlayingSwitch] = useState(null);
+  const handleWishlistClick = () =>
+    isWishlisted ? removeFromWishlist(data._id) : addToWishlist(data);
 
   const fetchData = async () => {
     setLoading(true);
     const response = await axios.get(
       `${url}/products/product/${param.product_id}`,
     );
+    console.log(response.data.product);
     setData(response.data.product);
     setLoading(false);
   };
@@ -424,8 +404,7 @@ const ProductPage = () => {
                 <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform"></div>
               </button>
               <button
-                onClick={handleWishlistToggle}
-                aria-pressed={isWishlisted}
+                onClick={handleWishlistClick}
                 aria-label={
                   isWishlisted ? "Remove from wishlist" : "Add to wishlist"
                 }
@@ -460,9 +439,11 @@ const ProductPage = () => {
             </div>
           </div>
         </div>
-
         {/* Sub Features / Tags */}
         <div className="flex flex-wrap items-center gap-2 lg:gap-3 mt-4">
+          <h2 className="uppercase px-5 py-1.5 bg-gpurple-2 border border-[#2a2a35] rounded-full hover:border-[#9F7AEA] transition-colors cursor-pointer group">
+            {!loading && data?.category_id?.category_name}
+          </h2>
           {!loading && data.subcategory_ids ? (
             data?.subcategory_ids.map((item) => {
               return (
@@ -470,9 +451,9 @@ const ProductPage = () => {
                   key={item._id}
                   className="px-5 py-1.5 bg-[#0C0C12] border border-[#2a2a35] rounded-full hover:border-[#9F7AEA] transition-colors cursor-pointer group"
                 >
-                  <span className="text-[9px] font-bold tracking-[1.5px] upper text-white group-hover:text-[#9F7AEA] transition-colors">
+                  <h2 className="text-base uppercase text-white group-hover:text-[#9F7AEA] transition-colors">
                     {item.subcategory_name}
-                  </span>
+                  </h2>
                 </div>
               );
             })
@@ -482,7 +463,7 @@ const ProductPage = () => {
         </div>
 
         {/* Description & Specs Block */}
-        <div className="w-full bg-[#0C0C12] border border-[#2a2a35] rounded-lg overflow-hidden flex flex-col md:flex-row mt-2">
+        <div className="w-full bg-[#0C0C12] border border-[#2a2a35] rounded-lg overflow-hidden flex flex-col md:flex-row">
           {/* Left: General Desc */}
           <div className="flex flex-col flex-1 border-b md:border-b-0 md:border-r border-[#2a2a35]">
             <div className="h-[48px] bg-[#A78BFA] flex items-center px-6 border-b border-[#A78BFA]">
@@ -492,106 +473,12 @@ const ProductPage = () => {
             </div>
             <div className="p-5 md:p-8 min-h-[120px] flex items-center">
               <p className="text-[12px] md:text-[13px] text-white/90 font-light leading-[1.8] max-w-[800px]">
-                Built with a solid aluminum frame, durable PBT double-shot
-                keycaps, and multi-device <br className="hidden md:block" />
-                Bluetooth connectivity to conquer both gaming and work. Equipped
-                with state-of-the-art optical switches for ultra-rapid
-                actuation.
+                {!loading && data?.description}
               </p>
-            </div>
-          </div>
-
-          {/* Right: Technical Specs */}
-          <div className="flex flex-col flex-1 bg-[#09090D]">
-            <div className="h-[48px] bg-transparent flex items-center px-6 border-b border-[#2a2a35]">
-              <h2 className="text-[13px] font-bold text-[#8A8A93] tracking-wide">
-                Technical Specifications
-              </h2>
-            </div>
-            <div className="p-5 md:p-8 flex flex-col gap-4">
-              <div className="flex justify-between items-center border-b border-[#1C1C24] pb-2">
-                <span className="text-[11px] text-[#8A8A93]">Switch Type</span>
-                <span className="text-[11px] text-white font-medium">
-                  Titan Optical Linear
-                </span>
-              </div>
-              <div className="flex justify-between items-center border-b border-[#1C1C24] pb-2">
-                <span className="text-[11px] text-[#8A8A93]">Connectivity</span>
-                <span className="text-[11px] text-white font-medium">
-                  Bluetooth 5.1 / 2.4GHz / USB-C
-                </span>
-              </div>
-              <div className="flex justify-between items-center border-b border-[#1C1C24] pb-2">
-                <span className="text-[11px] text-[#8A8A93]">Battery Life</span>
-                <span className="text-[11px] text-white font-medium">
-                  Up to 200 Hours
-                </span>
-              </div>
             </div>
           </div>
         </div>
       </main>
-
-      {/* Related Products Section */}
-      {/* <section className="max-w-[1280px] mx-auto px-4 sm:px-8 py-8 w-full">
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-2">
-            <div className="w-1 h-4 bg-[#00FFFF] shadow-[0_0_8px_#00FFFF]"></div>
-            <h2 className="text-[16px] font-bold uppercase tracking-[1.5px]">
-              You Might Also Like
-            </h2>
-          </div>
-          <Link
-            to="/products/all"
-            className="flex items-center gap-1.5 text-[10px] text-[#00FFFF] hover:text-white transition-colors group"
-          >
-            VIEW MORE{" "}
-            <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
-          </Link>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {RELATED_PRODUCTS.map((product) => (
-            <Link
-              key={product.id}
-              to={product.to}
-              className="bg-[#0C0C12] border border-[#2a2a35] rounded-xl overflow-hidden hover:border-[#9F7AEA] transition-all group"
-            >
-              <div className="aspect-[4/3] bg-[#181423] overflow-hidden">
-                <img
-                  src={product.image}
-                  alt={product.name}
-                  className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-500"
-                />
-              </div>
-              <div className="p-5 flex flex-col gap-2 relative">
-                {product.badge && (
-                  <div className="absolute -top-4 right-4 bg-[#00FFFF] text-black text-[9px] font-bold px-2 py-0.5 rounded-sm shadow-[0_0_8px_rgba(0,255,255,0.4)]">
-                    {product.badge}
-                  </div>
-                )}
-                <h3 className="text-[14px] font-bold text-white group-hover:text-[#9F7AEA] transition-colors">
-                  {product.name}
-                </h3>
-                {product.oldPrice ? (
-                  <div className="flex items-center gap-2">
-                    <span className="text-[13px] font-extrabold text-[#9F7AEA]">
-                      {product.price} $
-                    </span>
-                    <span className="text-[10px] text-[#8A8A93] line-through">
-                      {product.oldPrice} $
-                    </span>
-                  </div>
-                ) : (
-                  <span className="text-[13px] font-medium text-[#8A8A93]">
-                    {product.price} $
-                  </span>
-                )}
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section> */}
     </div>
   );
 };
