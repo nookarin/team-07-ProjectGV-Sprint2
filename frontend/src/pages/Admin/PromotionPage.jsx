@@ -30,6 +30,7 @@ const PromotionPage = () => {
     { value: "updatedAt", label: "Updated at" },
   ];
   const [data, setData] = useState([]);
+  const [dialogOpen, setDialogOpen] = useState(false)
   const [query, setQuery] = useState({
     name: "",
     max_use: "",
@@ -84,6 +85,7 @@ const PromotionPage = () => {
     if(response.data.success) {
       fetchApi()
     }
+    setDialogOpen(false)
   };
 
   const editingUser = () => {};
@@ -125,8 +127,8 @@ const PromotionPage = () => {
               </span>
             </div>
 
-            <Dialog>
-              <DialogTrigger>
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+              <DialogTrigger onClick={() => setDialogOpen(true)}>
                 <div className="flex items-center justify-center w-24 h-10 rounded-full gap-2 bg-linear-to-r from-violet-600 to-fuchsia-600 font-bold hover:from-violet-500 hover:to-fuchsia-500">
                   <Plus className="size-4" aria-hidden="true" /> Add
                 </div>
@@ -206,14 +208,14 @@ const PromotionPage = () => {
                 Created at
                 <ArrowUpDown />
               </Button>
-              <Button
+              {/* <Button
                 className={`border border-gbase-1 ${sortConfig.field === "updated_at" ? "bg-gpurple-3 border-gpurple-2" : "bg-gbase-3"}`}
                 type="button"
                 onClick={() => sortByField("updated_at")}
               >
                 Updated at
                 <ArrowUpDown />
-              </Button>
+              </Button> */}
               <Button
                 className={`border border-gbase-1 ${sortConfig.field === "promo_start" ? "bg-gpurple-3 border-gpurple-2" : "bg-gbase-3"}`}
                 type="button"
