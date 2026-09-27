@@ -1,8 +1,49 @@
 import { toSatang } from "./pricing.js";
 
+export const PROMPTPAY_PAYMENT_WINDOW_MS = 10 * 60 * 1000;
+
 // รวมวงจร PromptPay: สร้างรายการ -> confirm เพื่อรับ QR -> ตรวจผล -> อัปเดตออเดอร์
 // คืนข้อมูล validation ให้ route ใช้ res.status(); ข้อผิดพลาดจากระบบภายนอกยังโยนต่อได้
-export function createPromptPayService({ stripe, Order, User, secretKey }) {
+export function createPromptPayService({ stripe, Order, User, secretKey, now = Date.now }) {
+  const hasExpired = (order) => order.payment_expires_at != null &&
+    new Date(order.payment_expires_at).getTime() <= now();
+
+  async function ensureDeadline(order, intent) {
+    if (order.payment_expires_at || order.status !== "pending" ||
+        order.payment_status === "paid" || order.payment_method !== "promptpay" ||
+        order.stripe_session_id) return order;
+    // QR เก่าที่ไม่มี deadline ใช้เวลาสร้าง PaymentIntent เดิม ไม่ให้ต่ออายุด้วยการ refresh
+    const startedAt = Number.isFinite(intent.created) ? intent.created * 1000 : now();
+    const updated = await Order.findOneAndUpdate({
+      _id: order._id, status: "pending", payment_expires_at: null,
+      payment_status: { $ne: "paid" }, stripe_payment_intent_id: intent.id,
+    }, { $set: { payment_expires_at: new Date(startedAt + PROMPTPAY_PAYMENT_WINDOW_MS) } }, { new: true });
+    return updated ?? await Order.findById(order._id);
+  }
+
+  async function cancelIntent(intent, reason) {
+    if (intent.status === "canceled") return intent;
+    try {
+      return await stripe.paymentIntents.cancel(intent.id, { cancellation_reason: reason });
+    } catch (error) {
+      // อีก worker หรือการชำระเงินอาจชนะระหว่าง retrieve กับ cancel
+      const latest = await stripe.paymentIntents.retrieve(intent.id);
+      if (["succeeded", "processing", "canceled"].includes(latest.status)) return latest;
+      throw error;
+    }
+  }
+
+  async function reconcile(order, intent) {
+    const invalid = verifyIntent(order, intent);
+    if (invalid) return invalid;
+    order = await ensureDeadline(order, intent);
+    if (order.status === "pending" && order.payment_status !== "paid" && hasExpired(order) &&
+        !["succeeded", "processing", "canceled"].includes(intent.status)) {
+      intent = await cancelIntent(intent, "abandoned");
+    }
+    return response(await sync(order, intent), intent);
+  }
+
   // งานนี้เป็นการจำลอง จึงยอมรับเฉพาะ secret key ของ Stripe test mode
   function validateTestMode() {
     if (!secretKey?.startsWith("sk_test_")) {
@@ -62,7 +103,7 @@ export function createPromptPayService({ stripe, Order, User, secretKey }) {
           $set: {
             payment_status: "paid",
             status: "processing",
-            paid_at: new Date(),
+            paid_at: new Date(now()),
           },
         },
         { runValidators: true },
@@ -74,6 +115,7 @@ export function createPromptPayService({ stripe, Order, User, secretKey }) {
           $set: {
             payment_status: "cancelled",
             status: "cancelled",
+            ...(hasExpired(order) ? { payment_expired_at: new Date(now()) } : {}),
           },
         },
         { runValidators: true },
@@ -92,15 +134,20 @@ export function createPromptPayService({ stripe, Order, User, secretKey }) {
   // จัดผลลัพธ์ให้ frontend แสดง QR/สถานะ และซ่อนภาพ QR เมื่อจ่ายสำเร็จแล้ว
   function response(order, intent = null) {
     if (order.success === false) return order;
-    const qr = intent?.next_action?.promptpay_display_qr_code;
+    const canPay = order.status === "pending" && order.payment_status !== "paid" &&
+      !hasExpired(order) && intent?.status === "requires_action";
+    const qr = canPay ? intent?.next_action?.promptpay_display_qr_code : null;
     return {
       success: true,
       order,
       payment: {
         test_mode: true,
-        status: intent?.status ?? "not_started",
-        qr_image_url:
-          order.payment_status !== "paid" ? (qr?.image_url_png ?? null) : null,
+        status: order.payment_status === "paid" ? "succeeded" :
+          order.payment_status === "cancelled" ? "canceled" : intent?.status ?? "not_started",
+        expires_at: order.payment_expires_at ?? null,
+        server_time: new Date(now()).toISOString(),
+        expired: Boolean(order.payment_expired_at),
+        qr_image_url: qr?.image_url_png ?? null,
         // QR ทดสอบอาจเก็บ URL จำลองการจ่าย ยอมส่งเฉพาะลิงก์ HTTPS ของโดเมน Stripe
         test_payment_url:
           qr?.data && /^https:\/\/([a-z0-9-]+\.)*stripe\.com\//i.test(qr.data)
@@ -120,7 +167,7 @@ export function createPromptPayService({ stripe, Order, User, secretKey }) {
     const intent = await stripe.paymentIntents.retrieve(
       order.stripe_payment_intent_id,
     );
-    return response(await sync(order, intent), intent);
+    return reconcile(order, intent);
   }
 
   // ออก QR เฉพาะออเดอร์ PromptPay ที่ยังรอชำระ และไม่ได้ใช้ hosted Checkout เดิม
@@ -176,7 +223,10 @@ export function createPromptPayService({ stripe, Order, User, secretKey }) {
           payment_status: { $ne: "paid" },
           stripe_payment_intent_id: null,
         },
-        { $set: { stripe_payment_intent_id: intent.id } },
+        { $set: {
+          stripe_payment_intent_id: intent.id,
+          payment_expires_at: new Date(now() + PROMPTPAY_PAYMENT_WINDOW_MS),
+        } },
         { new: true },
       );
       order = bound ?? (await Order.findById(order._id));
@@ -197,12 +247,13 @@ export function createPromptPayService({ stripe, Order, User, secretKey }) {
     }
     const invalid = verifyIntent(order, intent);
     if (invalid) return invalid;
+    order = await ensureDeadline(order, intent);
     if (
-      ["succeeded", "canceled", "processing", "requires_action"].includes(
+      hasExpired(order) || ["succeeded", "canceled", "processing", "requires_action"].includes(
         intent.status,
       )
     ) {
-      return response(await sync(order, intent), intent);
+      return reconcile(order, intent);
     }
     // ใช้รหัสวิธีจ่ายที่ล้มเหลวแยกรอบลองใหม่ แต่การกดซ้ำในรอบเดียวกันใช้ key เดียวกัน
     const attempt =
@@ -226,7 +277,7 @@ export function createPromptPayService({ stripe, Order, User, secretKey }) {
       },
       { idempotencyKey: `gearverse:promptpay:${order._id}:confirm:${attempt}` },
     );
-    return response(await sync(order, intent), intent);
+    return reconcile(order, intent);
   }
 
   // ตรวจและยกเลิกรายการที่ Stripe ก่อนเปลี่ยนออเดอร์เป็น cancelled
@@ -264,11 +315,13 @@ export function createPromptPayService({ stripe, Order, User, secretKey }) {
           message: "Payment is complete or processing and cannot be cancelled.",
         };
       }
-      const intent =
-        current.status === "canceled"
-          ? current
-          : await stripe.paymentIntents.cancel(current.id);
-      return sync(order, intent);
+      const intent = await cancelIntent(current, "requested_by_customer");
+      const updated = await sync(order, intent);
+      if (["succeeded", "processing"].includes(intent.status)) {
+        return { success: false, status: 409,
+          message: "Payment is complete or processing and cannot be cancelled." };
+      }
+      return updated;
     }
     const cancelled = await Order.findOneAndUpdate(
       {
@@ -300,7 +353,7 @@ export function createPromptPayService({ stripe, Order, User, secretKey }) {
     if (!order) return;
     // อ่านสถานะล่าสุดแทนข้อมูลเก่าใน event เพราะ webhook อาจซ้ำหรือมาถึงสลับลำดับ
     const intent = await stripe.paymentIntents.retrieve(event.data.object.id);
-    return sync(order, intent);
+    return reconcile(order, intent);
   }
   return { start, read, cancel, handleEvent };
 }

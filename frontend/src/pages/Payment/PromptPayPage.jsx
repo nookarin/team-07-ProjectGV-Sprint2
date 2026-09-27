@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
   CheckCircle2,
@@ -23,6 +23,16 @@ export default function PromptPayPage() {
   const { url } = useAuth();
   const { refreshOrders } = useOrder();
   const [result, setResult] = useState(null);
+  const [clock, setClock] = useState(Date.now);
+  const [serverOffset, setServerOffset] = useState(0);
+  const expiryRefresh = useRef(null);
+  const receiveResult = useCallback((data) => {
+    const receivedAt = Date.now();
+    const serverTime = Date.parse(data.payment.server_time);
+    setServerOffset(Number.isFinite(serverTime) ? serverTime - receivedAt : 0);
+    setClock(receivedAt);
+    setResult(data);
+  }, []);
   const [error, setError] = useState("");
   // แยก error จากปุ่มกับ polling เพื่อไม่ให้การ polling ลบข้อความของการกดปุ่ม
   const [actionError, setActionError] = useState("");
@@ -36,6 +46,13 @@ export default function PromptPayPage() {
   const payment = order ? result.payment : null;
   const paid = order?.payment_status === "paid";
   const cancelled = order?.status === "cancelled";
+  const expiresAt = Date.parse(payment?.expires_at);
+  const remainingSeconds = Number.isFinite(expiresAt)
+    ? Math.max(0, Math.ceil((expiresAt - clock - serverOffset) / 1000))
+    : null;
+  const timeExpired = remainingSeconds === 0 && !paid && !cancelled;
+  const countdown = remainingSeconds === null ? null :
+    `${Math.floor(remainingSeconds / 60).toString().padStart(2, "0")}:${(remainingSeconds % 60).toString().padStart(2, "0")}`;
   const failed =
     payment?.status === "requires_payment_method" && !!payment.error;
   // สร้างหรือลอง QR ใหม่เฉพาะสถานะที่ยังต้องเริ่ม/ยืนยันการจ่าย
@@ -43,11 +60,31 @@ export default function PromptPayPage() {
     payment &&
     !paid &&
     !cancelled &&
+    !timeExpired &&
     [
       "not_started",
       "requires_payment_method",
       "requires_confirmation",
     ].includes(payment.status);
+
+  useEffect(() => {
+    if (!Number.isFinite(expiresAt) || paid || cancelled) return;
+    const timer = setInterval(() => setClock(Date.now()), 250);
+    return () => clearInterval(timer);
+  }, [expiresAt, paid, cancelled]);
+
+  // เมื่อหมดเวลา ซ่อน QR ทันทีและขอสถานะจาก backend โดยไม่รอ polling รอบปกติ
+  useEffect(() => {
+    if (!Number.isFinite(expiresAt) || paid || cancelled) return;
+    const key = `${orderId}:${expiresAt}`;
+    if (expiryRefresh.current === key) return;
+    const timer = setTimeout(() => {
+      expiryRefresh.current = key;
+      setClock(Date.now());
+      setRevision((value) => value + 1);
+    }, Math.max(0, expiresAt - Date.now() - serverOffset));
+    return () => clearTimeout(timer);
+  }, [orderId, expiresAt, serverOffset, paid, cancelled]);
 
   // polling เรียก backend ทุก 4 วินาที โดย backend ตรวจสถานะจริงจาก Stripe อีกที
   useEffect(() => {
@@ -62,7 +99,7 @@ export default function PromptPayPage() {
           signal: controller.signal,
         });
         if (controller.signal.aborted) return;
-        setResult(data);
+        receiveResult(data);
         setError("");
         failures = 0;
         terminal =
@@ -91,7 +128,7 @@ export default function PromptPayPage() {
       controller.abort();
       clearTimeout(timer);
     };
-  }, [endpoint, revision, refreshOrders]);
+  }, [endpoint, revision, refreshOrders, receiveResult]);
 
   // จัดการปุ่มสร้าง QR/ยกเลิก และล็อกทันทีเพื่อป้องกันกดซ้ำระหว่างรอ API
   async function act(action) {
@@ -110,7 +147,7 @@ export default function PromptPayPage() {
           {},
           { withCredentials: true },
         );
-        setResult(data);
+        receiveResult(data);
       }
       setRevision((value) => value + 1);
       refreshOrders();
@@ -201,8 +238,16 @@ export default function PromptPayPage() {
                   <>
                     <h2 className="text-xl font-bold">Order cancelled</h2>
                     <p className="mt-3 text-sm text-slate-400">
-                      This payment is closed. You can place a new order from
-                      your cart.
+                      {payment.expired
+                        ? "The 10-minute payment window has expired. Please place a new order."
+                        : "This payment is closed. You can place a new order from your cart."}
+                    </p>
+                  </>
+                ) : timeExpired && payment.status !== "processing" ? (
+                  <>
+                    <h2 className="text-xl font-bold">Payment time expired</h2>
+                    <p role="status" className="mt-3 text-sm text-slate-400">
+                      The 10-minute payment window has ended. Confirming the final payment status…
                     </p>
                   </>
                 ) : (
@@ -216,8 +261,19 @@ export default function PromptPayPage() {
                     <p className="my-4 text-3xl font-bold tabular-nums">
                       {money(order.total_price)}
                     </p>
+                    {countdown && payment.status !== "processing" && (
+                      <p className="mb-4 text-sm text-amber-200">
+                        Complete payment within{" "}
+                        <span role="timer" className="font-semibold tabular-nums">{countdown}</span>
+                      </p>
+                    )}
+                    {!countdown && !payment.qr_image_url && (
+                      <p className="mb-4 text-sm text-slate-400">
+                        You have 10 minutes to complete payment after generating your QR.
+                      </p>
+                    )}
                     {/* ใช้ภาพ QR ที่ backend รับจาก Stripe แสดงภายใน GearVerse */}
-                    {payment.qr_image_url && (
+                    {payment.qr_image_url && !timeExpired && (
                       <div className="mx-auto mb-5 w-fit rounded-2xl bg-white p-4">
                         <img
                           src={payment.qr_image_url}
@@ -259,7 +315,7 @@ export default function PromptPayPage() {
                       scanner to simulate the result.
                     </p> */}
                     {/* เปิดหน้าจำลองผลจ่ายของ Stripe ในแท็บใหม่ และรออัปเดตสถานะในหน้านี้ */}
-                    {(payment.test_payment_url || payment.instructions_url) && (
+                    {!timeExpired && (payment.test_payment_url || payment.instructions_url) && (
                       <a
                         href={
                           payment.test_payment_url || payment.instructions_url
@@ -345,7 +401,7 @@ export default function PromptPayPage() {
               <p className="flex items-center justify-center gap-2 text-xs text-slate-400">
                 <ShieldCheck size={16} /> Payment verified by Stripe
               </p>
-              {!paid && !cancelled && payment.status !== "processing" && (
+              {!paid && !cancelled && !timeExpired && payment.status !== "processing" && (
                 <button
                   disabled={busy}
                   onClick={() => act("cancel")}

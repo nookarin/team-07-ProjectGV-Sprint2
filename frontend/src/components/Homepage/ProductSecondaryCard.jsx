@@ -4,7 +4,10 @@ import React from "react";
 
 const ProductSecondaryCard = ({ product, discount }) => {
   const { addToCart } = useCart();
-  // console.log(product.category_id.category_name)
+  const discountedPrice = Number.isFinite(discount) && discount > 0 && discount < 1
+    ? Math.floor(product.price * discount)
+    : null;
+  const hasDiscount = Number.isFinite(discountedPrice);
   return (
     <div className="border border-gpurple-2 bg-gbg-1/95 text-center rounded-2xl shadow-lg shadow-purple-900/50">
       <div className="relative">
@@ -29,15 +32,15 @@ const ProductSecondaryCard = ({ product, discount }) => {
         <div className="flex w-40 justify-between items-center border-2 rounded-xl border-gpurple-2">
           <div className="flex items-center w-full h-10">
             <p
-              className={`text-gpurple-2 ${discount ? "line-through ml-2 font-normal text-sm" : "w-full p-2 font-bold text-2xl"}`}
+              className={`text-gpurple-2 ${hasDiscount ? "line-through ml-2 font-normal text-sm" : "w-full p-2 font-bold text-2xl"}`}
             >
               ${product.price}
             </p>
-            <p
-              className={`text-red-500 ml-1 font-bold text-2xl ${!discount && "hidden"}`}
-            >
-              {Math.floor(product.price * discount)}
-            </p>
+            {hasDiscount && (
+              <p className="text-red-500 ml-1 font-bold text-2xl">
+                {discountedPrice}
+              </p>
+            )}
           </div>
           <button
             onClick={() => addToCart(product)}

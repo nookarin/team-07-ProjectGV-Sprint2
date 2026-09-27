@@ -6,6 +6,7 @@ import { useOrder } from "@/contexts/Order/OrderProvider";
 export default function MyPurchase() {
   // อ่านออเดอร์จาก Context ที่หน้าจ่ายเงินสั่ง refresh ได้หลังสถานะเปลี่ยน
   const { orders, loading, error } = useOrder();
+  const paidOrders = orders.filter((order) => order.payment_status === "paid");
 
   return (
     <main className="min-h-screen bg-[#090813] px-4 py-12 font-sans text-[#DDD6FE] sm:px-8 lg:px-14 lg:py-[72px]">
@@ -19,8 +20,8 @@ export default function MyPurchase() {
             {/* แยกกำลังโหลด/โหลดไม่สำเร็จ/ไม่มีออเดอร์ เพื่อไม่แสดงว่าไม่มีออเดอร์ตอนยังรอ API */}
             {loading && <p role="status">Loading orders…</p>}
             {error && <p role="alert" className="text-rose-300">{error}</p>}
-            {!loading && !error && !orders.length && <p>No orders yet.</p>}
-            {orders.map((order) => (
+            {!loading && !error && !paidOrders.length && <p>No paid orders yet.</p>}
+            {paidOrders.map((order) => (
               <article
                 key={order._id}
                 className="overflow-hidden rounded-2xl border border-white/10 bg-[#141321] shadow-lg shadow-black/10 transition-colors hover:border-violet-400/30"
@@ -48,7 +49,7 @@ export default function MyPurchase() {
                       aria-hidden="true"
                     />
                     {/* แสดงสถานะจัดส่งควบคู่กับ paid เพื่อแยกการรับเงินกับขั้นตอนส่งสินค้า */}
-                    {order.payment_status === "paid" ? `${order.status} · paid` : order.status}
+                    {order.status} · paid
                   </span>
                 </header>
 
@@ -123,12 +124,12 @@ export default function MyPurchase() {
                       </p>
                     </div>
 
-                    {/* ออเดอร์ PromptPay เปิดหน้าจ่ายเดิมได้ ทั้งจ่ายต่อและดูสถานะหลังจ่าย */}
+                    {/* เปิดดูสถานะของออเดอร์ที่ชำระเงินแล้ว */}
                     <Link
                       to={order.payment_method === "promptpay" ? `/payment/${order._id}` : `/my-purchases/${order._id}`}
                       className="group inline-flex w-full items-center justify-center gap-2 rounded-xl border border-violet-400/20 bg-violet-400/10 px-4 py-3 text-xs font-semibold text-violet-200 transition-colors hover:border-violet-400/40 hover:bg-violet-400/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#141321] sm:w-auto"
                     >
-                      {order.payment_method === "promptpay" && order.status === "pending" && order.payment_status !== "paid" ? "Pay with PromptPay" : "View Status"}
+                      View Status
                       <ChevronRight
                         className="h-4 w-4 transition-transform group-hover:translate-x-0.5"
                         aria-hidden="true"

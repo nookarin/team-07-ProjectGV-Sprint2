@@ -4,6 +4,9 @@ import cookieParser from "cookie-parser";
 
 import { connectDB } from "./config/db.js";
 import { router as apiRoutes } from "./routes/index.js";
+import { Order } from "./models/order.model.js";
+import { paymentService } from "./services/paymentService.js";
+import { startPaymentExpiryWorker } from "./services/paymentExpiry.js";
 
 // ✅ เพิ่มอันนี้
 import { stripeWebhookRouter } from "./routes/stripeWebhook.route.js";
@@ -68,6 +71,7 @@ async function start() {
     await connectDB();
 
     app.listen(port, () => {
+      startPaymentExpiryWorker({ Order, paymentService });
       console.log(`Server running on port: ${port} 🏃‍♀️`);
     });
   } catch (err) {

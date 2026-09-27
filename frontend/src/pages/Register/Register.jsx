@@ -102,7 +102,7 @@ export default function Register() {
         >
           <div className="flex flex-row gap-1.5 ">
             <div className="flex flex-col w-full min-w-0">
-              <label className="text-white" for="firstname">
+              <label className="text-white" htmlFor="firstname">
                 First name
               </label>
               <div className="relative w-full">
@@ -115,7 +115,6 @@ export default function Register() {
              autofill:[-webkit-text-fill-color:white]"
                   id="firstname"
                   type="text"
-                  oninput="this.value = this.value.replace(/\s+/g, '');"
                   name="firstname"
                   onChange={onChangeHandler}
                   required
@@ -123,7 +122,7 @@ export default function Register() {
               </div>
             </div>
             <div className="flex flex-col w-full min-w-0">
-              <label className="text-white" for="lastname">
+              <label className="text-white" htmlFor="lastname">
                 Last name
               </label>
               <div className="relative w-full">
@@ -136,7 +135,6 @@ export default function Register() {
              autofill:[-webkit-text-fill-color:white]"
                   id="lastname"
                   type="text"
-                  oninput="this.value = this.value.replace(/\s+/g, '');"
                   onChange={onChangeHandler}
                   name="lastname"
                   required
@@ -145,7 +143,7 @@ export default function Register() {
             </div>
           </div>
           <div className="flex flex-col">
-            <label className="text-white" for="email">
+            <label className="text-white" htmlFor="email">
               Email Address
             </label>
 
@@ -160,7 +158,6 @@ export default function Register() {
              autofill:[-webkit-text-fill-color:white]"
                 id="email"
                 type="email"
-                oninput="this.value = this.value.replace(/\s+/g, '');"
                 name="email"
                 onChange={onChangeHandler}
                 required
@@ -169,7 +166,7 @@ export default function Register() {
           </div>
 
           <div className="flex flex-col">
-            <label className="text-white" for="password">
+            <label className="text-white" htmlFor="password">
               Password
             </label>
             <div className="relative w-full">
@@ -182,12 +179,11 @@ export default function Register() {
              autofill:[-webkit-text-fill-color:white]"
                 id="password"
                 type={showPassword ? "text" : "password"}
-                oninput="this.value = this.value.replace(/\s+/g, '');"
                 value={data.password}
                 onChange={onChangeHandler}
                 name="password"
-                minlength="6"
-                maxlength="20"
+                minLength={6}
+                maxLength={20}
                 required
               ></input>
               <button
@@ -204,7 +200,7 @@ export default function Register() {
             </div>
           </div>
           <div className="flex flex-col">
-            <label className="text-white" for="confirm-password">
+            <label className="text-white" htmlFor="confirm-password">
               Confirm Password
             </label>
             <div className="relative w-full">
@@ -217,12 +213,11 @@ export default function Register() {
              autofill:[-webkit-text-fill-color:white]"
                 id="confirm-password"
                 type={showConfirmPassword ? "text" : "password"}
-                oninput="this.value = this.value.replace(/\s+/g, '');"
                 value={data.confirmpassword}
                 onChange={onChangeHandler}
                 name="confirmpassword"
-                minlength="6"
-                maxlength="20"
+                minLength={6}
+                maxLength={20}
                 required
               ></input>
 
