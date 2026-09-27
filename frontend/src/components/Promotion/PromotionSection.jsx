@@ -1,7 +1,14 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import { Check, Copy, Sparkles } from "lucide-react";
 import { toast } from "sonner";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "#components/ui/carousel";
 import { useAuth } from "@/contexts/Authentication/AuthContext";
 import { cn } from "@/lib/utils";
 
@@ -29,27 +36,18 @@ const discountLabel = (promo) =>
     ? `฿${formatBaht(promo.discount_amount)}`
     : `${promo.discount_amount}%`;
 
-const isRedeemable = (promo) => {
-  const now = Date.now();
-  return (
-    promo.is_active &&
-    new Date(promo.promo_start).getTime() <= now &&
-    new Date(promo.expire_at).getTime() >= now
-  );
-};
-
 const CouponTicket = ({ promo, accent, onCopy, copied }) => {
   return (
     <div
       className={cn(
         "group relative flex w-full items-stretch overflow-hidden rounded-2xl",
-        "bg-gradient-to-br",
-        accent,
-        "text-white shadow-lg shadow-purple-900/40",
+        "bg-linear-to-br bg-gpurple-5",
+        // accent,
+        "text-white", // shadow-sm shadow-purple-900/40
         "transition-transform duration-300 hover:-translate-y-1",
       )}
     >
-      <div className="pointer-events-none absolute -top-10 -left-8 size-24 rounded-full bg-white/20 blur-2xl" />
+      {/* <div className="pointer-events-none absolute -top-10 -left-8 size-24 rounded-full bg-white/20 blur-2xl" /> */}
 
       <div className="relative flex min-w-0 flex-1 flex-col justify-center gap-2 px-4 py-4">
         <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-semibold uppercase ring-1 ring-white/30">
@@ -96,7 +94,10 @@ const CouponTicket = ({ promo, accent, onCopy, copied }) => {
   );
 };
 
-const PromotionSection = ({ limit = 4 }) => {
+const ARROW_BUTTON =
+  "border-gpurple-2 bg-gbg-2 text-white hover:bg-gpurple-4 hover:text-white";
+
+const PromotionSection = () => {
   const { url } = useAuth();
   const [promos, setPromos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -116,11 +117,6 @@ const PromotionSection = ({ limit = 4 }) => {
     fetchPromos();
   }, [url]);
 
-  const visiblePromos = useMemo(
-    () => promos.filter(isRedeemable).slice(0, limit),
-    [promos, limit],
-  );
-
   const handleCopy = async (code) => {
     try {
       await navigator.clipboard.writeText(code);
@@ -134,20 +130,35 @@ const PromotionSection = ({ limit = 4 }) => {
 
   if (loading) return null;
 
-  if (visiblePromos.length === 0) return null;
+  if (promos.length === 0) return null;
 
   return (
-    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-      {visiblePromos.map((promo, index) => (
-        <CouponTicket
-          key={promo._id}
-          promo={promo}
-          accent={ACCENTS[index % ACCENTS.length]}
-          onCopy={handleCopy}
-          copied={copiedCode === promo.name}
-        />
-      ))}
-    </div>
+    <Carousel opts={{ align: "start" }}>
+      <CarouselPrevious
+        className={cn("-left-3 lg:-left-12", ARROW_BUTTON)}
+        aria-label="Previous promotions"
+      />
+      <CarouselNext
+        className={cn("-right-3 lg:-right-12", ARROW_BUTTON)}
+        aria-label="Next promotions"
+      />
+
+      <CarouselContent className="py-2">
+        {promos.map((promo, index) => (
+          <CarouselItem
+            key={promo._id}
+            className="basis-1/2 md:basis-1/3 lg:basis-1/4"
+          >
+            <CouponTicket
+              promo={promo}
+              accent={ACCENTS[index % ACCENTS.length]}
+              onCopy={handleCopy}
+              copied={copiedCode === promo.name}
+            />
+          </CarouselItem>
+        ))}
+      </CarouselContent>
+    </Carousel>
   );
 };
 

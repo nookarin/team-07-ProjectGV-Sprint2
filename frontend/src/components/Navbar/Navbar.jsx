@@ -83,9 +83,9 @@ const Navbar = () => {
           <NavigationMenuItem>
             <NavigationMenuLink
               className={"hover:bg-gbase-1 hover:rounded-2xl"}
-              render={<Link to={"/new-arrival"} />}
+              render={<Link to={"/coupons"} />}
             >
-              NEW ARRIVALS
+              COUPONS
             </NavigationMenuLink>
           </NavigationMenuItem>
           <NavigationMenuItem>
@@ -146,11 +146,11 @@ const Navbar = () => {
               </Link>
             ))}
           <Link
-            to={"/new-arrival"}
+            to={"/coupons"}
             onClick={() => setMobileMenuOpen(false)}
             className="px-3 py-2.5 rounded-lg hover:bg-gbase-2 cursor-pointer"
           >
-            NEW ARRIVALS
+            Coupon
           </Link>
           <Link
             to={"/sale"}
