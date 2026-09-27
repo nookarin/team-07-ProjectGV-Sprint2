@@ -14,6 +14,7 @@ import HeaderSection from "#components/Homepage/HeaderSection";
 import axios from "axios";
 import { useAuth } from "@/contexts/Authentication/AuthContext";
 import LoadingScreen from "@/components/LoadingScreen";
+import PromotionSection from "#components/Promotion/PromotionSection";
 
 const category = [
   { name: "headset", img: img_cate1 },
@@ -69,6 +70,10 @@ const Homepage = () => {
       {/* Show full-screen LoadingScreen while the products API request is being fetched */}
       {loading && <LoadingScreen />}
       <BannerCarousel />
+      <div className="w-3/4 mx-auto my-10">
+        <HeaderSection name={"Coupon"} />
+        <PromotionSection />
+      </div>
       <div className="w-3/4 mx-auto my-10">
         <HeaderSection name={"categories"} />
         <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
